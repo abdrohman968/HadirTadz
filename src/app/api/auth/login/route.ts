@@ -3,6 +3,10 @@ import pool from '@/lib/db';
 import { verifyPassword, signJWT } from '@/lib/auth';
 import type { RowDataPacket, ResultSetHeader } from 'mysql2';
 
+// Force this route to always run on the server (never statically cached)
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();

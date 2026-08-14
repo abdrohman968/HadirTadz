@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import type { RowDataPacket } from 'mysql2';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function GET() {
   try {
     const [schools] = await pool.query<RowDataPacket[]>(
