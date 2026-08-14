@@ -38,7 +38,8 @@ try {
  * Didefinisikan di sini agar tersedia sejak include pertama
  */
 if (!function_exists('get_base_url')) {
-    function get_base_url() {
+    function get_base_url()
+    {
         $script = $_SERVER['SCRIPT_NAME'] ?? '';
         $parts = explode('/', trim($script, '/'));
         if (isset($parts[0]) && $parts[0] === 'absensi_digital') {
