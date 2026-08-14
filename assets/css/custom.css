@@ -1,0 +1,171 @@
+/* ==========================================================
+   Custom CSS for HadirTadz (v.1.0)
+   Multi-Tenant Digital Attendance System
+   Theme: Hadir (Dark Emerald) & Tadz (Bright Emerald)
+   ========================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+
+body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #1e293b;
+    background-color: #f8fafc;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* HadirTadz Brand Typography Two-Color Accent */
+.brand-hadir {
+    color: #065f46;
+}
+.brand-tadz {
+    color: #10b981;
+}
+
+/* Prevent double scrolling and handle full height responsive viewport */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overscroll-behavior-y: none;
+}
+
+/* Safe padding for main containers on mobile to prevent bottom nav collision */
+main {
+    padding-bottom: 5.5rem !important;
+}
+@media (min-width: 1024px) {
+    main {
+        padding-bottom: 2rem !important;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Smooth Transitions */
+.transition-all-200 {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* Mobile App-like Card Layout for Tables */
+@media (max-width: 768px) {
+    .table-responsive-card table,
+    .table-responsive-card thead,
+    .table-responsive-card tbody,
+    .table-responsive-card th,
+    .table-responsive-card td,
+    .table-responsive-card tr {
+        display: block;
+    }
+
+    .table-responsive-card thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .table-responsive-card tr {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        margin-bottom: 0.75rem;
+        padding: 0.875rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .table-responsive-card td {
+        border: none;
+        position: relative;
+        padding-left: 45%;
+        padding-top: 0.35rem;
+        padding-bottom: 0.35rem;
+        font-size: 0.8125rem;
+        text-align: right;
+    }
+
+    .table-responsive-card td:before {
+        position: absolute;
+        left: 0.75rem;
+        width: 40%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: 700;
+        color: #64748b;
+        text-align: left;
+        content: attr(data-label);
+        text-transform: uppercase;
+        font-size: 0.6875rem;
+        letter-spacing: 0.025em;
+    }
+}
+
+/* Scanner Animation */
+@keyframes scan-line {
+    0%, 100% {
+        top: 5%;
+    }
+    50% {
+        top: 90%;
+    }
+}
+
+.scanner-laser {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0) 0%, #10b981 50%, rgba(16, 185, 129, 0) 100%);
+    box-shadow: 0 0 15px #10b981, 0 0 30px #10b981;
+    animation: scan-line 2.2s ease-in-out infinite;
+}
+
+/* Safe Area Inset Support for iPhone Notch & Home Indicator */
+.safe-area-pb {
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* Print Stylesheet for ID Cards & Reports */
+@media print {
+    .no-print, header, aside, nav, .sidebar, #toast-container, button, #pwa-install-banner {
+        display: none !important;
+    }
+    body, main {
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .print-page {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 10mm !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+    .card-print-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 15px !important;
+        page-break-inside: avoid;
+    }
+}

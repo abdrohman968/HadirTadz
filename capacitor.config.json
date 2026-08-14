@@ -1,0 +1,25 @@
+{
+  "appId": "id.sch.hadirtadz.app",
+  "appName": "HadirTadz",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "http://10.0.2.2/absensi_digital",
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "Camera": {
+      "permissions": ["camera", "photos"]
+    },
+    "Geolocation": {
+      "permissions": ["location"]
+    },
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#065f46",
+      "showSpinner": true,
+      "spinnerColor": "#34d399"
+    }
+  }
+}

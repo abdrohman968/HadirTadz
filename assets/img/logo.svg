@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" fill="none">
+  <defs>
+    <linearGradient id="hadirGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#047857" />
+      <stop offset="100%" stop-color="#065f46" />
+    </linearGradient>
+    <linearGradient id="tadzGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <linearGradient id="iconBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#10b981" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Logo Mark -->
+  <g transform="translate(15, 10)" filter="url(#glow)">
+    <rect x="0" y="0" width="80" height="80" rx="22" fill="url(#iconBg)" />
+    <!-- Graduation Cap & Checkmark Hybrid -->
+    <path d="M40 24L62 34L40 44L18 34L40 24Z" fill="#ffffff" />
+    <path d="M26 40V52C26 57 32 60 40 60C48 60 54 57 54 52V40" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M62 34V48" stroke="#34d399" stroke-width="3" stroke-linecap="round" />
+    <circle cx="62" cy="50" r="2.5" fill="#34d399" />
+    <!-- Checkmark Accent inside cap -->
+    <path d="M35 34L39 37L46 30" stroke="#047857" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+
+  <!-- Typography: HadirTadz -->
+  <text x="110" y="60" font-family="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" font-size="44" font-weight="800" letter-spacing="-1">
+    <tspan fill="#065f46" class="brand-hadir">Hadir</tspan><tspan fill="#10b981" class="brand-tadz">Tadz</tspan>
+  </text>
+  <text x="112" y="78" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="11" font-weight="600" fill="#64748b" letter-spacing="1.5">
+    PRESENSI DIGITAL TERPADU
+  </text>
+</svg>

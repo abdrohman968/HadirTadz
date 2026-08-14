@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" fill="none">
+  <defs>
+    <linearGradient id="pwaBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <filter id="pwaGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#047857" flood-opacity="0.4" />
+    </filter>
+  </defs>
+  <rect width="192" height="192" rx="42" fill="url(#pwaBg)" />
+  <g transform="translate(16, 16)">
+    <!-- Graduation Hat -->
+    <path d="M80 46L126 68L80 90L34 68L80 46Z" fill="#ffffff" />
+    <path d="M50 80V106C50 116 63 124 80 124C97 124 110 116 110 106V80" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M126 68V98" stroke="#a7f3d0" stroke-width="6" stroke-linecap="round" />
+    <circle cx="126" cy="103" r="5" fill="#a7f3d0" />
+    <!-- Checkmark inside hat -->
+    <path d="M70 68L77 75L92 59" stroke="#047857" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>

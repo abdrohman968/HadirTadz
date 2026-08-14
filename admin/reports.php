@@ -1,0 +1,278 @@
+<?php
+$page_title = 'Rekapitulasi Laporan Kehadiran';
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/auth.php';
+require_once __DIR__ . '/../config/helpers.php';
+
+require_auth(['admin']);
+$current_user = auth_user();
+$base_url = get_base_url();
+
+$start_date = $_GET['start_date'] ?? date('Y-m-01');
+$end_date = $_GET['end_date'] ?? date('Y-m-d');
+$filter_class = $_GET['class_id'] ?? '';
+$filter_role = $_GET['role_code'] ?? '';
+$format = $_GET['format'] ?? '';
+
+// Handle CSV / Excel Export
+if ($format === 'csv') {
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename=Rekap_Absensi_' . $start_date . '_sd_' . $end_date . '.csv');
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['No', 'Tanggal', 'ID/NISN', 'Nama Lengkap', 'Peran/Kelas', 'Jam Masuk', 'Jam Pulang', 'Status', 'Metode', 'Keterangan']);
+
+    $sql = "
+        SELECT a.*, u.full_name, u.identifier, r.role_name, c.class_name
+        FROM attendance a
+        JOIN users u ON a.user_id = u.id
+        JOIN roles r ON u.role_id = r.id
+        LEFT JOIN classes c ON a.class_id = c.id
+        WHERE a.date BETWEEN :start AND :end
+    ";
+    $params = [':start' => $start_date, ':end' => $end_date];
+    if (!empty($filter_class)) {
+        $sql .= " AND a.class_id = :class_id";
+        $params[':class_id'] = $filter_class;
+    }
+    if (!empty($filter_role)) {
+        $sql .= " AND r.role_code = :role_code";
+        $params[':role_code'] = $filter_role;
+    }
+    $sql .= " ORDER BY a.date DESC, c.class_name, u.full_name";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $no = 1;
+    while ($row = $stmt->fetch()) {
+        fputcsv($output, [
+            $no++,
+            $row['date'],
+            $row['identifier'],
+            $row['full_name'],
+            $row['class_name'] ?? $row['role_name'],
+            $row['time_in'] ?: '-',
+            $row['time_out'] ?: '-',
+            $row['status'],
+            $row['method'],
+            $row['notes'] ?: '-'
+        ]);
+    }
+    fclose($output);
+    exit;
+}
+
+// Fetch Classes
+$classes = $pdo->query("SELECT * FROM classes ORDER BY grade, class_name")->fetchAll();
+
+// Main Query for Page View
+$sql = "
+    SELECT a.*, u.full_name, u.identifier, r.role_name, c.class_name
+    FROM attendance a
+    JOIN users u ON a.user_id = u.id
+    JOIN roles r ON u.role_id = r.id
+    LEFT JOIN classes c ON a.class_id = c.id
+    WHERE a.date BETWEEN :start AND :end
+";
+$params = [':start' => $start_date, ':end' => $end_date];
+if (!empty($filter_class)) {
+    $sql .= " AND a.class_id = :class_id";
+    $params[':class_id'] = $filter_class;
+}
+if (!empty($filter_role)) {
+    $sql .= " AND r.role_code = :role_code";
+    $params[':role_code'] = $filter_role;
+}
+$sql .= " ORDER BY a.date DESC, c.class_name, u.full_name";
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$records = $stmt->fetchAll();
+
+// Calculate Summary Totals
+$totals = ['HADIR' => 0, 'TERLAMBAT' => 0, 'IZIN' => 0, 'SAKIT' => 0, 'ALPHA' => 0];
+foreach ($records as $r) {
+    if (isset($totals[$r['status']])) {
+        $totals[$r['status']]++;
+    }
+}
+
+$school_name = get_setting('schoolName', 'SMA Terpadu Al-Mu\'min');
+$school_address = get_setting('address', 'Bandung');
+
+include __DIR__ . '/../includes/header.php';
+include __DIR__ . '/../includes/sidebar.php';
+?>
+
+<main class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <div class="max-w-7xl mx-auto space-y-6">
+
+        <!-- Page Header (Hidden on Print) -->
+        <div class="no-print flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Rekapitulasi Laporan Kehadiran</h1>
+                <p class="text-xs sm:text-sm text-slate-500">Filter, cetak laporan resmi, dan ekspor data presensi ke format Excel/CSV.</p>
+            </div>
+            <div class="flex items-center gap-2.5">
+                <button onclick="window.print()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i>
+                    <span>Cetak Laporan</span>
+                </button>
+                <a href="reports.php?start_date=<?= urlencode($start_date) ?>&end_date=<?= urlencode($end_date) ?>&class_id=<?= urlencode($filter_class) ?>&role_code=<?= urlencode($filter_role) ?>&format=csv" class="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-excel"></i>
+                    <span>Ekspor CSV</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter Bar (Hidden on Print) -->
+        <div class="no-print bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+            <form method="GET" action="" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Dari Tanggal</label>
+                    <input type="date" name="start_date" value="<?= htmlspecialchars($start_date) ?>" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Sampai Tanggal</label>
+                    <input type="date" name="end_date" value="<?= htmlspecialchars($end_date) ?>" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Kelas</label>
+                    <select name="class_id" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <option value="">-- Semua Kelas --</option>
+                        <?php foreach ($classes as $c): ?>
+                            <option value="<?= $c['id'] ?>" <?= ($filter_class == $c['id']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($c['class_name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Peran</label>
+                    <select name="role_code" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <option value="">-- Semua Peran --</option>
+                        <option value="siswa" <?= ($filter_role === 'siswa') ? 'selected' : '' ?>>Siswa</option>
+                        <option value="guru" <?= ($filter_role === 'guru') ? 'selected' : '' ?>>Guru</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-1 py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs transition">
+                        Tampilkan
+                    </button>
+                    <a href="reports.php" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs transition" title="Reset">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Summary Totals -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <div class="bg-emerald-50 border border-emerald-200 p-3.5 rounded-2xl text-center">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Hadir Tepat Waktu</span>
+                <p class="text-2xl font-extrabold text-emerald-800 mt-1"><?= $totals['HADIR'] ?></p>
+            </div>
+            <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl text-center">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600">Terlambat</span>
+                <p class="text-2xl font-extrabold text-amber-800 mt-1"><?= $totals['TERLAMBAT'] ?></p>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 p-3.5 rounded-2xl text-center">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-blue-600">Izin</span>
+                <p class="text-2xl font-extrabold text-blue-800 mt-1"><?= $totals['IZIN'] ?></p>
+            </div>
+            <div class="bg-purple-50 border border-purple-200 p-3.5 rounded-2xl text-center">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-purple-600">Sakit</span>
+                <p class="text-2xl font-extrabold text-purple-800 mt-1"><?= $totals['SAKIT'] ?></p>
+            </div>
+            <div class="bg-rose-50 border border-rose-200 p-3.5 rounded-2xl text-center col-span-2 sm:col-span-1">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-rose-600">Alpha</span>
+                <p class="text-2xl font-extrabold text-rose-800 mt-1"><?= $totals['ALPHA'] ?></p>
+            </div>
+        </div>
+
+        <!-- Report Printable Sheet -->
+        <div class="print-page bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+            <!-- Kop Surat Resmi (Visible on Print and Screen) -->
+            <div class="border-b-2 border-slate-800 pb-4 mb-6 text-center">
+                <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 uppercase tracking-tight"><?= htmlspecialchars($school_name) ?></h2>
+                <p class="text-xs text-slate-600 mt-1"><?= htmlspecialchars($school_address) ?></p>
+                <div class="mt-3 py-1 bg-slate-100 rounded-lg inline-block px-6">
+                    <h3 class="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">
+                        LAPORAN REKAPITULASI PRESENSI KEHADIRAN
+                    </h3>
+                    <p class="text-[11px] text-slate-500">
+                        Periode: <?= format_date_indo($start_date, false) ?> s/d <?= format_date_indo($end_date, false) ?>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] border border-slate-300">
+                            <th class="py-2.5 px-3 border border-slate-300 text-center w-10">No</th>
+                            <th class="py-2.5 px-3 border border-slate-300">Tanggal</th>
+                            <th class="py-2.5 px-3 border border-slate-300">ID / NISN</th>
+                            <th class="py-2.5 px-3 border border-slate-300">Nama Lengkap</th>
+                            <th class="py-2.5 px-3 border border-slate-300">Kelas / Peran</th>
+                            <th class="py-2.5 px-3 border border-slate-300 text-center">Masuk</th>
+                            <th class="py-2.5 px-3 border border-slate-300 text-center">Pulang</th>
+                            <th class="py-2.5 px-3 border border-slate-300 text-center">Status</th>
+                            <th class="py-2.5 px-3 border border-slate-300">Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($records)): ?>
+                            <tr>
+                                <td colspan="9" class="text-center py-8 text-slate-400 border border-slate-300">
+                                    Tidak ada data presensi pada rentang waktu ini.
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php $no = 1; foreach ($records as $item): ?>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="py-2 px-3 border border-slate-300 text-center font-mono"><?= $no++ ?></td>
+                                    <td class="py-2 px-3 border border-slate-300 font-mono text-[11px] whitespace-nowrap"><?= date('d/m/Y', strtotime($item['date'])) ?></td>
+                                    <td class="py-2 px-3 border border-slate-300 font-mono font-bold text-slate-700"><?= htmlspecialchars($item['identifier']) ?></td>
+                                    <td class="py-2 px-3 border border-slate-300 font-bold text-slate-800"><?= htmlspecialchars($item['full_name']) ?></td>
+                                    <td class="py-2 px-3 border border-slate-300 text-slate-600"><?= htmlspecialchars($item['class_name'] ?? $item['role_name']) ?></td>
+                                    <td class="py-2 px-3 border border-slate-300 text-center font-mono font-bold text-emerald-700"><?= format_time($item['time_in']) ?></td>
+                                    <td class="py-2 px-3 border border-slate-300 text-center font-mono font-bold text-slate-700"><?= format_time($item['time_out']) ?></td>
+                                    <td class="py-2 px-3 border border-slate-300 text-center font-bold">
+                                        <?= htmlspecialchars($item['status']) ?>
+                                    </td>
+                                    <td class="py-2 px-3 border border-slate-300 text-slate-500 text-[11px]"><?= htmlspecialchars($item['notes'] ?: '-') ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Signature block for official printing -->
+            <div class="mt-12 pt-6 flex justify-between text-xs text-slate-700">
+                <div class="text-center">
+                    <p>Mengetahui,</p>
+                    <p class="font-bold mt-1">Kepala Sekolah</p>
+                    <div class="h-20"></div>
+                    <p class="font-bold underline">Drs. H. Ahmad Fauzi, M.M.</p>
+                    <p class="text-[10px] text-slate-500">NIP. 196805121995121001</p>
+                </div>
+                <div class="text-center">
+                    <p><?= htmlspecialchars(explode(',', $school_address)[count(explode(',', $school_address))-1] ?? 'Bandung') ?>, <?= format_date_indo(date('Y-m-d'), false) ?></p>
+                    <p class="font-bold mt-1">Petugas / Operator Presensi</p>
+                    <div class="h-20"></div>
+                    <p class="font-bold underline"><?= htmlspecialchars($current_user['full_name']) ?></p>
+                    <p class="text-[10px] text-slate-500">NIP/ID. <?= htmlspecialchars($current_user['identifier']) ?></p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<?php include __DIR__ . '/../includes/footer.php'; ?>
