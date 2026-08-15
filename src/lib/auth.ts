@@ -1,8 +1,19 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'hadirtadz_super_secret_jwt_key_2026';
 const JWT_EXPIRES_IN = '7d';
+
+/**
+ * Ambil secret JWT dari environment. Tidak ada fallback hardcode:
+ * sehingga produksi memaksa JWT_SECRET di-set (lihat .env.example).
+ */
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET belum di-set di environment. Salin .env.example menjadi .env.local dan isi nilainya.');
+  }
+  return secret;
+}
 
 export interface UserPayload {
   id: number;
@@ -29,7 +40,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
  * Sign JWT Token
  */
 export function signJWT(payload: UserPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: JWT_EXPIRES_IN });
 }
 
 /**
@@ -37,7 +48,7 @@ export function signJWT(payload: UserPayload): string {
  */
 export function verifyJWT(token: string): UserPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as UserPayload;
+    return jwt.verify(token, getJwtSecret()) as UserPayload;
   } catch (error) {
     return null;
   }

@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('hadirtadz_session')?.value;
 
   // Public routes that don't need auth
-  const publicPaths = ['/login', '/register-school', '/api/auth/login', '/api/schools', '/scan'];
+  const publicPaths = ['/login', '/register-school', '/api/auth/login', '/api/schools', '/api/register-school', '/scan'];
   const isPublic = publicPaths.some((p) => pathname.startsWith(p));
 
   if (isPublic) return NextResponse.next();
@@ -22,5 +22,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|manifest.json|service-worker.js|assets/).*)'],
+  matcher: ['/((?!_next/static|_next/image|logo.png|HadirTadz.png|favicon.ico|manifest.json|sw.js|icons/|assets/|apple-icon|icon).*)'],
 };

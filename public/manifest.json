@@ -1,0 +1,24 @@
+{
+  "name": "HadirTadz - Presensi Digital Terpadu",
+  "short_name": "HadirTadz",
+  "description": "Sistem presensi digital dengan QR code, kartu digital dan kiosk scanner untuk sekolah.",
+  "id": "/",
+  "start_url": "/login",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f1f5f9",
+  "theme_color": "#047857",
+  "lang": "id",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "/logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/logo.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
+    { "src": "/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Buka Scanner", "short_name": "Scanner", "url": "/scan", "icons": [{ "src": "/logo.png", "sizes": "192x192" }] },
+    { "name": "Presensi Saya", "short_name": "Absen", "url": "/siswa/absen", "icons": [{ "src": "/logo.png", "sizes": "192x192" }] }
+  ]
+}
