@@ -80,10 +80,16 @@ variables** bila tersedia:
 
 ---
 
-## Opsi 2 — Vercel (runtime PHP, gratis)
+## Opsi 2 — Vercel (menjalankan aplikasi Next.js cadangan)
 
-Vercel mendukung PHP via runtime `vercel-php`. File `vercel.json` di repo sudah dikonfigurasi
-untuk menjalankan `**/*.php` sebagai serverless function.
+Vercel dipakai untuk menjalankan **versi Next.js** yang tersimpan sebagai cadangan di repo
+(`src/`), bukan versi PHP Native. Ini berguna untuk preview/praktek dan percobaan GitHub
+Actions — bukan untuk produksi PHP.
+
+> Kenapa bukan PHP di Vercel? `vercel-php` (community runtime) hanya memetakan file `api/*.php`
+> menjadi serverless function; aplikasi PHP Native ini berbasis **banyak file + session PHP**
+> (`config/`, `helpers/`, `includes/`) sehingga tidak bisa berjalan penuh di platform serverless.
+> Jika dicoba, build akan gagal dengan error "pattern doesn't match any Serverless Functions".
 
 ### Opsi 2 — Langkah
 
@@ -95,11 +101,11 @@ untuk menjalankan `**/*.php` sebagai serverless function.
 
    > Jangan push secret lokal (`.env`, `.env.local` sudah di-`.gitignore`).
 
-2. **Import di vercel.com** → *Add New Project* → pilih repo. Build command dikenali otomatis
-   (bisa kosong / `vercel build`). Deploy.
+2. **Import di vercel.com** → *Add New Project* → pilih repo. Next.js terdeteksi otomatis,
+   `vercel.json` sudah minimal `{ "version": 2 }`. Deploy.
 
-3. **Database:** Vercel tidak punya MySQL — pasangkan DB cloud kompatibel MySQL
-   (mis. TiDB Cloud Serverless free) lalu set Environment Variables di
+3. **Database (untuk versi Next.js):** Vercel tidak punya MySQL — pasangkan DB cloud kompatibel
+   MySQL (mis. TiDB Cloud Serverless free) lalu set Environment Variables di
    *Settings → Environment Variables*:
 
    ```text
@@ -108,35 +114,27 @@ untuk menjalankan `**/*.php` sebagai serverless function.
    DB_USER=<user_tidb>
    DB_PASS=<password_tidb>
    DB_NAME=hadir_tadz
+   DB_SSL=true
+   JWT_SECRET=<secret_acak_unik>
    ```
 
-   > PHP di Vercel berjalan sebagai serverless function — koneksi PDO dibuat per-request,
-   > jadi pastikan kuota koneksi DB cukup untuk jumlah request.
-
-4. **Migrasi:** jalankan `migrate.php` lewat URL deployment (`/database/migrate.php`)
-   setelah env diset.
-
-### Keterbatasan Vercel + PHP
-
-- Session PHP bersifat stateless antar fungsi — bisa bermasalah untuk login memakai session.
-  Solusi: pastikan auth di `config/auth.php` memakai cookie + DB, atau uji dulu.
-- Koneksi DB serverless butuh DB eksternal yang mengizinkan koneksi dari cloud.
-- **Rekomendasi**: pakai Opsi 1 (hosting PHP) untuk produksi; Vercel hanya untuk demo.
+4. **Keterbatasan:** versi Next.js adalah cadangan — pastikan untuk go-live PHP Native memakai
+   Opsi 1 (Hostinger/Rumahweb).
 
 ---
 
 ## Peta Keputusan
 
-| Kebutuhan | Hosting PHP (Hostinger/Rumahweb) | Vercel (PHP) |
-| --------- | -------------------------------- | ------------ |
+| Kebutuhan | Hosting PHP (Hostinger/Rumahweb) | Vercel (Next.js cadangan) |
+| --------- | -------------------------------- | ------------------------- |
+| Format aktif | PHP Native (produksi) | Next.js (preview/praktek) |
 | Biaya | Mulai ~Rp20–100rb/bln | Gratis (kuota terbatas) |
-| MySQL | MySQL resmi dari hosting | Butuh DB cloud eksternal |
-| Kesesuaian PHP Native | Sempurna (dirancang untuk ini) | Terbatas (serverless, session stateless) |
+| MySQL | MySQL resmi dari hosting | Butuh DB cloud eksternal (TiDB free) |
 | Kinerja | Persisten, stabil | Cold start tiap request |
 | Cocok untuk | Produksi, sekolah | Demo / uji coba |
 
 **Rekomendasi:** pakai **hosting custom PHP** (Hostinger/Rumahweb) untuk produksi resmi.
-Vercel PHP bisa untuk percobaan.
+Vercel hanya untuk preview aplikasi Next.js cadangan.
 
 ---
 

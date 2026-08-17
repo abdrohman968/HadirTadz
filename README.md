@@ -82,7 +82,7 @@ absensi_digital/
 Format utama adalah **PHP Native** (Hostinger/Rumahweb/VPS paling cocok). Lihat [DEPLOYMENT.md](DEPLOYMENT.md):
 
 1. **Hosting custom PHP (Hostinger, Rumahweb, dsb.)** — upload folder proyek + MySQL hosting, siap.
-2. **Vercel** — dukungan runtime PHP (`vercel-php`) juga tersedia untuk deploy dari GitHub.
+2. **Vercel** — menjalankan versi **Next.js cadangan** (`src/`) sebagai preview/praktek (bukan PHP).
 
 > Catatan: kode **Next.js** (`src/`, Next.js config, dll.) tetap disimpan di repo sebagai cadangan,
 > bukan format aktif. Mengaktifkannya kembali memerlukan migrasi database & konfigurasi ulang.

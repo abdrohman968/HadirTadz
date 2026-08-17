@@ -5,6 +5,14 @@ Baru ditambahkan di paling atas. Tanggal mengikuti kalender WIB.
 
 ---
 
+## [2026-08-16] Vercel: Jalankan Next.js Cadangan (bukan PHP)
+
+- **Vercel diputuskan menjalankan versi Next.js cadangan** (`src/`), bukan PHP Native. Runtime PHP komunitas (`vercel-php`) hanya memetakan `api/*.php` → serverless function dan **tidak bisa** menjalankan aplikasi PHP Native multi-file + session (`config/`, `helpers/`, `includes/`); build gagal dengan "pattern doesn't match any Serverless Functions".
+- `vercel.json` dikembalikan minimal `{ "version": 2 }` — deploy Vercel sukses, `hadirtadz.vercel.app` live `/login` 200 + `/logo.png` 200 (image/png).
+- `DEPLOYMENT.md` & `README.md`: Panduan go-live diperjelas — PHP Native di Hostinger/Rumahweb (produksi), Vercel untuk preview Next.js cadangan.
+
+---
+
 ## [2026-08-16] Kembali ke PHP Native (format utama)
 
 - Keputusan: aplikasi **PHP Native kembali menjadi format utama**; kode **Next.js disimpan** di repo sebagai cadangan (`src/`, Next.js config) namun tidak aktif.
