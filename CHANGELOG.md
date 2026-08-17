@@ -5,6 +5,16 @@ Baru ditambahkan di paling atas. Tanggal mengikuti kalender WIB.
 
 ---
 
+## [2026-08-18] Tampilan Auth Dimodernkan (Login & Daftar Sekolah)
+
+- **`auth/login.php` ditulis ulang dengan desain modern** mengikuti tampilan Next.js cadangan: tema dark emerald + blur glass (Tailwind CDN + Plus Jakarta Sans + Font Awesome), logo polos tanpa frame, judul "HadirTadz" dua warna, tanpa badge version di judul, tanpa tombol Google SSO/demo autofill.
+- Fitur login: dropdown pilihan sekolah, checkbox **Ingat Saya** (remember), ikon mata **toggle password**, panel **"Lupa Password?"** yang bisa di-toggle (aria-expanded) berisi opsi **Hubungi Admin** → `https://wa.me/<62...>` (normalisasi nomor 0→62 dari `schools.phone`) + Hubungi Email, tombol **Kiosk** → `/scan.php`, tautan **"+ Daftarkan Sekolah Baru"**, spinner pada tombol Masuk saat submit, flash/error alert `animate-shake`.
+- **`auth/register_school.php` discrapkan**: branding header diganti logo.png + judul dua warna (sesuai login, tanpa icon frame/badge v.1.0), footer tanpa v.1.0, dan **toggle mata untuk Kata Sandi & Konfirmasi Kata Sandi** (`togglePw()`).
+- `logo.png` disalin ke root repo agar dipakai PHP (fallback `schools.logo_url`).
+- Verifikasi: `php -l` clean; smoke login `ADM-001`/`hadir123` → `/admin/index.php` 200; kedua halaman render 200.
+
+---
+
 ## [2026-08-16] Vercel: Jalankan Next.js Cadangan (bukan PHP)
 
 - **Vercel diputuskan menjalankan versi Next.js cadangan** (`src/`), bukan PHP Native. Runtime PHP komunitas (`vercel-php`) hanya memetakan `api/*.php` → serverless function dan **tidak bisa** menjalankan aplikasi PHP Native multi-file + session (`config/`, `helpers/`, `includes/`); build gagal dengan "pattern doesn't match any Serverless Functions".

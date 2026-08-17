@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Sekolah Baru - HadirTadz (v.1.0)</title>
+    <title>Daftar Sekolah Baru - HadirTadz</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -149,16 +149,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="w-full max-w-2xl">
         <!-- Logo & Brand Header -->
         <div class="text-center mb-6">
-            <a href="<?= $base_url ?>/auth/login.php" class="inline-flex items-center gap-3 group">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-800 text-white flex items-center justify-center text-2xl shadow-xl">
-                    <i class="fa-solid fa-school-flag"></i>
-                </div>
-                <div class="text-left">
-                    <div class="text-2xl font-black tracking-tight">
-                        <span class="text-emerald-400">Hadir</span><span class="text-emerald-300">Tadz</span>
-                        <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 ml-1 font-mono">v.1.0</span>
+            <a href="<?= $base_url ?>/auth/login.php" class="inline-flex items-center flex-col gap-2 group">
+                <img src="<?= $base_url ?>/logo.png" alt="Logo HadirTadz" class="h-14 w-auto object-contain mx-auto hover:scale-105 transition-transform duration-300">
+                <div class="text-center">
+                    <div class="flex items-center justify-center gap-1.5 text-2xl font-black tracking-tight">
+                        <span class="text-emerald-300">Hadir</span><span class="text-emerald-400">Tadz</span>
                     </div>
-                    <div class="text-xs text-slate-400 font-medium">Platform Presensi Digital Multi-Tenant</div>
+                    <div class="text-xs text-emerald-300/80 font-medium">Platform Presensi Digital Multi-Tenant</div>
                 </div>
             </a>
         </div>
@@ -252,13 +249,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-300 mb-1">Kata Sandi (Password) *</label>
-                            <input type="password" name="password" required placeholder="Minimal 6 karakter"
-                                class="w-full px-3.5 py-2.5 bg-slate-900/60 border border-slate-700 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                            <div class="relative">
+                                <input type="password" name="password" id="password" required placeholder="Minimal 6 karakter"
+                                    class="w-full px-3.5 py-2.5 pr-10 bg-slate-900/60 border border-slate-700 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                                <button type="button" onclick="togglePw('password')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-emerald-400 transition" aria-label="Tampilkan kata sandi">
+                                    <i class="fa-solid fa-eye" id="password-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-300 mb-1">Konfirmasi Kata Sandi *</label>
-                            <input type="password" name="confirm_password" required placeholder="Ulangi kata sandi"
-                                class="w-full px-3.5 py-2.5 bg-slate-900/60 border border-slate-700 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                            <div class="relative">
+                                <input type="password" name="confirm_password" id="confirm_password" required placeholder="Ulangi kata sandi"
+                                    class="w-full px-3.5 py-2.5 pr-10 bg-slate-900/60 border border-slate-700 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                                <button type="button" onclick="togglePw('confirm_password')" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-emerald-400 transition" aria-label="Tampilkan kata sandi">
+                                    <i class="fa-solid fa-eye" id="confirm_password-eye"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -273,9 +280,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="mt-6 text-center text-xs text-slate-400">
-            <span class="font-bold text-emerald-400">HadirTadz v.1.0</span> &bull; &copy; 2026 Hak Cipta Dilindungi Undang-Undang
-        </div>
+            <span class="font-bold text-emerald-400">HadirTadz</span> &bull; &copy; 2026 Hak Cipta Dilindungi Undang-Undang
+</div>
+
     </div>
+
+    <script>
+        function togglePw(id) {
+            var el = document.getElementById(id);
+            var icon = document.getElementById(id + '-eye');
+            if (el.type === 'password') {
+                el.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                el.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
 
 </body>
 </html>

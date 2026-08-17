@@ -13,6 +13,7 @@ $schools = get_all_schools();
 $selected_school_id = isset($_GET['school_id']) ? (int)$_GET['school_id'] : (isset($_SESSION['selected_school_id']) ? (int)$_SESSION['selected_school_id'] : 1);
 $current_school = current_school($selected_school_id);
 $school_name = $current_school['name'] ?? 'SMA Terpadu Al-Mu\'min';
+$school_phone = $current_school['phone'] ?? '';
 $base_url = get_base_url();
 $error = '';
 
@@ -63,13 +64,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+// Normalisasi nomor WhatsApp admin sekolah untuk tombol "Hubungi Admin" (0 -> 62)
+$wa_digits = '';
+$wa_url = '';
+if (!empty($school_phone)) {
+    $wa_digits = preg_replace('/\D/', '', $school_phone);
+    if (!empty($wa_digits)) {
+        if (str_starts_with($wa_digits, '0')) {
+            $wa_digits = '62' . substr($wa_digits, 1);
+        }
+        $wa_url = 'https://wa.me/' . $wa_digits . '?text=' . urlencode(
+            'Assalamualaikum/Selamat pagi, saya lupa kata sandi akun HadirTadz. Mohon bantuan untuk me-reset kata sandi saya. Terima kasih.'
+        );
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="id" class="h-full bg-slate-950">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - HadirTadz (v.1.0)</title>
+    <title>Login - HadirTadz</title>
     <!-- PWA Manifest -->
     <link rel="manifest" href="<?= $base_url ?>/manifest.json">
     <meta name="theme-color" content="#065f46">
@@ -97,6 +113,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             900: '#064e3b',
                             950: '#022c22',
                         }
+                    },
+                    keyframes: {
+                        shake: {
+                            '0%, 100%': { transform: 'translateX(0)' },
+                            '25%': { transform: 'translateX(-4px)' },
+                            '75%': { transform: 'translateX(4px)' },
+                        }
+                    },
+                    animation: {
+                        shake: 'shake 0.3s ease-in-out 0s 2',
                     }
                 }
             }
@@ -108,39 +134,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="min-h-full flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-900 text-slate-100 antialiased selection:bg-emerald-500 selection:text-white">
 
-    <div class="w-full max-w-md">
-        
-        <!-- App Branding & Dynamic School Logo Header -->
-        <div class="text-center mb-6">
-            <!-- Dynamic School / HadirTadz Logo -->
-            <div class="inline-flex items-center justify-center p-3 rounded-3xl bg-emerald-900/40 border border-emerald-500/30 backdrop-blur-xl shadow-2xl mb-3 group hover:scale-105 transition-transform duration-300">
+    <div class="w-full max-w-md my-auto">
+
+        <!-- App Branding -->
+        <div class="text-center mb-3">
+            <!-- Logo (tanpa frame, sesuai tampilan modern) -->
+            <div class="text-center mb-2">
                 <?php if (!empty($current_school['logo_url'])): ?>
-                    <img id="school-logo-img" src="<?= htmlspecialchars($current_school['logo_url']) ?>" alt="Logo Sekolah" class="w-14 h-14 object-contain">
+                    <img id="school-logo-img" src="<?= htmlspecialchars($current_school['logo_url']) ?>" alt="Logo Sekolah" class="h-14 w-auto object-contain mx-auto">
                 <?php else: ?>
-                    <!-- Official HadirTadz Modern Emblem -->
-                    <div id="default-logo-icon" class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-600 to-emerald-800 text-white flex items-center justify-center text-3xl shadow-lg">
-                        <i class="fa-solid fa-graduation-cap"></i>
-                    </div>
+                    <img src="<?= $base_url ?>/logo.png" alt="Logo HadirTadz" class="h-14 w-auto object-contain mx-auto hover:scale-105 transition-transform duration-300">
                 <?php endif; ?>
             </div>
 
-            <!-- Two-Color App Name: Hadir (Dark Green / Emerald 700-800) + Tadz (Bright Green / Emerald 400) -->
+            <!-- Two-Color App Name -->
             <div class="flex items-center justify-center gap-1.5">
-                <span class="text-3xl sm:text-4xl font-black tracking-tight drop-shadow-sm text-emerald-300">Hadir</span><span class="text-3xl sm:text-4xl font-black tracking-tight drop-shadow-sm text-emerald-400">Tadz</span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 tracking-wider">v.1.0</span>
+                <span class="text-2xl sm:text-3xl font-black tracking-tight drop-shadow-sm text-emerald-300">Hadir</span>
+                <span class="text-2xl sm:text-3xl font-black tracking-tight drop-shadow-sm text-emerald-400">Tadz</span>
             </div>
 
-            <!-- Dynamic School Title -->
-            <h2 id="school-name-display" class="text-base font-bold text-slate-200 mt-1.5 truncate max-w-sm mx-auto">
-                <?= htmlspecialchars($school_name) ?>
-            </h2>
-            <p class="text-xs text-emerald-300/80 font-medium">Sistem Presensi & Absensi Digital Multi-Tenant</p>
+            <p class="text-[11px] text-emerald-300/80 font-medium">Sistem Presensi & Absensi Digital Multi-Tenant</p>
         </div>
 
         <!-- Login Card -->
-        <div class="bg-white/10 backdrop-blur-xl border border-white/20 p-6 sm:p-8 rounded-3xl shadow-2xl relative overflow-hidden">
-            
-            <div class="flex items-center justify-between mb-5 pb-4 border-b border-white/10">
+        <div class="bg-white/10 backdrop-blur-xl border border-white/20 p-5 sm:p-6 rounded-3xl shadow-2xl relative overflow-hidden">
+
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
                 <div>
                     <h2 class="text-lg font-bold text-white">Masuk ke Portal</h2>
                     <p class="text-xs text-slate-300">Gunakan akun Admin, Guru, atau Siswa</p>
@@ -155,37 +174,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $flash = get_flash();
             if ($flash): 
             ?>
-                <div class="mb-5 p-3.5 rounded-xl <?= $flash['type'] === 'error' ? 'bg-rose-500/20 border-rose-500/40 text-rose-200' : 'bg-emerald-500/20 border-emerald-500/40 text-emerald-200' ?> border text-xs flex items-center gap-2.5">
+                <div role="alert" class="mb-5 p-3.5 rounded-xl <?= $flash['type'] === 'error' ? 'bg-rose-500/20 border-rose-500/40 text-rose-200' : 'bg-emerald-500/20 border-emerald-500/40 text-emerald-200' ?> border text-xs flex items-center gap-2.5">
                     <i class="fa-solid <?= $flash['type'] === 'error' ? 'fa-circle-exclamation text-rose-400' : 'fa-circle-check text-emerald-400' ?> text-base"></i>
                     <span><?= htmlspecialchars($flash['message']) ?></span>
                 </div>
             <?php endif; ?>
 
             <?php if (!empty($error)): ?>
-                <div class="mb-5 p-3.5 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-200 text-xs flex items-center gap-2.5">
+                <div role="alert" class="mb-5 p-3.5 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-200 text-xs flex items-center gap-2.5 animate-shake">
                     <i class="fa-solid fa-circle-exclamation text-base text-rose-400"></i>
                     <span><?= htmlspecialchars($error) ?></span>
                 </div>
             <?php endif; ?>
 
-            <form method="POST" action="" class="space-y-4">
-                
-                <!-- Multi-School Selector (Dynamic Multi-Tenant) -->
+            <form method="POST" action="" class="space-y-3.5">
+
+                <!-- Multi-School Selector -->
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5 flex items-center justify-between">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
                         <span>Pilihan Sekolah / Institusi</span>
-                        <a href="<?= $base_url ?>/auth/register_school.php" class="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold lowercase tracking-normal">
-                            + daftar baru
-                        </a>
                     </label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                             <i class="fa-solid fa-school"></i>
                         </div>
-                        <select name="school_id" id="school-select" onchange="onSchoolChange(this)"
-                            class="w-full pl-10 pr-8 py-2.5 bg-slate-900/60 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition appearance-none cursor-pointer">
+                        <select name="school_id" id="school-select"
+                            class="w-full pl-10 pr-8 py-2 bg-slate-900/60 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition appearance-none cursor-pointer">
                             <?php foreach ($schools as $sch): ?>
-                                <option value="<?= $sch['id'] ?>" <?= $sch['id'] == $selected_school_id ? 'selected' : '' ?> data-name="<?= htmlspecialchars($sch['name']) ?>" data-logo="<?= htmlspecialchars($sch['logo_url'] ?? '') ?>">
+                                <option value="<?= $sch['id'] ?>" <?= $sch['id'] == $selected_school_id ? 'selected' : '' ?> class="bg-slate-900 text-white">
                                     <?= htmlspecialchars($sch['name']) ?> (NPSN: <?= htmlspecialchars($sch['npsn']) ?>)
                                 </option>
                             <?php endforeach; ?>
@@ -196,90 +212,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 </div>
 
-                <!-- ID Pengguna / Identifier -->
+                <!-- ID Pengguna -->
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">ID Pengguna / NIP / NISN / Email</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                             <i class="fa-regular fa-user"></i>
                         </div>
-                        <input type="text" id="identifier-input" name="identifier" required autofocus placeholder="Contoh: ADM-001 / NISN / Email"
-                            class="w-full pl-10 pr-4 py-2.5 bg-slate-900/60 border border-slate-700 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition">
+                        <input type="text" id="identifier-input" name="identifier" required autofocus placeholder="Contoh: ADM-001 / NISN / Email" value="<?= htmlspecialchars($_POST['identifier'] ?? '') ?>"
+                            class="w-full pl-10 pr-4 py-2 bg-slate-900/60 border border-slate-700 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition">
                     </div>
                 </div>
 
-                <!-- Password -->
+                <!-- Password (ikon mata di dalam field, tanpa teks "Lihat") -->
                 <div>
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300">Kata Sandi (Password)</label>
-                        <button type="button" onclick="togglePasswordVisibility()" class="text-xs text-emerald-400 hover:text-emerald-300 font-medium">
-                            <span id="toggle-text"><i class="fa-regular fa-eye mr-1"></i>Lihat</span>
-                        </button>
-                    </div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Kata Sandi (Password)</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                             <i class="fa-solid fa-lock"></i>
                         </div>
                         <input type="password" id="password-input" name="password" required placeholder="Masukkan kata sandi..."
-                            class="w-full pl-10 pr-4 py-2.5 bg-slate-900/60 border border-slate-700 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition">
+                            class="w-full pl-10 pr-11 py-2 bg-slate-900/60 border border-slate-700 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition">
+                        <button type="button" id="toggle-password-btn" onclick="togglePasswordVisibility()" aria-label="Tampilkan kata sandi"
+                            class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-emerald-400 hover:text-emerald-300 cursor-pointer">
+                            <i id="toggle-eye-icon" class="fa-regular fa-eye w-5 h-5 text-base"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Ingat Saya + Lupa Password? -->
+                <div class="flex items-center justify-between mt-2">
+                    <label class="inline-flex items-center gap-2 text-xs text-slate-300 cursor-pointer select-none">
+                        <input type="checkbox" name="remember" value="1" class="w-4 h-4 rounded-md border-slate-600 bg-slate-900/60 text-emerald-500 focus:ring-emerald-500 focus:ring-2">
+                        <span>Ingat Saya</span>
+                    </label>
+                    <button type="button" id="forgot-toggle" onclick="toggleForgotPanel()" aria-expanded="false" aria-controls="forgot-password-panel"
+                        class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold">
+                        Lupa Password?
+                    </button>
+                </div>
+
+                <!-- Forgot Password Panel -->
+                <div id="forgot-password-panel" class="hidden p-4 rounded-2xl bg-slate-900/50 border border-emerald-500/25 text-left">
+                    <div class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-key text-emerald-400 text-xl mt-0.5 flex-shrink-0"></i>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-white mb-1">Lupa Kata Sandi?</p>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Hubungi administrator sekolah <span class="font-semibold text-white"><?= htmlspecialchars($school_name) ?></span> melalui WhatsApp untuk me-reset kata sandi Anda.
+                            </p>
+                            <div class="mt-3">
+                                <?php if (!empty($wa_url)): ?>
+                                    <a href="<?= htmlspecialchars($wa_url) ?>" target="_blank" rel="noopener noreferrer"
+                                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg transition">
+                                        <i class="fa-brands fa-whatsapp w-4 h-4 text-base"></i>
+                                        <span>Hubungi Admin</span>
+                                    </a>
+                                <?php else: ?>
+                                    <p class="text-[11px] text-amber-300/90">Nomor WhatsApp admin sekolah belum tersedia. Silakan hubungi pihak sekolah secara langsung.</p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-900/40 transform active:scale-[0.99] transition duration-200 flex items-center justify-center gap-2">
-                    <span>Masuk ke HadirTadz</span>
-                    <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
+                <button type="submit" id="submit-btn"
+                    class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-900/40 transform active:scale-[0.99] transition duration-200 flex items-center justify-center gap-2 cursor-pointer">
+                    <span id="submit-text">Masuk</span>
                 </button>
-
-                <!-- Divider -->
-                <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t border-slate-700"></div>
-                    <span class="flex-shrink mx-3 text-slate-400 text-[11px] font-semibold uppercase tracking-wider">Atau</span>
-                    <div class="flex-grow border-t border-slate-700"></div>
-                </div>
-
-                <!-- Google SSO Button -->
-                <a href="<?= $base_url ?>/auth/google_auth.php?demo=1" class="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-800 font-semibold text-xs border border-slate-300 shadow-md transition flex items-center justify-center gap-2.5">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                    </svg>
-                    <span>Masuk dengan Google (SSO Admin)</span>
-                </a>
             </form>
 
-            <!-- Quick Demo Accounts Switcher -->
-            <div class="mt-6 pt-5 border-t border-white/10">
-                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5 text-center">Akun Demo (Klik untuk Isi Otomatis)</p>
-                <div class="grid grid-cols-3 gap-2">
-                    <button type="button" onclick="fillDemo('ADM-001', 'hadir123')" class="p-2 rounded-xl bg-slate-800/80 hover:bg-emerald-800/60 border border-slate-700 text-left transition group">
-                        <div class="text-[11px] font-bold text-emerald-400 group-hover:text-white">Admin</div>
-                        <div class="text-[10px] text-slate-400 font-mono">ADM-001</div>
-                    </button>
-                    <button type="button" onclick="fillDemo('198503152010011002', 'hadir123')" class="p-2 rounded-xl bg-slate-800/80 hover:bg-emerald-800/60 border border-slate-700 text-left transition group">
-                        <div class="text-[11px] font-bold text-emerald-400 group-hover:text-white">Guru</div>
-                        <div class="text-[10px] text-slate-400 font-mono">Pak Budi</div>
-                    </button>
-                    <button type="button" onclick="fillDemo('12009101', 'hadir123')" class="p-2 rounded-xl bg-slate-800/80 hover:bg-emerald-800/60 border border-slate-700 text-left transition group">
-                        <div class="text-[11px] font-bold text-emerald-400 group-hover:text-white">Siswa</div>
-                        <div class="text-[10px] text-slate-400 font-mono">Rizky</div>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Daftar Sekolah Baru Link -->
-            <div class="mt-4 text-center">
+            <!-- Daftar Sekolah Baru -->
+            <div class="mt-3 text-center">
                 <a href="<?= $base_url ?>/auth/register_school.php" class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold inline-flex items-center gap-1.5 transition">
                     <i class="fa-solid fa-plus-circle"></i>
-                    <span>Daftarkan Sekolah Baru ke HadirTadz &rarr;</span>
+                    <span>+ Daftarkan Sekolah Baru</span>
                 </a>
             </div>
         </div>
 
-        <!-- Footer Hak Cipta Sesuai Revisi: HadirTadz v.1.0 - © 2026 -->
-        <div class="mt-6 text-center text-xs text-slate-400 font-medium">
+        <!-- Footer Hak Cipta -->
+        <div class="mt-4 text-center text-xs text-slate-400 font-medium">
             <span class="font-bold text-emerald-400">HadirTadz v.1.0</span> - &copy; 2026
         </div>
     </div>
@@ -287,31 +301,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script>
         function togglePasswordVisibility() {
             const pwd = document.getElementById('password-input');
-            const toggleText = document.getElementById('toggle-text');
+            const icon = document.getElementById('toggle-eye-icon');
+            const btn = document.getElementById('toggle-password-btn');
             if (pwd.type === 'password') {
                 pwd.type = 'text';
-                toggleText.innerHTML = '<i class="fa-regular fa-eye-slash mr-1"></i>Sembunyi';
+                icon.className = 'fa-regular fa-eye-slash w-5 h-5 text-base';
+                btn.setAttribute('aria-label', 'Sembunyikan kata sandi');
             } else {
                 pwd.type = 'password';
-                toggleText.innerHTML = '<i class="fa-regular fa-eye mr-1"></i>Lihat';
+                icon.className = 'fa-regular fa-eye w-5 h-5 text-base';
+                btn.setAttribute('aria-label', 'Tampilkan kata sandi');
             }
         }
 
-        function fillDemo(identifier, password) {
-            document.getElementById('identifier-input').value = identifier;
-            document.getElementById('password-input').value = password;
+        function toggleForgotPanel() {
+            const panel = document.getElementById('forgot-password-panel');
+            const btn = document.getElementById('forgot-toggle');
+            const expanded = btn.getAttribute('aria-expanded') === 'true';
+            panel.classList.toggle('hidden', expanded);
+            btn.setAttribute('aria-expanded', String(!expanded));
         }
 
-        function onSchoolChange(select) {
-            const selectedOpt = select.options[select.selectedIndex];
-            const schoolName = selectedOpt.getAttribute('data-name');
-            const schoolLogo = selectedOpt.getAttribute('data-logo');
-            
-            const nameDisplay = document.getElementById('school-name-display');
-            if (nameDisplay && schoolName) {
-                nameDisplay.textContent = schoolName;
+        // Tambahkan spinner loading saat submit, dan disable tombol agar tidak dobel klik
+        document.getElementById('submit-btn').addEventListener('click', function (e) {
+            if (this.disabled) return;
+            // Biarkan validasi native memproses; hanya aktif saat field valid & form siap submit
+            if (!document.getElementById('identifier-input').value.trim() || !document.getElementById('password-input').value) {
+                return;
             }
-        }
+            this.disabled = true;
+            this.classList.add('disabled:opacity-60');
+            document.getElementById('submit-text').innerHTML =
+                '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>';
+        });
     </script>
 </body>
 </html>
