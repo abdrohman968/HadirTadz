@@ -6,12 +6,15 @@ if (session_status() === PHP_SESSION_NONE) {
 // Konfigurasi Database
 // Mengutamakan environment variables (berguna untuk deploy Vercel/Cloud Hosting)
 $host = getenv('DB_HOST') ?: "localhost";
+$port = getenv('DB_PORT') ?: "3306";
 $user = getenv('DB_USER') ?: "root";
 $pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : "";
 $db   = getenv('DB_NAME') ?: "hadir_tadz"; // Default ke hadir_tadz (atau fallback ke absensi_sekolah)
 
+$dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
+
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass, [
+    $pdo = new PDO($dsn, $user, $pass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
@@ -20,7 +23,7 @@ try {
     // Fallback jika database hadir_tadz belum ada, coba sambung ke absensi_sekolah
     if ($db === 'hadir_tadz') {
         try {
-            $pdo = new PDO("mysql:host=$host;dbname=absensi_sekolah;charset=utf8mb4", $user, $pass, [
+            $pdo = new PDO("mysql:host=$host;port=$port;dbname=absensi_sekolah;charset=utf8mb4", $user, $pass, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES => false,

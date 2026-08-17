@@ -27,38 +27,47 @@
   - Konfigurasi Capacitor JS (`capacitor.config.json`) untuk dikonversi menjadi APK/AAB (Android) dan IPA (iOS).
 
 ---
-Last updated: 2026-08-16 (migrasi penuh ke Next.js — struktur PHP lama digantikan aplikasi Node.js di `src/`)
+Last updated: 2026-08-16 (format utama dikembalikan ke PHP Native; Next.js disimpan sebagai cadangan di `src/`)
 
 ---
 
-## 🗂️ Struktur Direktori (Next.js)
+## 🗂️ Struktur Direktori
 
 ```text
 absensi_digital/
-├── src/                    # Kode aplikasi Next.js (App Router)
-│   ├── app/                # Pages + API Routes (login, admin, guru, siswa, scan, api/*)
-│   ├── components/         # Komponen React (dashboard, admin, guru, siswa, ui, scan)
-│   ├── lib/                # Utilitas (db, auth, session, api, qr, export, format, dsb)
-│   └── middleware.ts       # Proteksi route + whitelist aset publik
-├── public/                 # Aset statis (logo.png, manifest.json, sw.js)
-├── database/               # Schema SQL + Skrip Migrasi (schema.sql, migrate.php)
-├── capacitor.config.json   # Konfigurasi Capacitor JS untuk Mobile App
-├── DEPLOYMENT.md           # Panduan go-live: Vercel (gratis) + hosting custom
-├── MOBILE_APP_GUIDE.md     # Panduan Build Android APK & iOS IPA
-└── next.config.js          # Konfigurasi Next.js (output standalone untuk hosting custom)
+├── admin/                 # Modul & Dashboard Administrator
+├── api/                   # Endpoint API PHP (Scan processing, Geolocation checkin, Stats)
+├── assets/                # Aset Statis (CSS Tailwind/Custom, JS, SVG Icons & Logos)
+├── auth/                  # Modul Autentikasi (Login, Register School, Logout)
+├── config/                # Konfigurasi Database, Auth, dan Helper Multi-Tenant
+├── database/              # Schema SQL & Skrip Migrasi Multi-Tenant (migrate.php)
+├── guru/                  # Modul & Dashboard Guru Pengajar
+├── includes/              # Komponen Layout (Header, Sidebar, Bottom Nav, Footer)
+├── siswa/                 # Modul & Dashboard Siswa
+├── index.php              # Router & Entry Point Aplikasi (PHP Native)
+├── scan.php               # Halaman Kiosk Scanner QR Gerbang
+├── capacitor.config.json  # Konfigurasi Capacitor JS untuk Mobile App
+├── manifest.json          # Web App Manifest PWA
+├── service-worker.js      # Service Worker PWA Offline Caching
+├── MOBILE_APP_GUIDE.md    # Panduan Build Android APK & iOS IPA
+├── DEPLOYMENT.md          # Panduan go-live (hosting PHP + Vercel PHP)
+└── src/                   # (Cadangan) Aplikasi Next.js — tidak dipakai aktif
 ```
 
 ---
 
-## 🚀 Menjalankan Lokal (Next.js / dev)
+## 🚀 Panduan Instalasi Lokal (Laragon / XAMPP)
 
-```bash
-npm install
-npm run dev        # buka http://localhost:3000
-```
+1. Letakkan proyek di folder `www` (Laragon) atau `htdocs` (XAMPP).
+2. **Setup Database:**
 
-Setup database tetap memakai `database/migrate.php` (jalankan lewat php CLI di Laragon/XAMPP).
-Credential env ada di `.env.local` (contoh: `.env.example`).
+   ```bash
+   php database/migrate.php
+   ```
+
+   *Atau akses melalui browser:* `http://localhost/absensi_digital/database/migrate.php`
+
+3. **Akses aplikasi:** `http://localhost/absensi_digital/`
 
 **Akun Demo Bawaan:**
 
@@ -70,10 +79,13 @@ Credential env ada di `.env.local` (contoh: `.env.example`).
 
 ## ☁️ Meng-Onlinekan Aplikasi (Go-Live)
 
-HadirTadz dapat di-online-kan lewat **2 opsi** (lihat [DEPLOYMENT.md](DEPLOYMENT.md)):
+Format utama adalah **PHP Native** (Hostinger/Rumahweb/VPS paling cocok). Lihat [DEPLOYMENT.md](DEPLOYMENT.md):
 
-1. **Vercel (hosting gratis)** — deploy otomatis dari GitHub, pasangkan MySQL cloud gratis (TiDB Cloud).
-2. **Hosting custom (Hostinger, Rumahweb, VPS)** — build `standalone` lalu jalankan `node server.js`.
+1. **Hosting custom PHP (Hostinger, Rumahweb, dsb.)** — upload folder proyek + MySQL hosting, siap.
+2. **Vercel** — dukungan runtime PHP (`vercel-php`) juga tersedia untuk deploy dari GitHub.
+
+> Catatan: kode **Next.js** (`src/`, Next.js config, dll.) tetap disimpan di repo sebagai cadangan,
+> bukan format aktif. Mengaktifkannya kembali memerlukan migrasi database & konfigurasi ulang.
 
 ---
 

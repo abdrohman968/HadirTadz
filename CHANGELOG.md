@@ -5,6 +5,16 @@ Baru ditambahkan di paling atas. Tanggal mengikuti kalender WIB.
 
 ---
 
+## [2026-08-16] Kembali ke PHP Native (format utama)
+
+- Keputusan: aplikasi **PHP Native kembali menjadi format utama**; kode **Next.js disimpan** di repo sebagai cadangan (`src/`, Next.js config) namun tidak aktif.
+- `vercel.json` dikembalikan ke konfigurasi runtime **PHP** (`vercel-php@0.6.0`) yang asli.
+- `config/database.php` ditambahkan support env `DB_PORT` (sebelumnya hanya host/user/pass/name) — default `3306`.
+- `README.md` & `DEPLOYMENT.md` diperbarui: dokumentasi kembali ke PHP Native (struktur, instalasi Laragon/XAMPP, go-live Hostinger/Rumahweb/VPS + opsi Vercel PHP).
+- Verifikasi: `php -l` clean; smoke login PHP Native `ADM-001`/`hadir123` → redirect → `/admin/index.php` 200 "Dashboard Administrator - HadirTadz"; DB MySQL lokal tersambung.
+
+---
+
 ## [2026-08-16] Opsi Go-Live: Vercel & Hosting Custom
 
 - **2 opsi onlinekan** didokumentasikan di `DEPLOYMENT.md`: (1) **Vercel** gratis — deploy dari GitHub + MySQL cloud TiDB/Aiven/Clever (TLS wajib, env `DB_SSL=true`, `DB_CONN_LIMIT` kecil); (2) **hosting custom** Hostinger/Rumahweb/VPS — `next.config.js` kini `output: 'standalone'`, jalankan `node server.js` (panduan copy `.next/static` + `.env` disertakan).

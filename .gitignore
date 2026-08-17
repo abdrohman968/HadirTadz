@@ -30,3 +30,5 @@ npm-debug.log*
 
 # Build artifacts
 tsconfig.tsbuildinfo
+.vercel
+.env*
