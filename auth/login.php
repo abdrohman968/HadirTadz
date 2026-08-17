@@ -322,18 +322,22 @@ if (!empty($school_phone)) {
             btn.setAttribute('aria-expanded', String(!expanded));
         }
 
-        // Tambahkan spinner loading saat submit, dan disable tombol agar tidak dobel klik
-        document.getElementById('submit-btn').addEventListener('click', function (e) {
-            if (this.disabled) return;
-            // Biarkan validasi native memproses; hanya aktif saat field valid & form siap submit
-            if (!document.getElementById('identifier-input').value.trim() || !document.getElementById('password-input').value) {
-                return;
-            }
-            this.disabled = true;
-            this.classList.add('disabled:opacity-60');
-            document.getElementById('submit-text').innerHTML =
-                '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>';
-        });
+        // Tambahkan spinner loading saat submit, dan disable tombol agar tidak dobel klik.
+        // Dipasang pada event 'submit' form (bukan click tombol) agar button yang di-disable
+        // tidak membatalkan pengiriman form di browser.
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                if (!document.getElementById('identifier-input').value.trim() || !document.getElementById('password-input').value) {
+                    return;
+                }
+                const btn = document.getElementById('submit-btn');
+                btn.disabled = true;
+                btn.classList.add('opacity-60');
+                document.getElementById('submit-text').innerHTML =
+                    '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>';
+            });
+        }
     </script>
 </body>
 </html>
