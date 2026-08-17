@@ -27,8 +27,9 @@ include __DIR__ . '/../includes/sidebar.php';
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
-<main class="flex-1 overflow-y-auto bg-slate-900 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-    <div class="max-w-md w-full space-y-6">
+<main class="flex-1 overflow-y-auto bg-slate-900 p-4 sm:p-6 lg:p-8">
+    <div class="max-w-md w-full mx-auto min-h-full flex flex-col">
+      <div class="flex flex-col justify-center my-auto space-y-6">
 
         <div class="text-center text-white space-y-1">
             <h1 class="text-xl font-bold tracking-tight">Kartu Pelajar Digital</h1>
@@ -82,6 +83,7 @@ include __DIR__ . '/../includes/sidebar.php';
             </button>
         </div>
 
+      </div>
     </div>
 </main>
 

@@ -153,7 +153,7 @@ include __DIR__ . '/../includes/sidebar.php';
                 </div>
             </div>
 
-            <div class="grid grid-cols-3 gap-3">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Mulai Buka</label>
                     <input type="time" name="check_in_start" id="form-rule-in-start" value="06:00" class="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
@@ -168,7 +168,7 @@ include __DIR__ . '/../includes/sidebar.php';
                 </div>
             </div>
 
-            <div class="grid grid-cols-3 gap-3">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Mulai Pulang</label>
                     <input type="time" name="check_out_start" id="form-rule-out-start" value="14:00" class="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">

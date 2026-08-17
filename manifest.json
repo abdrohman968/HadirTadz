@@ -3,6 +3,8 @@
   "short_name": "HadirTadz",
   "description": "Sistem Presensi & Absensi Digital Multi-Tenant Berbasis QR Code, Barcode, dan GPS",
   "start_url": "index.php",
+  "scope": "./",
+  "id": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#091e17",
@@ -10,14 +12,26 @@
   "lang": "id",
   "icons": [
     {
-      "src": "assets/img/icon.svg",
-      "sizes": "192x192 512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "assets/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "assets/img/logo.svg",
-      "sizes": "any",
+      "src": "assets/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/img/icon.svg",
+      "sizes": "192x192 512x512",
       "type": "image/svg+xml",
       "purpose": "any"
     }
@@ -28,22 +42,22 @@
       "name": "Scan QR Gerbang",
       "short_name": "Scanner",
       "description": "Buka Kiosk Scanner QR Gerbang Sekolah",
-      "url": "scan.php",
-      "icons": [{ "src": "assets/img/icon.svg", "sizes": "192x192" }]
+      "url": "/absensi_digital/scan.php",
+      "icons": [{ "src": "assets/img/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Kartu Pelajar Digital",
       "short_name": "Kartu",
       "description": "Buka Kartu Pelajar Siswa",
-      "url": "siswa/kartu.php",
-      "icons": [{ "src": "assets/img/icon.svg", "sizes": "192x192" }]
+      "url": "/absensi_digital/siswa/kartu.php",
+      "icons": [{ "src": "assets/img/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Absen Mandiri GPS",
       "short_name": "Absen",
       "description": "Lakukan Absensi Mandiri dengan Kamera & Lokasi",
-      "url": "siswa/absen.php",
-      "icons": [{ "src": "assets/img/icon.svg", "sizes": "192x192" }]
+      "url": "/absensi_digital/siswa/absen.php",
+      "icons": [{ "src": "assets/img/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

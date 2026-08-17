@@ -121,7 +121,7 @@ include __DIR__ . '/../includes/sidebar.php';
                 </span>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="table-responsive-card">
                 <table class="w-full text-left text-xs text-slate-600">
                     <thead class="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
                         <tr>
@@ -136,10 +136,10 @@ include __DIR__ . '/../includes/sidebar.php';
                     <tbody class="divide-y divide-slate-100">
                         <?php foreach ($users as $u): ?>
                             <tr class="hover:bg-slate-50/80 transition">
-                                <td class="py-3 px-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-emerald-700 text-white font-bold flex items-center justify-center text-xs">
-                                            <?= strtoupper(substr($u['full_name'], 0, 1)) ?>
+<td class="py-3 px-4" data-label="Nama & ID Pengguna">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-emerald-700 text-white font-bold flex items-center justify-center text-xs">
+                                                <?= strtoupper(substr($u['full_name'], 0, 1)) ?>
                                         </div>
                                         <div>
                                             <div class="font-bold text-slate-800"><?= htmlspecialchars($u['full_name']) ?></div>
@@ -147,17 +147,17 @@ include __DIR__ . '/../includes/sidebar.php';
                                         </div>
                                     </div>
                                 </td>
-                                <td class="py-3 px-4">
+                                <td class="py-3 px-4" data-label="Peran (Role)">
                                     <span class="px-2.5 py-1 rounded-full text-xs font-bold capitalize 
                                         <?= ($u['role_code'] === 'admin') ? 'bg-purple-100 text-purple-800' : (($u['role_code'] === 'guru') ? 'bg-teal-100 text-teal-800' : 'bg-blue-100 text-blue-800') ?>">
                                         <?= htmlspecialchars($u['role_name']) ?>
                                     </span>
                                 </td>
-                                <td class="py-3 px-4 text-slate-600">
+                                <td class="py-3 px-4 text-slate-600" data-label="Kontak (Email / HP)">
                                     <div><?= htmlspecialchars($u['email'] ?: '-') ?></div>
                                     <div class="font-mono text-[10px] text-slate-400"><?= htmlspecialchars($u['phone'] ?: '-') ?></div>
                                 </td>
-                                <td class="py-3 px-4">
+                                <td class="py-3 px-4" data-label="Status Akun">
                                     <?php if ($u['status'] === 'active'): ?>
                                         <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Aktif
@@ -168,10 +168,10 @@ include __DIR__ . '/../includes/sidebar.php';
                                         </span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="py-3 px-4 text-slate-400 text-[11px]">
+                                <td class="py-3 px-4 text-slate-400 text-[11px]" data-label="Terakhir Masuk">
                                     <?= $u['last_login_at'] ? format_date_indo($u['last_login_at'], false, true) : 'Belum pernah' ?>
                                 </td>
-                                <td class="py-3 px-4 text-center">
+                                <td class="py-3 px-4 text-center" data-label="Aksi">
                                     <div class="flex items-center justify-center gap-2">
                                         <!-- Reset Password -->
                                         <form method="POST" action="" onsubmit="return confirm('Reset kata sandi pengguna ini menjadi: hadir123 ?');">

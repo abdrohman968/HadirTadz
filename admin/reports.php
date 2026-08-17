@@ -170,26 +170,26 @@ include __DIR__ . '/../includes/sidebar.php';
         </div>
 
         <!-- Summary Totals -->
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            <div class="bg-emerald-50 border border-emerald-200 p-3.5 rounded-2xl text-center">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Hadir Tepat Waktu</span>
-                <p class="text-2xl font-extrabold text-emerald-800 mt-1"><?= $totals['HADIR'] ?></p>
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 sm:gap-3">
+            <div class="bg-emerald-50 border border-emerald-200 p-3 sm:p-3.5 rounded-2xl text-center">
+                <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-tight leading-tight text-emerald-600 block">Hadir Tepat Waktu</span>
+                <p class="text-xl sm:text-2xl font-extrabold text-emerald-800 mt-1"><?= $totals['HADIR'] ?></p>
             </div>
-            <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl text-center">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600">Terlambat</span>
-                <p class="text-2xl font-extrabold text-amber-800 mt-1"><?= $totals['TERLAMBAT'] ?></p>
+            <div class="bg-amber-50 border border-amber-200 p-3 sm:p-3.5 rounded-2xl text-center">
+                <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-tight leading-tight text-amber-600 block">Terlambat</span>
+                <p class="text-xl sm:text-2xl font-extrabold text-amber-800 mt-1"><?= $totals['TERLAMBAT'] ?></p>
             </div>
-            <div class="bg-blue-50 border border-blue-200 p-3.5 rounded-2xl text-center">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-blue-600">Izin</span>
-                <p class="text-2xl font-extrabold text-blue-800 mt-1"><?= $totals['IZIN'] ?></p>
+            <div class="bg-blue-50 border border-blue-200 p-3 sm:p-3.5 rounded-2xl text-center">
+                <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-tight leading-tight text-blue-600 block">Izin</span>
+                <p class="text-xl sm:text-2xl font-extrabold text-blue-800 mt-1"><?= $totals['IZIN'] ?></p>
             </div>
-            <div class="bg-purple-50 border border-purple-200 p-3.5 rounded-2xl text-center">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-purple-600">Sakit</span>
-                <p class="text-2xl font-extrabold text-purple-800 mt-1"><?= $totals['SAKIT'] ?></p>
+            <div class="bg-purple-50 border border-purple-200 p-3 sm:p-3.5 rounded-2xl text-center">
+                <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-tight leading-tight text-purple-600 block">Sakit</span>
+                <p class="text-xl sm:text-2xl font-extrabold text-purple-800 mt-1"><?= $totals['SAKIT'] ?></p>
             </div>
-            <div class="bg-rose-50 border border-rose-200 p-3.5 rounded-2xl text-center col-span-2 sm:col-span-1">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-rose-600">Alpha</span>
-                <p class="text-2xl font-extrabold text-rose-800 mt-1"><?= $totals['ALPHA'] ?></p>
+            <div class="bg-rose-50 border border-rose-200 p-3 sm:p-3.5 rounded-2xl text-center col-span-2 sm:col-span-1">
+                <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-tight leading-tight text-rose-600 block">Alpha</span>
+                <p class="text-xl sm:text-2xl font-extrabold text-rose-800 mt-1"><?= $totals['ALPHA'] ?></p>
             </div>
         </div>
 
@@ -210,7 +210,7 @@ include __DIR__ . '/../includes/sidebar.php';
             </div>
 
             <!-- Table -->
-            <div class="overflow-x-auto">
+            <div class="table-responsive-card print-table">
                 <table class="w-full text-left text-xs border-collapse">
                     <thead>
                         <tr class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] border border-slate-300">
@@ -228,24 +228,24 @@ include __DIR__ . '/../includes/sidebar.php';
                     <tbody>
                         <?php if (empty($records)): ?>
                             <tr>
-                                <td colspan="9" class="text-center py-8 text-slate-400 border border-slate-300">
+                                <td colspan="9" class="text-center py-8 text-slate-400 border border-slate-300" data-label="">
                                     Tidak ada data presensi pada rentang waktu ini.
                                 </td>
                             </tr>
                         <?php else: ?>
                             <?php $no = 1; foreach ($records as $item): ?>
                                 <tr class="hover:bg-slate-50">
-                                    <td class="py-2 px-3 border border-slate-300 text-center font-mono"><?= $no++ ?></td>
-                                    <td class="py-2 px-3 border border-slate-300 font-mono text-[11px] whitespace-nowrap"><?= date('d/m/Y', strtotime($item['date'])) ?></td>
-                                    <td class="py-2 px-3 border border-slate-300 font-mono font-bold text-slate-700"><?= htmlspecialchars($item['identifier']) ?></td>
-                                    <td class="py-2 px-3 border border-slate-300 font-bold text-slate-800"><?= htmlspecialchars($item['full_name']) ?></td>
-                                    <td class="py-2 px-3 border border-slate-300 text-slate-600"><?= htmlspecialchars($item['class_name'] ?? $item['role_name']) ?></td>
-                                    <td class="py-2 px-3 border border-slate-300 text-center font-mono font-bold text-emerald-700"><?= format_time($item['time_in']) ?></td>
-                                    <td class="py-2 px-3 border border-slate-300 text-center font-mono font-bold text-slate-700"><?= format_time($item['time_out']) ?></td>
-                                    <td class="py-2 px-3 border border-slate-300 text-center font-bold">
+                                    <td class="py-2 px-3 border border-slate-300 text-center font-mono" data-label="No"><?= $no++ ?></td>
+                                    <td class="py-2 px-3 border border-slate-300 font-mono text-[11px] whitespace-nowrap" data-label="Tanggal"><?= date('d/m/Y', strtotime($item['date'])) ?></td>
+                                    <td class="py-2 px-3 border border-slate-300 font-mono font-bold text-slate-700" data-label="ID / NISN"><?= htmlspecialchars($item['identifier']) ?></td>
+                                    <td class="py-2 px-3 border border-slate-300 font-bold text-slate-800" data-label="Nama Lengkap"><?= htmlspecialchars($item['full_name']) ?></td>
+                                    <td class="py-2 px-3 border border-slate-300 text-slate-600" data-label="Kelas / Peran"><?= htmlspecialchars($item['class_name'] ?? $item['role_name']) ?></td>
+                                    <td class="py-2 px-3 border border-slate-300 text-center font-mono font-bold text-emerald-700" data-label="Masuk"><?= format_time($item['time_in']) ?></td>
+                                    <td class="py-2 px-3 border border-slate-300 text-center font-mono font-bold text-slate-700" data-label="Pulang"><?= format_time($item['time_out']) ?></td>
+                                    <td class="py-2 px-3 border border-slate-300 text-center font-bold" data-label="Status">
                                         <?= htmlspecialchars($item['status']) ?>
                                     </td>
-                                    <td class="py-2 px-3 border border-slate-300 text-slate-500 text-[11px]"><?= htmlspecialchars($item['notes'] ?: '-') ?></td>
+                                    <td class="py-2 px-3 border border-slate-300 text-slate-500 text-[11px]" data-label="Keterangan"><?= htmlspecialchars($item['notes'] ?: '-') ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -254,7 +254,7 @@ include __DIR__ . '/../includes/sidebar.php';
             </div>
 
             <!-- Signature block for official printing -->
-            <div class="mt-12 pt-6 flex justify-between text-xs text-slate-700">
+            <div class="mt-12 pt-6 flex flex-col sm:flex-row justify-between gap-10 sm:gap-6 text-xs text-slate-700">
                 <div class="text-center">
                     <p>Mengetahui,</p>
                     <p class="font-bold mt-1">Kepala Sekolah</p>

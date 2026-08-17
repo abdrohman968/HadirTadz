@@ -36,6 +36,7 @@ const SoundEffects = {
 
     playSuccess() {
         try {
+            if (navigator.vibrate) navigator.vibrate(50);
             this.init();
             if (!this.audioCtx) return;
             if (this.audioCtx.state === 'suspended') {
@@ -90,6 +91,7 @@ const SoundEffects = {
 
     playError() {
         try {
+            if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
             this.init();
             if (!this.audioCtx) return;
             if (this.audioCtx.state === 'suspended') {
@@ -121,8 +123,8 @@ function showToast(message, type = 'success') {
     let container = document.getElementById('toast-container');
     if (!container) {
         container = document.createElement('div');
-        container.id = 'toast-container';
-        container.className = 'fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm pointer-events-none';
+        // Di layar kecil letakkan di atas bottom nav (aman dari gesture), di atas kanan untuk layar besar
+        container.className = 'fixed left-4 right-4 bottom-24 lg:bottom-auto lg:left-auto lg:right-5 lg:top-5 z-50 flex flex-col gap-3 lg:max-w-sm max-w-none pointer-events-none';
         document.body.appendChild(container);
     }
 

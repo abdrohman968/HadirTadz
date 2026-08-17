@@ -66,7 +66,7 @@ include __DIR__ . '/../includes/sidebar.php';
 
         <!-- Attendance List -->
         <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden p-3 sm:p-0">
-            <div class="table-responsive-card overflow-x-auto">
+            <div class="table-responsive-card">
                 <table class="w-full text-left text-xs text-slate-600">
                     <thead class="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
                         <tr>
@@ -81,7 +81,7 @@ include __DIR__ . '/../includes/sidebar.php';
                     <tbody class="divide-y divide-slate-100">
                         <?php if (empty($history)): ?>
                             <tr>
-                                <td colspan="6" class="text-center py-10 text-slate-400" data-label="Info">
+                                <td colspan="6" class="text-center py-10 text-slate-400" data-label="">
                                     Tidak ada rekaman presensi pada bulan ini.
                                 </td>
                             </tr>

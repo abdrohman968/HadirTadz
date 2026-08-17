@@ -194,7 +194,7 @@ include __DIR__ . '/../includes/sidebar.php';
                 </span>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="table-responsive-card">
                 <table class="w-full text-left text-xs text-slate-600">
                     <thead class="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
                         <tr>
@@ -210,14 +210,14 @@ include __DIR__ . '/../includes/sidebar.php';
                     <tbody class="divide-y divide-slate-100">
                         <?php if (empty($students)): ?>
                             <tr>
-                                <td colspan="7" class="text-center py-10 text-slate-400">
+                                <td colspan="7" class="text-center py-10 text-slate-400" data-label="">
                                     Belum ada data siswa yang ditemukan.
                                 </td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($students as $s): ?>
                                 <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3 px-4">
+                                    <td class="py-3 px-4" data-label="Nama Lengkap">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-xs">
                                                 <?= strtoupper(substr($s['full_name'], 0, 1)) ?>
@@ -228,25 +228,25 @@ include __DIR__ . '/../includes/sidebar.php';
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="py-3 px-4 font-mono font-bold text-slate-700">
+                                    <td class="py-3 px-4 font-mono font-bold text-slate-700" data-label="NISN">
                                         <?= htmlspecialchars($s['nisn']) ?>
                                     </td>
-                                    <td class="py-3 px-4">
+                                    <td class="py-3 px-4" data-label="Kelas & Jurusan">
                                         <span class="font-bold text-slate-700"><?= htmlspecialchars($s['class_name'] ?? 'Belum Ditentukan') ?></span>
                                         <span class="block text-[10px] text-slate-400"><?= htmlspecialchars($s['major'] ?? '') ?></span>
                                     </td>
-                                    <td class="py-3 px-4">
+                                    <td class="py-3 px-4" data-label="Gender">
                                         <span class="px-2 py-0.5 rounded text-[10px] font-bold <?= ($s['gender'] === 'L') ? 'bg-blue-100 text-blue-800' : 'bg-pink-100 text-pink-800' ?>">
                                             <?= ($s['gender'] === 'L') ? 'Laki-laki' : 'Perempuan' ?>
                                         </span>
                                     </td>
-                                    <td class="py-3 px-4 text-slate-700">
+                                    <td class="py-3 px-4 text-slate-700" data-label="Orang Tua / Wali">
                                         <?= htmlspecialchars($s['parent_name'] ?: '-') ?>
                                     </td>
-                                    <td class="py-3 px-4 font-mono text-slate-600">
+                                    <td class="py-3 px-4 font-mono text-slate-600" data-label="No. HP Orang Tua">
                                         <?= htmlspecialchars($s['parent_phone'] ?: '-') ?>
                                     </td>
-                                    <td class="py-3 px-4 text-center">
+                                    <td class="py-3 px-4 text-center" data-label="Aksi">
                                         <div class="flex items-center justify-center gap-1.5">
                                             <button type="button" onclick="editStudent(<?= htmlspecialchars(json_encode($s)) ?>)" class="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition" title="Edit Data">
                                                 <i class="fa-solid fa-pen-to-square text-xs"></i>

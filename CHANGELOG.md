@@ -5,6 +5,16 @@ Baru ditambahkan di paling atas. Tanggal mengikuti kalender WIB.
 
 ---
 
+## [2026-08-18] Optimasi Tampilan & Fungsi Mobile (Web + PWA)
+
+- **Layout HP**: FAB tengah bottom nav diperbaiki (`w-13 h-13` invalid → `w-14 h-14`); viewport `viewport-fit=cover` + zoom aktif + `h-dvh` (layout valid di browser mobile); toast dipindah ke atas bottom nav di layar kecil; flash `showToast` + haptic `navigator.vibrate` (√ getar sukses/error).
+- **Tabel → kartu di HP** (`table-responsive-card` + `data-label`): `guru/kelas.php` (plus radio pill status wrap — tidak overflow), `admin/attendance.php`, `admin/students.php`, `admin/teachers.php`, `admin/users.php`, `admin/permissions.php`, `admin/reports.php` (tetap tabel asli saat print via `.print-table`). Riwayat guru/siswa dibersihkan.
+- **Absen GPS/kamera**: fallback alert "Kamera tidak tersedia" + tombol Coba Lagi, dan error GPS menampilkan kartu merah + panduan (guru/absen.php & siswa/absen.php).
+- **Lainnya**: `siswa/kartu.php` centering aman (konten tak terpotong di layar pendek); `admin/rules.php` form waktu 3→2→3 kolom; KPI dashboard angka `text-2xl sm:text-3xl`; summary laporan & blok tanda tangan responsif.
+- **PWA**: `service-worker.js` v1.1 — cache Tailwind CDN/fonts.gstatic/apexcharts/unpkg + runtime-cache halaman (offline deeper), SW terdaftar di `auth/login.php`, `auth/register_school.php`, `scan.php`; icon PNG 192/512 dihasilkan + `manifest.json` (scope/id, PNG maskable, start_url relatif).
+
+---
+
 ## [2026-08-18] Tampilan Auth Dimodernkan (Login & Daftar Sekolah)
 
 - **`auth/login.php` ditulis ulang dengan desain modern** mengikuti tampilan Next.js cadangan: tema dark emerald + blur glass (Tailwind CDN + Plus Jakarta Sans + Font Awesome), logo polos tanpa frame, judul "HadirTadz" dua warna, tanpa badge version di judul, tanpa tombol Google SSO/demo autofill.

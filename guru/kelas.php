@@ -143,7 +143,7 @@ include __DIR__ . '/../includes/sidebar.php';
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
+                <div class="table-responsive-card">
                     <table class="w-full text-left text-xs text-slate-600">
                         <thead class="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
                             <tr>
@@ -165,17 +165,17 @@ include __DIR__ . '/../includes/sidebar.php';
                                     $current_st = $s['attendance_status'] ?? 'HADIR';
                                 ?>
                                     <tr class="hover:bg-slate-50/80 transition">
-                                        <td class="py-3.5 px-4 text-center font-mono text-slate-400"><?= $no++ ?></td>
-                                        <td class="py-3.5 px-4">
+                                        <td class="py-3.5 px-4 text-center font-mono text-slate-400" data-label="No"><?= $no++ ?></td>
+                                        <td class="py-3.5 px-4" data-label="Nama">
                                             <div class="font-bold text-slate-800 text-sm"><?= htmlspecialchars($s['full_name']) ?></div>
                                             <div class="text-[10px] text-slate-400"><?= ($s['gender'] === 'L') ? 'Laki-laki' : 'Perempuan' ?></div>
                                         </td>
-                                        <td class="py-3.5 px-4 font-mono font-bold text-slate-700">
+                                        <td class="py-3.5 px-4 font-mono font-bold text-slate-700" data-label="NISN">
                                             <?= htmlspecialchars($s['nisn']) ?>
                                         </td>
-                                        <td class="py-3.5 px-4">
-                                            <!-- Radio Status Buttons Grid -->
-                                            <div class="flex items-center justify-center gap-2">
+                                        <td class="py-3.5 px-4" data-label="Status">
+                                            <!-- Radio Status Buttons Grid (wrap di layar kecil) -->
+                                            <div class="flex flex-wrap items-center justify-start gap-1.5 sm:justify-center sm:gap-2">
                                                 <label class="cursor-pointer">
                                                     <input type="radio" name="status[<?= $s['user_id'] ?>]" value="HADIR" <?= ($current_st === 'HADIR') ? 'checked' : '' ?> class="peer sr-only status-radio" data-status="HADIR">
                                                     <span class="px-3 py-1.5 rounded-xl border text-xs font-bold transition peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-600 bg-slate-50 text-slate-600 border-slate-200">

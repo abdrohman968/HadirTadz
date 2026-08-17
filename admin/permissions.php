@@ -123,7 +123,7 @@ include __DIR__ . '/../includes/sidebar.php';
                 </span>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="table-responsive-card">
                 <table class="w-full text-left text-xs text-slate-600">
                     <thead class="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
                         <tr>
@@ -139,33 +139,33 @@ include __DIR__ . '/../includes/sidebar.php';
                     <tbody class="divide-y divide-slate-100">
                         <?php if (empty($permissions)): ?>
                             <tr>
-                                <td colspan="7" class="text-center py-10 text-slate-400">
+                                <td colspan="7" class="text-center py-10 text-slate-400" data-label="">
                                     Belum ada berkas pengajuan izin atau sakit.
                                 </td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($permissions as $p): ?>
                                 <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3 px-4">
+                                    <td class="py-3 px-4" data-label="Pemohon">
                                         <div class="font-bold text-slate-800"><?= htmlspecialchars($p['full_name']) ?></div>
                                         <div class="text-[10px] text-slate-400"><?= htmlspecialchars($p['class_name'] ?? $p['role_name']) ?> &bull; <span class="font-mono"><?= htmlspecialchars($p['identifier']) ?></span></div>
                                     </td>
-                                    <td class="py-3 px-4">
+                                    <td class="py-3 px-4" data-label="Tipe">
                                         <span class="px-2.5 py-1 rounded-full text-xs font-bold uppercase <?= ($p['type'] === 'sakit') ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' ?>">
                                             <?= htmlspecialchars($p['type']) ?>
                                         </span>
                                     </td>
-                                    <td class="py-3 px-4 font-mono text-[11px] text-slate-700">
+                                    <td class="py-3 px-4 font-mono text-[11px] text-slate-700" data-label="Rentang Waktu">
                                         <div><?= format_date_indo($p['start_date'], false) ?></div>
                                         <div class="text-slate-400 text-[10px]">s/d <?= format_date_indo($p['end_date'], false) ?></div>
                                     </td>
-                                    <td class="py-3 px-4 text-slate-700 max-w-xs">
+                                    <td class="py-3 px-4 text-slate-700 max-w-xs" data-label="Alasan / Catatan">
                                         <?= htmlspecialchars($p['reason']) ?>
                                         <?php if ($p['rejection_reason']): ?>
                                             <div class="text-[10px] text-rose-600 mt-1">Alasan ditolak: <?= htmlspecialchars($p['rejection_reason']) ?></div>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="py-3 px-4">
+                                    <td class="py-3 px-4" data-label="Bukti / Lampiran">
                                         <?php if (!empty($p['attachment_url'])): ?>
                                             <a href="<?= htmlspecialchars($p['attachment_url']) ?>" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-800 font-semibold text-[11px] transition">
                                                 <i class="fa-solid fa-paperclip"></i> Lihat Berkas
@@ -174,10 +174,10 @@ include __DIR__ . '/../includes/sidebar.php';
                                             <span class="text-slate-400">-</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="py-3 px-4">
+                                    <td class="py-3 px-4" data-label="Status">
                                         <?= status_badge($p['status']) ?>
                                     </td>
-                                    <td class="py-3 px-4 text-center">
+                                    <td class="py-3 px-4 text-center" data-label="Aksi / Verifikasi">
                                         <?php if ($p['status'] === 'pending'): ?>
                                             <div class="flex items-center justify-center gap-2">
                                                 <!-- Approve -->

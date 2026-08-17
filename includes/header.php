@@ -13,7 +13,7 @@ $page_title = $page_title ?? 'Absensi Digital';
 <html lang="id" class="h-full bg-slate-50">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <title><?= htmlspecialchars($page_title) ?> - HadirTadz (<?= htmlspecialchars($school_name) ?>)</title>
     
     <!-- PWA Manifest & App Icons -->
@@ -62,7 +62,7 @@ $page_title = $page_title ?? 'Absensi Digital';
     <!-- ApexCharts CDN -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
-<body class="h-screen flex flex-col overflow-hidden bg-slate-50 text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
+<body class="h-dvh flex flex-col overflow-hidden bg-slate-50 text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
 
     <!-- Top Navigation Bar -->
     <header class="no-print flex-shrink-0 z-30 bg-emerald-800 text-white shadow-md border-b border-emerald-900">

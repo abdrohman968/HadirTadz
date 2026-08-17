@@ -111,8 +111,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="id" class="h-full bg-slate-900">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Daftar Sekolah Baru - HadirTadz</title>
+    <!-- PWA Manifest & Service Worker -->
+    <link rel="manifest" href="<?= $base_url ?>/manifest.json">
+    <meta name="theme-color" content="#065f46">
+    <link rel="apple-touch-icon" href="<?= $base_url ?>/assets/img/icon.svg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="HadirTadz">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -298,6 +305,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');
             }
+        }
+    </script>
+
+    <script>
+        // Register PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('<?= $base_url ?>/service-worker.js')
+                    .catch(err => console.log('HadirTadz Service Worker Failed:', err));
+            });
         }
     </script>
 

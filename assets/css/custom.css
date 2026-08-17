@@ -168,4 +168,25 @@ main {
         gap: 15px !important;
         page-break-inside: avoid;
     }
+    /* Revert mobile card table to real table when printing official reports */
+    .print-table table,
+    .print-table thead,
+    .print-table tbody,
+    .print-table th,
+    .print-table td,
+    .print-table tr {
+        display: revert !important;
+        position: static !important;
+    }
+    .print-table td {
+        padding-left: 0.75rem !important;
+        text-align: left !important;
+    }
+    .print-table td:before {
+        content: none !important;
+    }
+    .print-table thead tr {
+        top: auto !important;
+        left: auto !important;
+    }
 }

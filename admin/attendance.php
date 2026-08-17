@@ -131,7 +131,7 @@ include __DIR__ . '/../includes/sidebar.php';
                 <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Presensi Harian</h1>
                 <p class="text-xs sm:text-sm text-slate-500">Monitor dan kelola kehadiran siswa serta guru secara realtime.</p>
             </div>
-            <div class="flex items-center gap-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
                 <button onclick="openModal('modal-attendance')" class="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition flex items-center gap-2">
                     <i class="fa-solid fa-plus"></i>
                     <span>Tambah Presensi Manual</span>
@@ -205,7 +205,7 @@ include __DIR__ . '/../includes/sidebar.php';
                 </span>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="table-responsive-card">
                 <table class="w-full text-left text-xs text-slate-600">
                     <thead class="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
                         <tr>
@@ -222,14 +222,14 @@ include __DIR__ . '/../includes/sidebar.php';
                     <tbody class="divide-y divide-slate-100">
                         <?php if (empty($attendance_list)): ?>
                             <tr>
-                                <td colspan="8" class="text-center py-10 text-slate-400">
+                                <td colspan="8" class="text-center py-10 text-slate-400" data-label="">
                                     Tidak ada data presensi yang sesuai dengan filter.
                                 </td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($attendance_list as $item): ?>
                                 <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3 px-4">
+                                    <td class="py-3 px-4" data-label="Nama Pengguna">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-xs">
                                                 <?= strtoupper(substr($item['full_name'], 0, 1)) ?>
@@ -240,28 +240,28 @@ include __DIR__ . '/../includes/sidebar.php';
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="py-3 px-4">
+                                    <td class="py-3 px-4" data-label="Role & Kelas">
                                         <span class="font-medium text-slate-700"><?= htmlspecialchars($item['class_name'] ?? '-') ?></span>
                                         <span class="block text-[10px] text-slate-400 capitalize"><?= htmlspecialchars($item['role_name']) ?></span>
                                     </td>
-                                    <td class="py-3 px-4 font-mono font-semibold text-emerald-700">
+                                    <td class="py-3 px-4 font-mono font-semibold text-emerald-700" data-label="Masuk">
                                         <?= format_time($item['time_in']) ?>
                                     </td>
-                                    <td class="py-3 px-4 font-mono font-semibold text-slate-700">
+                                    <td class="py-3 px-4 font-mono font-semibold text-slate-700" data-label="Pulang">
                                         <?= format_time($item['time_out']) ?>
                                     </td>
-                                    <td class="py-3 px-4">
+                                    <td class="py-3 px-4" data-label="Status">
                                         <?= status_badge($item['status']) ?>
                                     </td>
-                                    <td class="py-3 px-4">
+                                    <td class="py-3 px-4" data-label="Metode">
                                         <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-100 text-slate-600 border border-slate-200">
                                             <?= htmlspecialchars($item['method']) ?>
                                         </span>
                                     </td>
-                                    <td class="py-3 px-4 text-slate-500 max-w-xs truncate">
+                                    <td class="py-3 px-4 text-slate-500 max-w-xs truncate" data-label="Keterangan">
                                         <?= htmlspecialchars($item['notes'] ?: '-') ?>
                                     </td>
-                                    <td class="py-3 px-4 text-center">
+                                    <td class="py-3 px-4 text-center" data-label="Aksi">
                                         <div class="flex items-center justify-center gap-1.5">
                                             <button type="button" onclick="editAttendance(<?= htmlspecialchars(json_encode($item)) ?>)" class="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition" title="Edit Presensi">
                                                 <i class="fa-solid fa-pen-to-square text-xs"></i>

@@ -108,7 +108,7 @@ include __DIR__ . '/../includes/sidebar.php';
                     </div>
                 </div>
                 <div class="mt-4 flex items-baseline gap-2">
-                    <span class="text-3xl font-extrabold text-slate-800"><?= $hadir_count ?></span>
+                    <span class="text-2xl sm:text-3xl font-extrabold text-slate-800"><?= $hadir_count ?></span>
                     <span class="text-xs text-slate-500">Siswa / Guru</span>
                 </div>
                 <div class="mt-2 text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
@@ -125,7 +125,7 @@ include __DIR__ . '/../includes/sidebar.php';
                     </div>
                 </div>
                 <div class="mt-4 flex items-baseline gap-2">
-                    <span class="text-3xl font-extrabold text-amber-600"><?= $terlambat_count ?></span>
+                    <span class="text-2xl sm:text-3xl font-extrabold text-amber-600"><?= $terlambat_count ?></span>
                     <span class="text-xs text-slate-500">Siswa</span>
                 </div>
                 <div class="mt-2 text-[11px] text-amber-600 font-semibold flex items-center gap-1">
@@ -142,7 +142,7 @@ include __DIR__ . '/../includes/sidebar.php';
                     </div>
                 </div>
                 <div class="mt-4 flex items-baseline gap-2">
-                    <span class="text-3xl font-extrabold text-blue-600"><?= $izin_count + $sakit_count ?></span>
+                    <span class="text-2xl sm:text-3xl font-extrabold text-blue-600"><?= $izin_count + $sakit_count ?></span>
                     <span class="text-xs text-slate-500"><?= $izin_count ?> Izin, <?= $sakit_count ?> Sakit</span>
                 </div>
                 <div class="mt-2 text-[11px] text-blue-600 font-semibold flex items-center gap-1">
@@ -159,7 +159,7 @@ include __DIR__ . '/../includes/sidebar.php';
                     </div>
                 </div>
                 <div class="mt-4 flex items-baseline gap-2">
-                    <span class="text-3xl font-extrabold text-slate-800"><?= $total_students ?></span>
+                    <span class="text-2xl sm:text-3xl font-extrabold text-slate-800"><?= $total_students ?></span>
                     <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800"><?= $attendance_rate ?>% Hadir</span>
                 </div>
                 <div class="mt-2 text-[11px] text-slate-500 font-medium">

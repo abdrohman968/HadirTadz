@@ -160,7 +160,7 @@ include __DIR__ . '/../includes/sidebar.php';
                 </span>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="table-responsive-card">
                 <table class="w-full text-left text-xs text-slate-600">
                     <thead class="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
                         <tr>
@@ -176,14 +176,14 @@ include __DIR__ . '/../includes/sidebar.php';
                     <tbody class="divide-y divide-slate-100">
                         <?php if (empty($teachers)): ?>
                             <tr>
-                                <td colspan="7" class="text-center py-10 text-slate-400">
+                                <td colspan="7" class="text-center py-10 text-slate-400" data-label="">
                                     Belum ada data guru pengajar yang ditemukan.
                                 </td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($teachers as $t): ?>
                                 <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="py-3 px-4">
+                                    <td class="py-3 px-4" data-label="Nama Lengkap & NIP">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full bg-teal-100 text-teal-800 font-bold flex items-center justify-center text-xs">
                                                 <?= strtoupper(substr($t['full_name'], 0, 1)) ?>
@@ -194,26 +194,26 @@ include __DIR__ . '/../includes/sidebar.php';
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="py-3 px-4">
+                                    <td class="py-3 px-4" data-label="Mata Pelajaran">
                                         <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                             <?= htmlspecialchars($t['subject_specialty'] ?: 'Umum') ?>
                                         </span>
                                     </td>
-                                    <td class="py-3 px-4">
+                                    <td class="py-3 px-4" data-label="Gender">
                                         <span class="px-2 py-0.5 rounded text-[10px] font-bold <?= ($t['gender'] === 'L') ? 'bg-blue-100 text-blue-800' : 'bg-pink-100 text-pink-800' ?>">
                                             <?= ($t['gender'] === 'L') ? 'Laki-laki' : 'Perempuan' ?>
                                         </span>
                                     </td>
-                                    <td class="py-3 px-4 text-slate-600">
+                                    <td class="py-3 px-4 text-slate-600" data-label="Email">
                                         <?= htmlspecialchars($t['email'] ?: '-') ?>
                                     </td>
-                                    <td class="py-3 px-4 font-mono text-slate-600">
+                                    <td class="py-3 px-4 font-mono text-slate-600" data-label="No. HP / WA">
                                         <?= htmlspecialchars($t['phone'] ?: '-') ?>
                                     </td>
-                                    <td class="py-3 px-4 text-slate-400 text-[11px]">
+                                    <td class="py-3 px-4 text-slate-400 text-[11px]" data-label="Terakhir Masuk">
                                         <?= $t['last_login_at'] ? format_date_indo($t['last_login_at'], false, true) : 'Belum pernah' ?>
                                     </td>
-                                    <td class="py-3 px-4 text-center">
+                                    <td class="py-3 px-4 text-center" data-label="Aksi">
                                         <div class="flex items-center justify-center gap-1.5">
                                             <button type="button" onclick="editTeacher(<?= htmlspecialchars(json_encode($t)) ?>)" class="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition" title="Edit">
                                                 <i class="fa-solid fa-pen-to-square text-xs"></i>

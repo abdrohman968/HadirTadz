@@ -51,6 +51,20 @@ include __DIR__ . '/../includes/sidebar.php';
                 </div>
             </div>
 
+            <!-- Camera / GPS Fallback Warning -->
+            <div id="camera-fallback-msg" class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs leading-relaxed">
+                <div class="flex items-start gap-3">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-600 text-lg mt-0.5"></i>
+                    <div class="flex-1">
+                        <p class="font-bold mb-1">Kamera tidak tersedia</p>
+                        <p id="camera-fallback-text">Mohon izinkan akses kamera di browser/WebView untuk verifikasi wajah (selfie).</p>
+                        <button type="button" onclick="initCamera()" class="mt-2.5 px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-[11px] shadow-sm transition">
+                            <i class="fa-solid fa-rotate mr-1"></i> Coba Lagi
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Selfie Camera Preview -->
             <div class="space-y-2">
                 <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider">Foto Selfie Kehadiran</label>
@@ -105,11 +119,20 @@ include __DIR__ . '/../includes/sidebar.php';
     }
 
     async function initCamera() {
+        const fallback = document.getElementById('camera-fallback-msg');
+        if (fallback) fallback.classList.add('hidden');
         try {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error("getUserMedia tidak didukung di browser/WebView ini. Gunakan HTTPS atau browser modern.");
+            }
             videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
             document.getElementById('selfie-video').srcObject = videoStream;
         } catch (e) {
             console.error("Camera access failed:", e);
+            const msg = document.getElementById('camera-fallback-text');
+            if (msg) msg.textContent = "Gagal mengakses kamera: " + e.message;
+            if (fallback) fallback.classList.remove('hidden');
+            showToast("Kamera tidak dapat diakses. Periksa izin kamera di browser.", "error");
         }
     }
 
@@ -156,7 +179,21 @@ include __DIR__ . '/../includes/sidebar.php';
                     if (btnOut) btnOut.disabled = true;
                 }
             }, err => {
-                document.getElementById('gps-title').textContent = "Gagal mengambil lokasi: " + err.message;
+                const card = document.getElementById('gps-status-card');
+                const icon = document.getElementById('gps-icon');
+                const title = document.getElementById('gps-title');
+                const desc = document.getElementById('gps-desc');
+                if (card) card.className = "p-4 rounded-2xl bg-rose-50 border border-rose-300 flex items-center justify-between gap-4";
+                if (icon) {
+                    icon.className = "w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center text-lg";
+                    icon.innerHTML = '<i class="fa-solid fa-location-crosshairs-slash"></i>';
+                }
+                if (title) title.textContent = "Lokasi GPS tidak dapat diakses";
+                if (desc) desc.textContent = "" + err.message + ". Izinkan akses lokasi pada browser, lalu muat ulang halaman.";
+                const btnIn = document.getElementById('btn-checkin');
+                const btnOut = document.getElementById('btn-checkout');
+                if (btnIn) btnIn.disabled = true;
+                if (btnOut) btnOut.disabled = true;
             }, { enableHighAccuracy: true });
         }
     }

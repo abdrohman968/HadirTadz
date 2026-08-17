@@ -19,7 +19,7 @@ function bottom_nav_item($url, $icon, $label, $isActive, $isCenter = false) {
     if ($isCenter) {
         return '
         <a href="' . $url . '" class="relative -top-5 flex flex-col items-center group">
-            <div class="w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-xl shadow-lg shadow-emerald-600/40 border-4 border-white transform active:scale-95 transition group-hover:scale-105">
+            <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-xl shadow-lg shadow-emerald-600/40 border-4 border-white transform active:scale-95 transition group-hover:scale-105">
                 <i class="' . $icon . '"></i>
             </div>
             <span class="text-[10px] font-bold text-emerald-700 mt-0.5">' . $label . '</span>
