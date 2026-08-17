@@ -1,6 +1,6 @@
 # HadirTadz Mobile (Expo Go / WebView)
 
-Wrapper ringan berbasis **React Native + Expo (SDK 57)** yang menampilkan aplikasi web HadirTadz di dalam **WebView**. Bisa dijalankan langsung lewat **Expo Go** tanpa build native.
+Wrapper ringan berbasis **React Native + Expo (SDK 54)** yang menampilkan aplikasi web HadirTadz di dalam **WebView**. Bisa dijalankan langsung lewat **Expo Go** tanpa build native.
 
 Fitur:
 - Tab target **Lokal** dan **Online** (tap untuk pindah server).
@@ -9,7 +9,7 @@ Fitur:
 
 ## Menjalankan (Expo Go)
 
-1. Instal **Expo Go** di HP dari Play Store / App Store (kompatibel Expo SDK 57).
+1. Instal **Expo Go** di HP dari Play Store / App Store (pilih versi yang kompatibel **Expo SDK 54** — untuk iOS gunakan versi Expo Go yang mendukung SDK 54).
 2. (HP & PC harus satu WiFi) Jalankan dev server:
    ```
    npm install
