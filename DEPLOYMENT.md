@@ -138,6 +138,20 @@ Vercel hanya untuk preview aplikasi Next.js cadangan.
 
 ---
 
+## Opsi 3 — Aplikasi Android (Expo Go / WebView)
+
+Folder `mobile/` berisi wrapper **React Native + Expo** yang memuat aplikasi web HadirTadz di dalam
+**WebView** — bisa dijalankan di HP langsung lewat **Expo Go** (tanpa build native).
+
+- `npm install` → `npx expo start` → scan QR dengan Expo Go (HP & PC satu WiFi).
+- Tab **Lokal** (default `http://10.0.2.2/...`, ganti ke IP PC bila pakai HP fisik) dan
+  **Online** (`https://hadirtadz.vercel.app/login`).
+- Detil & kredensial uji: lihat `mobile/README.md`.
+- Untuk produksi (APK): `npx expo run:android` atau `eas build`, dan **wajib HTTPS** (cleartext HTTP
+  diblokir di WebView Android setelah API 28 untuk build produksi).
+
+---
+
 ## Verifikasi setelah deploy
 
 1. Buka `https://domainanda/` → login dengan admin `ADM-001` / `hadir123`.
