@@ -4,11 +4,21 @@ import { StatusBar } from 'expo-status-bar';
 import Constants from 'expo-constants';
 import { WebView } from 'react-native-webview';
 
+// Host LAN PC diambil dari alamat Metro (hostUri) yang dihubungi Expo Go,
+// mis. "192.168.1.10:8081" -> "192.168.1.10". Dengan ini IP lokal tidak perlu
+// diedit manual; otomatis mengikuti IP PC di WiFi yang sama.
+const getLanHost = () => {
+  const hostUri = Constants.expoConfig?.hostUri || Constants.expoGoConfig?.debuggerHost || '';
+  return hostUri.split(':')[0] || '10.0.2.2';
+};
+
+const LAN_HOST = getLanHost();
+
 const TARGETS = [
   {
     key: 'local',
     label: 'Lokal',
-    uri: 'http://10.0.2.2/absensi_digital/auth/login.php',
+    uri: `http://${LAN_HOST}/absensi_digital/auth/login.php`,
   },
   {
     key: 'online',
@@ -36,6 +46,7 @@ export default function App() {
       setError(null);
     }
     const internalHost =
+      nav.url.startsWith(`http://${LAN_HOST}`) ||
       nav.url.startsWith('http://10.0.2.2') ||
       nav.url.startsWith('http://localhost') ||
       nav.url.startsWith('https://hadirtadz.vercel.app');

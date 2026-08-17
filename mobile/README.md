@@ -23,14 +23,13 @@ Buka `App.js`, bagian `TARGETS`:
 
 | key | label   | uri (default)                          |
 |-----|---------|----------------------------------------|
-| local | Lokal  | `http://10.0.2.2/absensi_digital/auth/login.php` |
+| local | Lokal  | `http://<IP-LAN-PC>/absensi_digital/auth/login.php` |
 | online | Online | `https://hadirtadz.vercel.app/login`  |
 
 Catatan:
-- `10.0.2.2` = host PC bila memakai **Android Emulator**.
-- Untuk **HP fisik**, ganti `local` dengan IP PC di jaringan lokal, contoh:
-  `http://192.168.1.10/absensi_digital/auth/login.php`.
-  Cek IP dengan `ipconfig` (Windows) lalu pastikan server Laragon/Apache aktif.
+- IP LAN PC **diambil otomatis** dari alamat Metro (`Constants.expoConfig.hostUri`) yang dihubungi Expo Go — tidak perlu edit manual. Saat `npx expo start` menampilkan IP seperti `exp://192.168.1.10:8081`, target Lokal memakai `192.168.1.10`.
+- Syarat "Gagal Terhubung" hilang: **HP & PC satu WiFi**, server Laragon **Apache aktif**, dan tidak memakai `10.0.2.2` (itu khusus Android Emulator).
+- Verifikasi manual dari browser HP: buka `http://<IP-LAN-PC>/absensi_digital/auth/login.php` — wajib tampil halaman login sebelum mencoba di Expo Go.
 
 ## Kredensial Login Uji (seed)
 
