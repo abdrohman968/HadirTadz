@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
-import { ActivityIndicator, Linking, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import Constants from 'expo-constants';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
 // Host LAN PC diambil dari alamat Metro (hostUri) yang dihubungi Expo Go,
@@ -56,8 +57,9 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar style="light" />
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+        <StatusBar style="light" />
       <View style={styles.topbar}>
         <Text style={styles.title}>HadirTadz</Text>
         <View style={styles.seg}>
@@ -110,6 +112,7 @@ export default function App() {
         )}
       </View>
     </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -117,7 +120,6 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: '#064e3b',
-    paddingTop: Constants.statusBarHeight,
   },
   topbar: {
     flexDirection: 'row',
