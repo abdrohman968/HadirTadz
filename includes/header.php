@@ -68,11 +68,19 @@ $page_title = $page_title ?? 'Absensi Digital';
     <header class="no-print flex-shrink-0 z-30 bg-emerald-800 text-white shadow-md border-b border-emerald-900">
         <div class="px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <!-- Left: Mobile Toggle & HadirTadz Two-Color Brand -->
+                <!-- Left: Desktop Burger, Mobile Menu (Admin), Brand -->
                 <div class="flex items-center gap-3">
-                    <button id="mobile-menu-btn" type="button" class="lg:hidden p-2 rounded-lg text-emerald-100 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                    <!-- Desktop Burger: hide/show sidebar -->
+                    <button id="desktop-sidebar-btn" type="button" title="Tampilkan / Sembunyikan menu samping" class="hidden lg:flex items-center justify-center p-2 rounded-lg text-emerald-100 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400">
                         <i class="fa-solid fa-bars text-xl"></i>
                     </button>
+                    <!-- Mobile Menu (hanya Admin; Guru & Siswa memakai bottom nav) -->
+                    <?php if (($current_user['role_code'] ?? '') === 'admin'): ?>
+                    <button id="mobile-menu-btn" type="button" class="lg:hidden flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-900/50 border border-emerald-700/60 text-emerald-100 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                        <i class="fa-solid fa-bars text-base"></i>
+                        <span class="text-xs font-bold">Menu</span>
+                    </button>
+                    <?php endif; ?>
                     <a href="<?= $base_url ?>/index.php" class="flex items-center gap-2.5 group">
                         <div class="w-10 h-10 rounded-xl bg-white text-emerald-800 flex items-center justify-center font-extrabold text-xl shadow-inner group-hover:scale-105 transition-transform overflow-hidden">
                             <?php if (!empty($school['logo_url'])): ?>

@@ -7,12 +7,25 @@ $base_url = get_base_url();
     <!-- Mobile Bottom Navigation Bar -->
     <?php include __DIR__ . '/bottom_nav.php'; ?>
 
-    <!-- Mobile Sidebar Controller Script -->
+    <!-- Sidebar Controller Script -->
     <script>
+        const desktopSidebarBtn = document.getElementById('desktop-sidebar-btn');
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const appSidebar = document.getElementById('app-sidebar');
         const mobileSidebarBackdrop = document.getElementById('mobile-sidebar-backdrop');
 
+        // Desktop: burger untuk hide/show sidebar (state tersimpan antar halaman)
+        if (desktopSidebarBtn && appSidebar) {
+            if (localStorage.getItem('ht-sidebar-collapsed') === '1') {
+                appSidebar.classList.add('lg:hidden');
+            }
+            desktopSidebarBtn.addEventListener('click', () => {
+                appSidebar.classList.toggle('lg:hidden');
+                localStorage.setItem('ht-sidebar-collapsed', appSidebar.classList.contains('lg:hidden') ? '1' : '0');
+            });
+        }
+
+        // Mobile: drawer sidebar (hanya Admin yang punya tombol Menu)
         if (mobileMenuBtn && appSidebar && mobileSidebarBackdrop) {
             mobileMenuBtn.addEventListener('click', () => {
                 appSidebar.classList.toggle('-translate-x-full');
