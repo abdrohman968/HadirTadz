@@ -94,11 +94,14 @@ function bottom_menu_tile($url, $icon, $label, $isActive) {
 </nav>
 
 <?php if ($role === 'admin'): ?>
-<!-- Admin Menu Modal (muncul di tengah, bukan drawer samping) -->
-<div id="bottom-menu-modal" class="lg:hidden fixed inset-0 z-50 hidden flex items-end justify-center px-4 pt-4 pb-24">
-    <div id="bottom-menu-backdrop" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
-    <div class="relative w-full max-w-sm bg-white rounded-t-3xl rounded-b-none shadow-2xl p-4 pt-3 max-h-[78vh] overflow-y-auto">
-        <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
+<!-- Admin Menu Bottom Sheet (gaya iPhone, muncul dari bawah) -->
+<div id="bottom-menu-modal" class="lg:hidden fixed inset-0 z-50 hidden">
+    <div id="bottom-menu-backdrop" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
+    <div id="bottom-menu-sheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[2rem] shadow-2xl transition-transform duration-300 ease-out translate-y-full">
+        <div class="flex justify-center pt-2.5">
+            <span class="w-10 h-1.5 bg-slate-300 rounded-full"></span>
+        </div>
+        <div class="flex items-center justify-between px-5 pt-2 pb-3 border-b border-slate-100">
             <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
                 <i class="fa-solid fa-bars text-emerald-600"></i>
                 <span>Menu Utama</span>
@@ -107,7 +110,7 @@ function bottom_menu_tile($url, $icon, $label, $isActive) {
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="px-5 py-4 max-h-[55vh] overflow-y-auto grid grid-cols-3 gap-2.5">
             <?= bottom_menu_tile("$base_url/admin/index.php", "fa-solid fa-gauge-high", "Dashboard", is_bottom_active('admin', 'index.php')) ?>
             <?= bottom_menu_tile("$base_url/admin/attendance.php", "fa-solid fa-clipboard-user", "Presensi Harian", is_bottom_active('admin', 'attendance.php')) ?>
             <?= bottom_menu_tile("$base_url/scan.php", "fa-solid fa-qrcode", "Kiosk Scanner", false) ?>
@@ -121,6 +124,12 @@ function bottom_menu_tile($url, $icon, $label, $isActive) {
             <?= bottom_menu_tile("$base_url/admin/reports.php", "fa-solid fa-file-invoice", "Rekap Laporan", is_bottom_active('admin', 'reports.php')) ?>
             <?= bottom_menu_tile("$base_url/admin/rules.php", "fa-solid fa-clock-rotate-left", "Aturan Absensi", is_bottom_active('admin', 'rules.php')) ?>
             <?= bottom_menu_tile("$base_url/admin/settings.php", "fa-solid fa-sliders", "Pengaturan", is_bottom_active('admin', 'settings.php')) ?>
+        </div>
+        <div class="px-5 pb-5 pt-1 safe-area-pb">
+            <a href="<?= $base_url ?>/auth/logout.php" class="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 text-sm font-bold transition hover:bg-rose-100">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Keluar (Logout)</span>
+            </a>
         </div>
     </div>
 </div>

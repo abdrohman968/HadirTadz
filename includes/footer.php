@@ -23,21 +23,35 @@ $base_url = get_base_url();
             });
         }
 
-        // Mobile: tombol "Menu" admin di bottom nav membuka kotak menu di tengah
+        // Mobile: tombol "Menu" admin membuka bottom sheet ala iPhone
         const bottomMenuBtn = document.getElementById('bottom-menu-btn');
         const bottomMenuModal = document.getElementById('bottom-menu-modal');
+        const bottomMenuSheet = document.getElementById('bottom-menu-sheet');
         const bottomMenuBackdrop = document.getElementById('bottom-menu-backdrop');
         const bottomMenuClose = document.getElementById('bottom-menu-close');
 
+        function closeBottomMenu() {
+            if (!bottomMenuSheet || !bottomMenuModal) return;
+            bottomMenuSheet.classList.add('translate-y-full');
+            setTimeout(() => bottomMenuModal.classList.add('hidden'), 300);
+        }
+
         if (bottomMenuBtn && bottomMenuModal) {
             bottomMenuBtn.addEventListener('click', () => {
-                bottomMenuModal.classList.toggle('hidden');
+                if (bottomMenuModal.classList.contains('hidden')) {
+                    bottomMenuModal.classList.remove('hidden');
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        bottomMenuSheet.classList.remove('translate-y-full');
+                    }));
+                } else {
+                    closeBottomMenu();
+                }
             });
             if (bottomMenuBackdrop) {
-                bottomMenuBackdrop.addEventListener('click', () => bottomMenuModal.classList.add('hidden'));
+                bottomMenuBackdrop.addEventListener('click', closeBottomMenu);
             }
             if (bottomMenuClose) {
-                bottomMenuClose.addEventListener('click', () => bottomMenuModal.classList.add('hidden'));
+                bottomMenuClose.addEventListener('click', closeBottomMenu);
             }
         }
     </script>
