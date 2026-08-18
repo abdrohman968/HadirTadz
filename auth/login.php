@@ -9,34 +9,27 @@ if (auth_check()) {
     redirect_to_dashboard($user['role_code'] ?? 'admin');
 }
 
-$schools = get_all_schools();
-$selected_school_id = isset($_GET['school_id']) ? (int)$_GET['school_id'] : (isset($_SESSION['selected_school_id']) ? (int)$_SESSION['selected_school_id'] : 1);
-$current_school = current_school($selected_school_id);
-$school_name = $current_school['name'] ?? 'SMA Terpadu Al-Mu\'min';
-$school_phone = $current_school['phone'] ?? '';
 $base_url = get_base_url();
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identifier = trim($_POST['identifier'] ?? '');
     $password = trim($_POST['password'] ?? '');
-    $school_id = isset($_POST['school_id']) ? (int)$_POST['school_id'] : $selected_school_id;
 
     if (empty($identifier) || empty($password)) {
         $error = 'Silakan masukkan ID Pengguna / Email dan Kata Sandi.';
     } else {
-        // Cari user berdasarkan identifier atau email
-        // Di sistem multi-tenant, user dicocokkan dengan identifier/email dan school_id (jika dipilih) atau global email
+        // Cari user berdasarkan identifier atau email (login umum tanpa pilihan sekolah)
         $stmt = $pdo->prepare("
             SELECT u.*, r.role_code, r.role_name, s.name AS school_name, s.logo_url AS school_logo_url
             FROM users u 
             JOIN roles r ON u.role_id = r.id 
             LEFT JOIN schools s ON u.school_id = s.id
             WHERE (u.identifier = ? OR u.email = ?) AND u.deleted_at IS NULL
-            ORDER BY (u.school_id = ?) DESC
+            ORDER BY u.id ASC
             LIMIT 1
         ");
-        $stmt->execute([$identifier, $identifier, $school_id]);
+        $stmt->execute([$identifier, $identifier]);
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password_hash'])) {
@@ -65,21 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Normalisasi nomor WhatsApp admin sekolah untuk tombol "Hubungi Admin" (0 -> 62)
-$wa_digits = '';
-$wa_url = '';
-if (!empty($school_phone)) {
-    $wa_digits = preg_replace('/\D/', '', $school_phone);
-    if (!empty($wa_digits)) {
-        if (str_starts_with($wa_digits, '0')) {
-            $wa_digits = '62' . substr($wa_digits, 1);
-        }
-        $wa_url = 'https://wa.me/' . $wa_digits . '?text=' . urlencode(
-            'Assalamualaikum/Selamat pagi, saya lupa kata sandi akun HadirTadz. Mohon bantuan untuk me-reset kata sandi saya. Terima kasih.'
-        );
-    }
-}
 ?>
+
+
 <!DOCTYPE html>
 <html lang="id" class="h-full bg-slate-950">
 <head>
@@ -144,11 +125,7 @@ if (!empty($school_phone)) {
         <div class="text-center mb-3">
             <!-- Logo (tanpa frame, sesuai tampilan modern) -->
             <div class="text-center mb-2">
-                <?php if (!empty($current_school['logo_url'])): ?>
-                    <img id="school-logo-img" src="<?= htmlspecialchars($current_school['logo_url']) ?>" alt="Logo Sekolah" class="h-14 w-auto object-contain mx-auto">
-                <?php else: ?>
-                    <img src="<?= $base_url ?>/logo.png" alt="Logo HadirTadz" class="h-14 w-auto object-contain mx-auto hover:scale-105 transition-transform duration-300">
-                <?php endif; ?>
+                <img src="<?= $base_url ?>/logo.png" alt="Logo HadirTadz" class="h-14 w-auto object-contain mx-auto hover:scale-105 transition-transform duration-300">
             </div>
 
             <!-- Two-Color App Name -->
@@ -192,29 +169,6 @@ if (!empty($school_phone)) {
             <?php endif; ?>
 
             <form method="POST" action="" class="space-y-3.5">
-
-                <!-- Multi-School Selector -->
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
-                        <span>Pilihan Sekolah / Institusi</span>
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                            <i class="fa-solid fa-school"></i>
-                        </div>
-                        <select name="school_id" id="school-select"
-                            class="w-full pl-10 pr-8 py-2 bg-slate-900/60 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition appearance-none cursor-pointer">
-                            <?php foreach ($schools as $sch): ?>
-                                <option value="<?= $sch['id'] ?>" <?= $sch['id'] == $selected_school_id ? 'selected' : '' ?> class="bg-slate-900 text-white">
-                                    <?= htmlspecialchars($sch['name']) ?> (NPSN: <?= htmlspecialchars($sch['npsn']) ?>)
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
-                            <i class="fa-solid fa-chevron-down text-xs"></i>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- ID Pengguna -->
                 <div>
@@ -263,19 +217,8 @@ if (!empty($school_phone)) {
                         <div class="flex-1">
                             <p class="text-sm font-semibold text-white mb-1">Lupa Kata Sandi?</p>
                             <p class="text-xs text-slate-300 leading-relaxed">
-                                Hubungi administrator sekolah <span class="font-semibold text-white"><?= htmlspecialchars($school_name) ?></span> melalui WhatsApp untuk me-reset kata sandi Anda.
+                                Hubungi administrator sekolah Anda untuk me-reset kata sandi akun HadirTadz.
                             </p>
-                            <div class="mt-3">
-                                <?php if (!empty($wa_url)): ?>
-                                    <a href="<?= htmlspecialchars($wa_url) ?>" target="_blank" rel="noopener noreferrer"
-                                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg transition">
-                                        <i class="fa-brands fa-whatsapp w-4 h-4 text-base"></i>
-                                        <span>Hubungi Admin</span>
-                                    </a>
-                                <?php else: ?>
-                                    <p class="text-[11px] text-amber-300/90">Nomor WhatsApp admin sekolah belum tersedia. Silakan hubungi pihak sekolah secara langsung.</p>
-                                <?php endif; ?>
-                            </div>
                         </div>
                     </div>
                 </div>
