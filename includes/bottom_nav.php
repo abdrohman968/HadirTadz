@@ -125,12 +125,7 @@ function bottom_menu_tile($url, $icon, $label, $isActive) {
             <?= bottom_menu_tile("$base_url/admin/rules.php", "fa-solid fa-clock-rotate-left", "Aturan Absensi", is_bottom_active('admin', 'rules.php')) ?>
             <?= bottom_menu_tile("$base_url/admin/settings.php", "fa-solid fa-sliders", "Pengaturan", is_bottom_active('admin', 'settings.php')) ?>
         </div>
-        <div class="px-5 pb-5 pt-1 safe-area-pb">
-            <a href="<?= $base_url ?>/auth/logout.php" class="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 text-sm font-bold transition hover:bg-rose-100">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                <span>Keluar (Logout)</span>
-            </a>
-        </div>
+        <div class="px-5 pb-6 pt-1 safe-area-pb"></div>
     </div>
 </div>
 <?php endif; ?>

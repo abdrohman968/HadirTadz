@@ -118,9 +118,6 @@ function nav_item($url, $icon, $label, $isActive, $badge = '') {
                 <p class="text-xs font-bold text-slate-800 truncate"><?= htmlspecialchars($current_user['full_name'] ?? '') ?></p>
                 <p class="text-[11px] text-emerald-600 font-medium"><?= htmlspecialchars($current_user['identifier'] ?? '') ?></p>
             </div>
-            <a href="<?= $base_url ?>/auth/logout.php" title="Logout" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
-                <i class="fa-solid fa-power-off text-sm"></i>
-            </a>
         </div>
     </div>
 </aside>
