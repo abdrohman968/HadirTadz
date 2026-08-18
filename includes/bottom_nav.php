@@ -37,6 +37,17 @@ function bottom_nav_item($url, $icon, $label, $isActive, $isCenter = false) {
         ' . $indicator . '
     </a>';
 }
+
+// Menu item untuk kotak modal tengah (mobile admin)
+function bottom_menu_tile($url, $icon, $label, $isActive) {
+    $tile = $isActive ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-50 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-100';
+    $tileIcon = $isActive ? 'text-white' : 'text-emerald-600';
+    return '
+    <a href="' . $url . '" class="flex flex-col items-center justify-center gap-1.5 px-1 py-3 rounded-2xl text-center transition ' . $tile . '">
+        <i class="' . $icon . ' text-xl ' . $tileIcon . '"></i>
+        <span class="text-[11px] font-semibold leading-tight">' . $label . '</span>
+    </a>';
+}
 ?>
 
 <!-- Mobile App-Like Bottom Navigation Bar (Visible on < lg screens) -->
@@ -81,3 +92,36 @@ function bottom_nav_item($url, $icon, $label, $isActive, $isCenter = false) {
 
     </div>
 </nav>
+
+<?php if ($role === 'admin'): ?>
+<!-- Admin Menu Modal (muncul di tengah, bukan drawer samping) -->
+<div id="bottom-menu-modal" class="lg:hidden fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div id="bottom-menu-backdrop" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+    <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl p-4 max-h-[78vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
+            <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-bars text-emerald-600"></i>
+                <span>Menu Utama</span>
+            </h3>
+            <button id="bottom-menu-close" type="button" aria-label="Tutup menu" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+            <?= bottom_menu_tile("$base_url/admin/index.php", "fa-solid fa-gauge-high", "Dashboard", is_bottom_active('admin', 'index.php')) ?>
+            <?= bottom_menu_tile("$base_url/admin/attendance.php", "fa-solid fa-clipboard-user", "Presensi Harian", is_bottom_active('admin', 'attendance.php')) ?>
+            <?= bottom_menu_tile("$base_url/scan.php", "fa-solid fa-qrcode", "Kiosk Scanner", false) ?>
+            <?= bottom_menu_tile("$base_url/admin/students.php", "fa-solid fa-user-graduate", "Data Siswa", is_bottom_active('admin', 'students.php')) ?>
+            <?= bottom_menu_tile("$base_url/admin/teachers.php", "fa-solid fa-chalkboard-user", "Data Guru", is_bottom_active('admin', 'teachers.php')) ?>
+            <?= bottom_menu_tile("$base_url/admin/classes.php", "fa-solid fa-school", "Data Kelas", is_bottom_active('admin', 'classes.php')) ?>
+            <?= bottom_menu_tile("$base_url/admin/users.php", "fa-solid fa-users-gear", "Kelola Akun", is_bottom_active('admin', 'users.php')) ?>
+            <?= bottom_menu_tile("$base_url/admin/permissions.php", "fa-solid fa-envelope-open-text", "Izin & Sakit", is_bottom_active('admin', 'permissions.php')) ?>
+            <?= bottom_menu_tile("$base_url/admin/journals.php", "fa-solid fa-book-journal-whills", "Jurnal Mengajar", is_bottom_active('admin', 'journals.php')) ?>
+            <?= bottom_menu_tile("$base_url/admin/cards.php", "fa-solid fa-id-card", "Cetak Kartu", is_bottom_active('admin', 'cards.php')) ?>
+            <?= bottom_menu_tile("$base_url/admin/reports.php", "fa-solid fa-file-invoice", "Rekap Laporan", is_bottom_active('admin', 'reports.php')) ?>
+            <?= bottom_menu_tile("$base_url/admin/rules.php", "fa-solid fa-clock-rotate-left", "Aturan Absensi", is_bottom_active('admin', 'rules.php')) ?>
+            <?= bottom_menu_tile("$base_url/admin/settings.php", "fa-solid fa-sliders", "Pengaturan", is_bottom_active('admin', 'settings.php')) ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>

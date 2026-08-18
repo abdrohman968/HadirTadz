@@ -7,12 +7,10 @@ $base_url = get_base_url();
     <!-- Mobile Bottom Navigation Bar -->
     <?php include __DIR__ . '/bottom_nav.php'; ?>
 
-    <!-- Sidebar Controller Script -->
+    <!-- Sidebar & Menu Controller Script -->
     <script>
         const desktopSidebarBtn = document.getElementById('desktop-sidebar-btn');
-        const bottomMenuBtn = document.getElementById('bottom-menu-btn');
         const appSidebar = document.getElementById('app-sidebar');
-        const mobileSidebarBackdrop = document.getElementById('mobile-sidebar-backdrop');
 
         // Desktop: burger untuk hide/show sidebar (state tersimpan antar halaman)
         if (desktopSidebarBtn && appSidebar) {
@@ -25,17 +23,22 @@ $base_url = get_base_url();
             });
         }
 
-        // Mobile: drawer sidebar dibuka dari tombol "Menu" di bottom nav (Admin)
-        if (bottomMenuBtn && appSidebar && mobileSidebarBackdrop) {
-            bottomMenuBtn.addEventListener('click', () => {
-                appSidebar.classList.toggle('-translate-x-full');
-                mobileSidebarBackdrop.classList.toggle('hidden');
-            });
+        // Mobile: tombol "Menu" admin di bottom nav membuka kotak menu di tengah
+        const bottomMenuBtn = document.getElementById('bottom-menu-btn');
+        const bottomMenuModal = document.getElementById('bottom-menu-modal');
+        const bottomMenuBackdrop = document.getElementById('bottom-menu-backdrop');
+        const bottomMenuClose = document.getElementById('bottom-menu-close');
 
-            mobileSidebarBackdrop.addEventListener('click', () => {
-                appSidebar.classList.add('-translate-x-full');
-                mobileSidebarBackdrop.classList.add('hidden');
+        if (bottomMenuBtn && bottomMenuModal) {
+            bottomMenuBtn.addEventListener('click', () => {
+                bottomMenuModal.classList.toggle('hidden');
             });
+            if (bottomMenuBackdrop) {
+                bottomMenuBackdrop.addEventListener('click', () => bottomMenuModal.classList.add('hidden'));
+            }
+            if (bottomMenuClose) {
+                bottomMenuClose.addEventListener('click', () => bottomMenuModal.classList.add('hidden'));
+            }
         }
     </script>
 
