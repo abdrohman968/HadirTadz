@@ -10,7 +10,7 @@ $base_url = get_base_url();
     <!-- Sidebar Controller Script -->
     <script>
         const desktopSidebarBtn = document.getElementById('desktop-sidebar-btn');
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const bottomMenuBtn = document.getElementById('bottom-menu-btn');
         const appSidebar = document.getElementById('app-sidebar');
         const mobileSidebarBackdrop = document.getElementById('mobile-sidebar-backdrop');
 
@@ -25,9 +25,9 @@ $base_url = get_base_url();
             });
         }
 
-        // Mobile: drawer sidebar (hanya Admin yang punya tombol Menu)
-        if (mobileMenuBtn && appSidebar && mobileSidebarBackdrop) {
-            mobileMenuBtn.addEventListener('click', () => {
+        // Mobile: drawer sidebar dibuka dari tombol "Menu" di bottom nav (Admin)
+        if (bottomMenuBtn && appSidebar && mobileSidebarBackdrop) {
+            bottomMenuBtn.addEventListener('click', () => {
                 appSidebar.classList.toggle('-translate-x-full');
                 mobileSidebarBackdrop.classList.toggle('hidden');
             });

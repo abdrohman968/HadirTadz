@@ -44,12 +44,17 @@ function bottom_nav_item($url, $icon, $label, $isActive, $isCenter = false) {
     <div class="flex items-center justify-around max-w-lg mx-auto">
         
         <?php if ($role === 'admin'): ?>
-            <!-- ADMIN BOTTOM NAV: Beranda, Presensi, Scanner (Center), Master, Profil -->
+            <!-- ADMIN BOTTOM NAV: Beranda, Guru, Menu (Center -> buka drawer), Siswa, Presensi -->
             <?= bottom_nav_item("$base_url/admin/index.php", "fa-solid fa-house", "Beranda", is_bottom_active('admin', 'index.php')) ?>
+            <?= bottom_nav_item("$base_url/admin/teachers.php", "fa-solid fa-chalkboard-user", "Guru", is_bottom_active('admin', 'teachers.php')) ?>
+            <button id="bottom-menu-btn" type="button" aria-label="Buka menu utama" class="relative -top-5 flex flex-col items-center group">
+                <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-xl shadow-lg shadow-emerald-600/40 border-4 border-white transform active:scale-95 transition group-hover:scale-105">
+                    <i class="fa-solid fa-bars"></i>
+                </div>
+                <span class="text-[10px] font-bold text-emerald-700 mt-0.5">Menu</span>
+            </button>
+            <?= bottom_nav_item("$base_url/admin/students.php", "fa-solid fa-user-graduate", "Siswa", is_bottom_active('admin', 'students.php')) ?>
             <?= bottom_nav_item("$base_url/admin/attendance.php", "fa-solid fa-clipboard-user", "Presensi", is_bottom_active('admin', 'attendance.php')) ?>
-            <?= bottom_nav_item("$base_url/scan.php", "fa-solid fa-qrcode", "Scan QR", false, true) ?>
-            <?= bottom_nav_item("$base_url/admin/students.php", "fa-solid fa-users", "Master", is_bottom_active('admin', 'students.php') || is_bottom_active('admin', 'teachers.php') || is_bottom_active('admin', 'classes.php')) ?>
-            <?= bottom_nav_item("$base_url/auth/profile.php", "fa-solid fa-user-gear", "Profil", is_bottom_active('auth', 'profile.php') || is_bottom_active('admin', 'settings.php')) ?>
 
         <?php elseif ($role === 'guru'): ?>
             <!-- GURU BOTTOM NAV: Beranda, Kelas, Absen GPS (Center), Jurnal, Profil -->
