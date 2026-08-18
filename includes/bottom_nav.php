@@ -95,9 +95,9 @@ function bottom_menu_tile($url, $icon, $label, $isActive) {
 
 <?php if ($role === 'admin'): ?>
 <!-- Admin Menu Modal (muncul di tengah, bukan drawer samping) -->
-<div id="bottom-menu-modal" class="lg:hidden fixed inset-0 z-50 hidden items-center justify-center p-4">
+<div id="bottom-menu-modal" class="lg:hidden fixed inset-0 z-50 hidden items-end justify-center px-4 pt-4 pb-24">
     <div id="bottom-menu-backdrop" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
-    <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl p-4 max-h-[78vh] overflow-y-auto">
+    <div class="relative w-full max-w-sm bg-white rounded-t-3xl rounded-b-none shadow-2xl p-4 pt-3 max-h-[78vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
             <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
                 <i class="fa-solid fa-bars text-emerald-600"></i>
