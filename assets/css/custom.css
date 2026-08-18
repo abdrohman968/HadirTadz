@@ -29,6 +29,13 @@ html, body {
     overscroll-behavior-y: none;
 }
 
+/* Slightly smaller base typography & spacing on mobile (Tailwind rem scaling) */
+@media (max-width: 767px) {
+    html {
+        font-size: 15px;
+    }
+}
+
 /* Safe padding for main containers on mobile to prevent bottom nav collision */
 main {
     padding-bottom: 5.5rem !important;
