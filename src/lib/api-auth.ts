@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT, type UserPayload } from '@/lib/auth';
+import { revalidateUser } from '@/lib/session-db';
 
 const SESSION_COOKIE = 'hadirtadz_session';
 
@@ -14,12 +15,14 @@ export function getApiUser(req: NextRequest): UserPayload | null {
 
 /**
  * Wajib login pada API route. Opsional membatasi role.
+ * Sesi divalidasi ulang ke database (status aktif, tidak dihapus, role terkini)
+ * sehingga akun yang dinonaktifkan/dihapus langsung kehilangan akses.
  * Mengembalikan { user, error } — jika error, langsung return error response.
  */
-export function requireApiAuth(
+export async function requireApiAuth(
   req: NextRequest,
   allowedRoles?: string[]
-): { user: UserPayload | null; error: NextResponse | null } {
+): Promise<{ user: UserPayload | null; error: NextResponse | null }> {
   const user = getApiUser(req);
   if (!user) {
     return {
@@ -27,11 +30,18 @@ export function requireApiAuth(
       error: NextResponse.json({ success: false, message: 'Silakan login terlebih dahulu' }, { status: 401 }),
     };
   }
-  if (allowedRoles && !allowedRoles.includes(user.role_code)) {
+  const fresh = await revalidateUser(user);
+  if (!fresh) {
     return {
-      user,
+      user: null,
+      error: NextResponse.json({ success: false, message: 'Sesi berakhir atau akun tidak aktif. Silakan login kembali.' }, { status: 401 }),
+    };
+  }
+  if (allowedRoles && !allowedRoles.includes(fresh.role_code)) {
+    return {
+      user: fresh,
       error: NextResponse.json({ success: false, message: 'Anda tidak memiliki hak akses' }, { status: 403 }),
     };
   }
-  return { user, error: null };
+  return { user: fresh, error: null };
 }

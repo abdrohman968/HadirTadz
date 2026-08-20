@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { requireApiAuth } from '@/lib/api-auth';
 import { getAuditLogs } from '@/lib/queries';
 
@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
  * ?action=LOGIN,LOGOUT&search=&from=YYYY-MM-DD&to=&page=&pageSize=
  */
 export async function GET(req: NextRequest) {
-  const { user, error } = requireApiAuth(req, ['admin']);
+  const { user, error } = await requireApiAuth(req, ['admin']);
   if (error) return error;
 
   const { searchParams } = new URL(req.url);

@@ -11,6 +11,7 @@ import ThemeToggle, { MobileThemeToggle } from '@/components/ui/ThemeToggle';
 import GlobalSearch from './GlobalSearch';
 import { fetchAPI } from '@/lib/api';
 import { toastSuccess } from '@/components/ui/Toast';
+import { beginLogout } from '@/lib/logout-guard';
 import type { NavGroup } from '@/lib/nav';
 import { nowClockWIB } from '@/lib/format';
 
@@ -54,6 +55,7 @@ function HeaderProfile({ user }: { user: DashboardShellProps['user'] }) {
   const handleLogout = async () => {
     if (loggingOut) return;
     setLoggingOut(true);
+    if (!beginLogout()) return; // sudah ada sesi logout lain yang berjalan
     const res = await fetchAPI('/api/auth/logout', { method: 'POST', silent: true });
     if (res.success) toastSuccess('Logout berhasil. Sampai jumpa!');
     router.push('/login');
@@ -146,19 +148,19 @@ export default function DashboardShell({ user, navGroups, children }: DashboardS
     if (role === 'siswa') {
       return [
         { href: '/siswa', label: 'Beranda', icon: bottomIcons.home },
-        { href: '/siswa/kartu', label: 'Kartu', icon: bottomIcons.card },
         { href: '/siswa/absen', label: 'Absen', icon: bottomIcons.camera },
-        { href: '/siswa/izin', label: 'Izin', icon: bottomIcons.envelope },
-        { href: '/siswa/riwayat', label: 'Riwayat', icon: bottomIcons.history },
+        { href: '/siswa/pelajaran', label: 'Pelajaran', icon: bottomIcons.book },
+        { href: '/siswa/ekskul', label: 'Ekskul', icon: bottomIcons.clipboard },
+        { more: true, label: 'Lainnya', icon: bottomIcons.grid },
       ];
     }
     if (role === 'guru') {
       return [
         { href: '/guru', label: 'Beranda', icon: bottomIcons.home },
         { href: '/guru/absen', label: 'Absen', icon: bottomIcons.camera },
+        { href: '/guru/pelajaran', label: 'Pelajaran', icon: bottomIcons.book },
         { href: '/guru/kelas', label: 'Kelas', icon: bottomIcons.clipboard },
-        { href: '/guru/jurnal', label: 'Jurnal', icon: bottomIcons.book },
-        { href: '/guru/riwayat', label: 'Riwayat', icon: bottomIcons.history },
+        { more: true, label: 'Lainnya', icon: bottomIcons.grid },
       ];
     }
     return [
@@ -202,7 +204,7 @@ export default function DashboardShell({ user, navGroups, children }: DashboardS
                     <span className="text-emerald-200">Tadz</span>
                   </div>
                   <div className="text-[10px] text-emerald-100 font-medium truncate max-w-[160px]">
-                    {user.school_name || 'SMA Terpadu Al-Mu\'min'}
+                    {user.school_name || 'SMA Negeri Harapan Bangsa'}
                   </div>
                 </div>
               </Link>
@@ -238,7 +240,7 @@ export default function DashboardShell({ user, navGroups, children }: DashboardS
             {/* Bagian tengah: Server Time + Search Bar global */}
             <div className="hidden md:flex items-center gap-3 flex-1 max-w-xl justify-center mx-2 min-w-0">
               <LiveClock />
-              {role === 'admin' || role === 'guru' ? <GlobalSearch /> : null}
+              {role === 'admin' ? <GlobalSearch role={role} /> : null}
             </div>
 
             {/* Bagian kanan: Lonceng, pintasan, & Profil */}
@@ -299,7 +301,7 @@ export default function DashboardShell({ user, navGroups, children }: DashboardS
                   <span className="text-emerald-600 dark:text-emerald-400">Tadz</span>
                 </div>
                 <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate max-w-[150px]">
-                  {user.school_name || 'SMA Terpadu Al-Mu\'min'}
+                  {user.school_name || 'SMA Negeri Harapan Bangsa'}
                 </div>
               </div>
             </div>

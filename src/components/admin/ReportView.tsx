@@ -34,6 +34,8 @@ export default function ReportView({
   operator,
   schoolName,
   address,
+  principalName,
+  principalNip,
   startDate,
   endDate,
   filterClass,
@@ -46,6 +48,8 @@ export default function ReportView({
   operator: Operator;
   schoolName: string;
   address: string;
+  principalName?: string;
+  principalNip?: string;
   startDate: string;
   endDate: string;
   filterClass: string;
@@ -220,8 +224,8 @@ export default function ReportView({
             <p>Mengetahui,</p>
             <p className="font-bold mt-1">Kepala Sekolah</p>
             <div className="h-20"></div>
-            <p className="font-bold underline">Drs. H. Ahmad Fauzi, M.M.</p>
-            <p className="text-[10px] text-slate-500">NIP. 196805121995121001</p>
+            <p className="font-bold underline">{principalName || '-'}</p>
+            <p className="text-[10px] text-slate-500">NIP. {principalNip || '-'}</p>
           </div>
           <div className="text-center">
             <p>

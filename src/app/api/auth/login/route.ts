@@ -89,18 +89,21 @@ export async function POST(req: NextRequest) {
       console.warn('Audit log error:', auditErr);
     }
 
-    // Sign JWT
-    const token = signJWT({
-      id: user.id,
-      school_id: user.school_id,
-      role_id: user.role_id,
-      role_code: user.role_code,
-      role_name: user.role_name,
-      identifier: user.identifier,
-      full_name: user.full_name,
-      email: user.email,
-      school_name: user.school_name,
-    });
+    // Sign JWT — sama dengan umur cookie agar sesi tidak putus sebelum cookie habis.
+    const token = signJWT(
+      {
+        id: user.id,
+        school_id: user.school_id,
+        role_id: user.role_id,
+        role_code: user.role_code,
+        role_name: user.role_name,
+        identifier: user.identifier,
+        full_name: user.full_name,
+        email: user.email,
+        school_name: user.school_name,
+      },
+      remember ? '30d' : '7d'
+    );
 
     // Determine dashboard redirect URL based on role
     let redirectUrl = '/admin';

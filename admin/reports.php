@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $page_title = 'Rekapitulasi Laporan Kehadiran';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/auth.php';
@@ -96,7 +96,7 @@ foreach ($records as $r) {
     }
 }
 
-$school_name = get_setting('schoolName', 'SMA Terpadu Al-Mu\'min');
+$school_name = get_setting('schoolName', 'SMA Negeri Harapan Bangsa');
 $school_address = get_setting('address', 'Bandung');
 
 include __DIR__ . '/../includes/header.php';

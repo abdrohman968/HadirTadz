@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { requireApiAuth } from '@/lib/api-auth';
@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
  * Manajemen Akun Pengguna (users.php): reset password & toggle status.
  */
 export async function POST(req: NextRequest) {
-  const { user, error } = requireApiAuth(req, ['admin']);
+  const { user, error } = await requireApiAuth(req, ['admin']);
   if (error) return error;
 
   let input: any = {};

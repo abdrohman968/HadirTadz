@@ -38,9 +38,12 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 
 /**
  * Sign JWT Token
+ * @param expiresIn Durasi token. Default 7d. Untuk "Ingat saya" beri 30d agar
+ *  selaras dengan umur cookie — jika tidak, sesi putus di hari ke-8 padahal
+ *  cookie remember masih berlaku.
  */
-export function signJWT(payload: UserPayload): string {
-  return jwt.sign(payload, getJwtSecret(), { expiresIn: JWT_EXPIRES_IN });
+export function signJWT(payload: UserPayload, expiresIn: jwt.SignOptions['expiresIn'] = JWT_EXPIRES_IN): string {
+  return jwt.sign(payload, getJwtSecret(), { expiresIn });
 }
 
 /**
@@ -48,7 +51,7 @@ export function signJWT(payload: UserPayload): string {
  */
 export function verifyJWT(token: string): UserPayload | null {
   try {
-    return jwt.verify(token, getJwtSecret()) as UserPayload;
+    return jwt.verify(token, getJwtSecret(), { algorithms: ['HS256'] }) as UserPayload;
   } catch (error) {
     return null;
   }

@@ -1,18 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import type { RowDataPacket } from 'mysql2';
 import bcrypt from 'bcryptjs';
 import { requireApiAuth } from '@/lib/api-auth';
 import { logAudit } from '@/lib/queries';
 import { generateTempPassword } from '@/lib/password';
+import { handleApiError } from '@/lib/api-error';
 
 export const dynamic = 'force-dynamic';
+
+/** Deteksi error duplikat (mis. NISN/NIP yang sudah dipakai user lain). */
+function isDuplicateError(e: any): boolean {
+  return e?.code === 'ER_DUP_ENTRY' || (e?.errno === 1062);
+}
 
 /**
  * CRUD Data Siswa (students.php)
  */
 export async function POST(req: NextRequest) {
-  const { user, error } = requireApiAuth(req, ['admin']);
+  const { user, error } = await requireApiAuth(req, ['admin']);
   if (error) return error;
 
   let input: any = {};
@@ -27,16 +33,16 @@ export async function POST(req: NextRequest) {
 
   try {
     if (action === 'save_student') {
-      const studentId = input.student_id ? Number(input.student_id) : null;
+      const studentId = input.student_id && Number.isInteger(Number(input.student_id)) ? Number(input.student_id) : null;
       const fullName = String(input.full_name ?? '').trim();
       const nisn = String(input.nisn ?? '').trim();
-      const classId = input.class_id ? Number(input.class_id) : null;
+      const classId = input.class_id && Number.isInteger(Number(input.class_id)) ? Number(input.class_id) : null;
       const gender = String(input.gender ?? 'L');
       const parentName = String(input.parent_name ?? '').trim();
       const parentPhone = String(input.parent_phone ?? '').trim();
 
       if (!fullName || !nisn) {
-        return NextResponse.json({ success: false, message: 'Nama lengkap dan NISN wajib diisi' });
+        return NextResponse.json({ success: false, message: 'Nama lengkap dan NISN wajib diisi' }, { status: 400 });
       }
 
       if (classId) {
@@ -45,7 +51,7 @@ export async function POST(req: NextRequest) {
           [classId, schoolId]
         );
         if (!cls[0]) {
-          return NextResponse.json({ success: false, message: 'Kelas tidak ditemukan pada sekolah ini.' });
+          return NextResponse.json({ success: false, message: 'Kelas tidak ditemukan pada sekolah ini.' }, { status: 400 });
         }
       }
 
@@ -96,7 +102,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, message: 'Data siswa berhasil diperbarui!' });
       } catch (e: any) {
         await conn.rollback();
-        return NextResponse.json({ success: false, message: 'Gagal menyimpan data siswa. Silakan coba lagi.' });
+        if (isDuplicateError(e)) {
+          return NextResponse.json({ success: false, message: `NISN "${nisn}" sudah digunakan oleh siswa lain.` }, { status: 409 });
+        }
+        console.error('admin/students save error:', e);
+        return NextResponse.json({ success: false, message: 'Gagal menyimpan data siswa. Silakan coba lagi.' }, { status: 500 });
       } finally {
         conn.release();
       }
@@ -104,7 +114,7 @@ export async function POST(req: NextRequest) {
 
     if (action === 'delete_student') {
       const delId = Number(input.student_id);
-      if (!delId) return NextResponse.json({ success: false, message: 'ID tidak valid' });
+      if (!delId || !Number.isInteger(delId)) return NextResponse.json({ success: false, message: 'ID tidak valid' }, { status: 400 });
 
       const conn = await pool.getConnection();
       try {
@@ -122,14 +132,19 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, message: 'Data siswa berhasil dihapus.' });
       } catch (e: any) {
         await conn.rollback();
-        return NextResponse.json({ success: false, message: 'Gagal menghapus data siswa. Silakan coba lagi.' });
+        console.error('admin/students delete error:', e);
+        return NextResponse.json({ success: false, message: 'Gagal menghapus data siswa. Silakan coba lagi.' }, { status: 500 });
       } finally {
         conn.release();
       }
     }
 
-    return NextResponse.json({ success: false, message: 'Aksi tidak dikenal' });
+    return NextResponse.json({ success: false, message: 'Aksi tidak dikenal' }, { status: 400 });
   } catch (e: any) {
-    return NextResponse.json({ success: false, message: 'Gagal memproses data siswa. Silakan coba lagi.' }, { status: 500 });
+    handleApiError(e, 'Gagal memproses data siswa. Silakan coba lagi.');
+    return NextResponse.json(
+      { success: false, message: 'Gagal memproses data siswa. Silakan coba lagi.' },
+      { status: 500 }
+    );
   }
 }

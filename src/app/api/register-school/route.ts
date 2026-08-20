@@ -31,10 +31,17 @@ export async function POST(req: NextRequest) {
   const npsn = String(input.npsn || '').trim();
   const level = String(input.level || 'SMA').trim();
   const address = String(input.address || '').trim();
+  const city = String(input.city || '').trim();
+  const province = String(input.province || '').trim();
+  const postalCode = String(input.postal_code || '').trim();
+  // Email & telepon sekolah (dipisah dari admin).
+  const schoolEmail = String(input.school_email || input.email || '').trim();
+  const schoolPhone = String(input.school_phone || input.phone || '').trim();
   const adminName = String(input.admin_name || '').trim();
+  const adminNik = String(input.admin_nik || '').trim();
+  const adminEmail = String(input.admin_email || input.email || '').trim();
+  const adminPhone = String(input.admin_phone || input.phone || '').trim();
   let identifier = String(input.identifier || '').trim();
-  const email = String(input.email || '').trim();
-  const phone = String(input.phone || '').trim();
   const password = String(input.password || '');
   const confirmPassword = String(input.confirm_password || '');
 
@@ -44,8 +51,14 @@ export async function POST(req: NextRequest) {
   if (password !== confirmPassword) {
     return NextResponse.json({ success: false, message: 'Konfirmasi kata sandi tidak cocok.' });
   }
-  if (password.length < 6) {
-    return NextResponse.json({ success: false, message: 'Kata sandi minimal harus 6 karakter.' });
+  if (password.length < 8) {
+    return NextResponse.json({ success: false, message: 'Kata sandi minimal harus 8 karakter.' });
+  }
+  if (schoolEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(schoolEmail)) {
+    return NextResponse.json({ success: false, message: 'Format email sekolah tidak valid.' });
+  }
+  if (adminEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(adminEmail)) {
+    return NextResponse.json({ success: false, message: 'Format email admin tidak valid.' });
   }
 
   const generateCode = (prefix: string) =>
@@ -73,7 +86,7 @@ export async function POST(req: NextRequest) {
       const [schoolRes] = await conn.execute(
         `INSERT INTO schools (school_code, npsn, name, level, address, phone, email, is_active, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())`,
-        [schoolCode, npsn, schoolName, level, address, phone, email]
+        [schoolCode, npsn, schoolName, level, address, schoolPhone, schoolEmail]
       );
       const newSchoolId = (schoolRes as any).insertId;
 
@@ -95,7 +108,7 @@ export async function POST(req: NextRequest) {
       await conn.execute(
         `INSERT INTO users (school_id, role_id, identifier, full_name, password_hash, email, phone, status, created_at, updated_at)
          VALUES (?, 1, ?, ?, ?, ?, ?, 'active', NOW(), NOW())`,
-        [newSchoolId, identifier, adminName, passHash, email, phone]
+        [newSchoolId, identifier, adminName, passHash, adminEmail, adminPhone]
       );
 
       // 5. Pengaturan default
@@ -104,6 +117,9 @@ export async function POST(req: NextRequest) {
         npsn: npsn,
         schoolLevel: level,
         address: address,
+        city: city,
+        province: province,
+        postalCode: postalCode,
         latitude: '-6.92720000',
         longitude: '107.72250000',
         radiusMeters: '150',
@@ -112,7 +128,8 @@ export async function POST(req: NextRequest) {
         lateThreshold: '07:15',
         timeOutStart: '14:00',
         operatorName: adminName,
-        operatorPhone: phone,
+        operatorNik: adminNik,
+        operatorPhone: adminPhone,
       };
       for (const [k, v] of Object.entries(defaultSettings)) {
         await conn.execute(
@@ -133,7 +150,13 @@ export async function POST(req: NextRequest) {
       await conn.commit();
       return NextResponse.json({
         success: true,
-        message: `Pendaftaran sekolah berhasil! Silakan login menggunakan ID Admin: ${identifier} atau Email.`,
+        message: `Pendaftaran sekolah berhasil! Silakan login.`,
+        data: {
+          school_code: schoolCode,
+          school_name: schoolName,
+          admin_identifier: identifier,
+          admin_name: adminName,
+        },
       });
     } catch (e) {
       await conn.rollback();

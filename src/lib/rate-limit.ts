@@ -55,15 +55,19 @@ export function resetRateLimit(key: string): void {
 
 /**
  * Ambil IP client dengan aman.
- * - `x-real-ip` biasanya di-set oleh reverse proxy terpercaya (nginx) — paling dipercaya.
- * - `x-forwarded-for` baris PERTAMA dapat dipalsukan klien; hanya dipakai bila
- *   `TRUST_PROXY=true` (berjalan di belakang proxy terpercaya yang menimpa header).
- * - Fallback terakhir: alamat socket TCP dari koneksi (tidak bisa dipalsukan klien).
+ *
+ * Header `x-real-ip` / `x-forwarded-for` DAPAT dipalsukan oleh klien, jadi hanya
+ * dipercaya bila `TRUST_PROXY=true` — artinya aplikasi benar-benar berjalan di
+ * belakang reverse proxy terpercaya (nginx/traefik) yang menimpa header tsb.
+ *
+ * Tanpa proxy (dev Laragon / `next start` langsung), gunakan `req.socket.remoteAddress`
+ * yang berasal dari handshake TCP — tidak bisa dipalsukan klien. Ini mencegah
+ * penyerang melewati rate limit dengan memasang `x-real-ip: 10.0.0.1` acak.
  */
 export function clientIp(req: Request): string {
-  const real = req.headers.get('x-real-ip')?.trim();
-  if (real) return real;
   if (process.env.TRUST_PROXY === 'true') {
+    const real = req.headers.get('x-real-ip')?.trim();
+    if (real) return real;
     const xff = req.headers.get('x-forwarded-for');
     if (xff) return xff.split(',')[0].trim() || 'unknown';
   }

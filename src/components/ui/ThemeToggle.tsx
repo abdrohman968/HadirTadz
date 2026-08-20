@@ -31,6 +31,7 @@ export default function ThemeToggle() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         title="Ganti Tema Tampilan"
+        aria-label="Ganti Tema Tampilan"
         className="hidden sm:flex items-center gap-1.5 p-2 rounded-lg text-emerald-100 hover:bg-emerald-700 focus:outline-none transition"
       >
         {ICONS[theme]}
@@ -79,6 +80,7 @@ export function MobileThemeToggle() {
       type="button"
       onClick={toggle}
       title="Ganti Tema"
+      aria-label="Ganti Tema"
       className="lg:hidden p-2 rounded-lg text-emerald-100 hover:bg-emerald-700 focus:outline-none transition"
     >
       {resolved === 'dark' ? ICONS.dark : ICONS.light}

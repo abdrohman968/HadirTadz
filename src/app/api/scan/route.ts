@@ -15,6 +15,12 @@ const MAX_IDENTIFIER_LENGTH = 64;
 /**
  * Proses presensi via QR / barcode (scan_process.php).
  * Method: POST, body JSON { identifier, method }
+ *
+ * Kiosk/QR hanya diperuntukkan bagi KEHADIRAN HARIAN (check-in / check-out
+ * gerbang) siswa & guru. Absensi pembelajaran / ekskul WAJIB lewat portal akun
+ * masing-masing (menu "Absen Pelajaran" / "Absen Ekskul"), bukan scan QR.
+ * Previous `pesan` pasts mode 'pelajaran'/'ekskul' telah dihapus; jika ada
+ * klien lama mengirim `mode` selain default, kiosk tetap memproses kehadiran.
  */
 export async function POST(req: NextRequest) {
   // Rate limit per IP: maksimal 40 request per 60 detik (kiosk ramai sekalipun cukup).
@@ -126,6 +132,7 @@ export async function POST(req: NextRequest) {
     const classId = user.class_id ?? null;
     const schoolId = user.school_id ?? 1;
 
+    // ── Mode: Gerbang (Default — Gate Check-In/Check-Out) ───
     const rule = await getRuleForRole(schoolId, user.role_code);
     const lateThreshold = rule?.late_threshold_time ?? '07:15:00';
     const earlyLeaveThreshold = rule?.early_leave_threshold ?? '13:30:00';

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import type { RowDataPacket } from 'mysql2';
 import { requireApiAuth } from '@/lib/api-auth';
@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
  * Body: { action: 'save_journal', class_id, date, time, subject, topic, present_count, absent_count, notes }
  */
 export async function POST(req: NextRequest) {
-  const { user, error } = requireApiAuth(req, ['guru']);
+  const { user, error } = await requireApiAuth(req, ['guru']);
   if (error) return error;
 
   let input: any = {};

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchAPI } from '@/lib/api';
 import { toastError } from '@/components/ui/Toast';
+import { beginLogout } from '@/lib/logout-guard';
 
 /**
  * Idle timeout session (DEVELOPMENT_RULES #12).
@@ -23,6 +24,7 @@ export default function SessionWatcher() {
   const shownAt = useRef<number>(0);
 
   const doLogout = useRef(async () => {
+    if (!beginLogout()) return; // sudah ada sesi logout lain yang berjalan
     await fetchAPI('/api/auth/logout', { method: 'POST', silent: true });
     toastError('Sesi berakhir karena tidak ada aktivitas. Silakan masuk kembali.');
     router.push('/login');

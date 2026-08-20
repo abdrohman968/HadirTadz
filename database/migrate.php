@@ -363,7 +363,7 @@ try {
         // 1. Schools
         $pdo->exec("
             INSERT INTO `schools` (`id`, `school_code`, `npsn`, `name`, `level`, `address`, `phone`, `email`, `latitude`, `longitude`, `radius_meters`, `is_active`) VALUES
-            (1, 'SCH-001', '20227912', 'SMA Terpadu Al-Mu\'min', 'SMA', 'Jl. Raya Pendidikan No. 123, Cibiru, Bandung', '081234567890', 'kontak@almumin.sch.id', -6.92720000, 107.72250000, 150, 1),
+            (1, 'SCH-001', '20227912', 'SMA Negeri Harapan Bangsa', 'SMA', 'Jl. Raya Pendidikan No. 123, Bandung', '081234567890', 'kontak@smanhb.sch.id', -6.92720000, 107.72250000, 150, 1),
             (2, 'SCH-002', '20227913', 'SMK Informatika Mandiri', 'SMK', 'Jl. Sukarno Hatta No. 45, Bandung', '081234567899', 'info@smkinformatika.sch.id', -6.93890000, 107.61890000, 200, 1)
             ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `address` = VALUES(`address`);
         ");
@@ -425,8 +425,8 @@ try {
 
         // 7. School Settings
         $settings = [
-            'schoolName' => 'SMA Terpadu Al-Mu\'min',
-            'address' => 'Jl. Raya Pendidikan No. 123, Cibiru, Bandung',
+            'schoolName' => 'SMA Negeri Harapan Bangsa',
+            'address' => 'Jl. Raya Pendidikan No. 123, Bandung',
             'latitude' => '-6.92720000',
             'longitude' => '107.72250000',
             'radiusMeters' => '150',
@@ -436,8 +436,8 @@ try {
             'timeOutStart' => '14:00',
             'npsn' => '20227912',
             'schoolLevel' => 'SMA',
-            'operatorName' => 'Abdul Rohman',
-            'operatorPhone' => '083829089297',
+            'operatorName' => 'Operator Sekolah',
+            'operatorPhone' => '081234567890',
             'waApiKey' => 'MOCK_WA_KEY_12345',
             'waGatewayNumber' => '081234567890'
         ];
@@ -496,7 +496,7 @@ try {
     log_msg("\n========================================================");
     log_msg("SEMUA DATABASE HADIRTADZ MULTI-TENANT SIAP DIGUNAKAN!");
     log_msg("========================================================");
-    log_msg("Akun Demo Sekolah 1 (SMA Terpadu Al-Mu'min):");
+    log_msg("Akun Demo Sekolah 1 (SMA Negeri Harapan Bangsa):");
     log_msg("1. Admin : ADM-001 | Password: hadir123");
     log_msg("2. Guru  : 198503152010011002 | Password: hadir123");
     log_msg("3. Siswa : 12009101 | Password: hadir123");

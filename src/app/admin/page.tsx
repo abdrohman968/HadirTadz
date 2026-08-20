@@ -249,7 +249,7 @@ export default async function AdminDashboardPage() {
               { href: '/admin/students', icon: 'user', label: 'Kelola Siswa', desc: 'Data & kelas' },
               { href: '/admin/teachers', icon: 'teacher', label: 'Kelola Guru', desc: 'Tenaga pendidik' },
               { href: '/admin/reports', icon: 'report', label: 'Laporan', desc: 'Rekap & export' },
-              { href: '/admin/permissions', icon: 'perm', label: 'Persetujuan Izin', desc: 'Ada {pendingPerm.length} berkas' },
+              { href: '/admin/permissions', icon: 'perm', label: 'Persetujuan Izin', desc: `Ada ${pendingPerm.length} berkas` },
               { href: '/admin/audit', icon: 'audit', label: 'Riwayat Audit', desc: 'Log aktivitas' },
             ].map((a) => (
               <a

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchAPI } from '@/lib/api';
 import { toastSuccess } from '@/components/ui/Toast';
+import { beginLogout } from '@/lib/logout-guard';
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function LogoutButton() {
   const handleLogout = async () => {
     if (loading) return;
     setLoading(true);
+    if (!beginLogout()) return; // sudah ada sesi logout lain yang berjalan
     const res = await fetchAPI('/api/auth/logout', { method: 'POST', silent: true });
     if (res.success) toastSuccess('Logout berhasil. Sampai jumpa!');
     router.push('/login');
@@ -22,6 +24,7 @@ export default function LogoutButton() {
     <button
       onClick={handleLogout}
       title="Logout"
+      aria-label="Logout"
       disabled={loading}
       className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition disabled:opacity-50"
     >

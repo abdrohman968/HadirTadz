@@ -18,7 +18,7 @@ export default async function AdminCardsPage({
   const schoolId = user.school_id;
 
   const filterClass = searchParams.class_id || '';
-  const schoolName = (await getSetting('schoolName', 'SMA Terpadu Al-Mu\'min', schoolId)) || 'SMA Terpadu Al-Mu\'min';
+  const schoolName = (await getSetting('schoolName', 'SMA Negeri Harapan Bangsa', schoolId)) || 'SMA Negeri Harapan Bangsa';
   const address = (await getSetting('address', 'Bandung', schoolId)) || 'Bandung';
   const npsn = (await getSetting('npsn', '20227912', schoolId)) || '20227912';
   const academicYear = (await getSetting('academicYear', '2025/2026', schoolId)) || '2025/2026';

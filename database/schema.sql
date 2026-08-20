@@ -312,7 +312,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 -- 1. Default Schools
 INSERT IGNORE INTO `schools` (`id`, `school_code`, `npsn`, `name`, `level`, `address`, `phone`, `email`, `latitude`, `longitude`, `radius_meters`) VALUES
-(1, 'SCH-001', '20227912', 'SMA Terpadu Al-Mu\'min', 'SMA', 'Jl. Raya Pendidikan No. 123, Cibiru, Bandung', '081234567890', 'kontak@almumin.sch.id', -6.92720000, 107.72250000, 150),
+(1, 'SCH-001', '20227912', 'SMA Negeri Harapan Bangsa', 'SMA', 'Jl. Raya Pendidikan No. 123, Bandung', '081234567890', 'kontak@smanhb.sch.id', -6.92720000, 107.72250000, 150),
 (2, 'SCH-002', '20227913', 'SMK Informatika Mandiri', 'SMK', 'Jl. Sukarno Hatta No. 45, Bandung', '081234567899', 'info@smkinformatika.sch.id', -6.93890000, 107.61890000, 200);
 
 -- 2. Roles

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { requireApiAuth } from '@/lib/api-auth';
 import { getSetting, setSetting, logAudit } from '@/lib/queries';
 
@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
  * Pengaturan Sekolah & Lokasi GPS (settings.php admin).
  */
 export async function POST(req: NextRequest) {
-  const { user, error } = requireApiAuth(req, ['admin']);
+  const { user, error } = await requireApiAuth(req, ['admin']);
   if (error) return error;
 
   let input: any = {};
@@ -26,6 +26,8 @@ export async function POST(req: NextRequest) {
     address: String(input.address ?? '').trim(),
     operatorName: String(input.operatorName ?? '').trim(),
     operatorPhone: String(input.operatorPhone ?? '').trim(),
+    principalName: String(input.principalName ?? '').trim(),
+    principalNip: String(input.principalNip ?? '').trim(),
     latitude: String(input.latitude ?? '').trim(),
     longitude: String(input.longitude ?? '').trim(),
     radiusMeters: String(input.radiusMeters ?? '150').trim(),
@@ -63,10 +65,10 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const { user, error } = requireApiAuth(req, ['admin']);
+  const { user, error } = await requireApiAuth(req, ['admin']);
   if (error) return error;
   const schoolId = user!.school_id;
-  const keys = ['schoolName', 'npsn', 'schoolLevel', 'address', 'operatorName', 'operatorPhone', 'latitude', 'longitude', 'radiusMeters', 'waGatewayNumber'];
+  const keys = ['schoolName', 'npsn', 'schoolLevel', 'address', 'operatorName', 'operatorPhone', 'principalName', 'principalNip', 'latitude', 'longitude', 'radiusMeters', 'waGatewayNumber'];
   const out: Record<string, string> = {};
   for (const k of keys) {
     out[k] = await getSetting(k, '', schoolId);

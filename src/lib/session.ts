@@ -1,17 +1,21 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { verifyJWT, type UserPayload } from '@/lib/auth';
+import { revalidateUser } from '@/lib/session-db';
 
 const SESSION_COOKIE = 'hadirtadz_session';
 
 /**
  * Membaca cookie sesi dari request dan mengembalikan payload JWT user.
+ * Sesi divalidasi ulang ke database (status aktif, tidak dihapus, role terkini).
  * Mengembalikan null jika tidak ada/tidak valid.
  */
 export async function getSession(): Promise<UserPayload | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return null;
-  return verifyJWT(token);
+  const payload = verifyJWT(token);
+  if (!payload) return null;
+  return revalidateUser(payload);
 }
 
 /**

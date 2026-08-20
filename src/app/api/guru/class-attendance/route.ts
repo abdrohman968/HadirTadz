@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import type { RowDataPacket } from 'mysql2';
 import { requireApiAuth } from '@/lib/api-auth';
@@ -16,7 +16,7 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
  * Body: { class_id, date, statuses: { [studentUserId]: 'HADIR'|'TERLAMBAT'|... } }
  */
 export async function POST(req: NextRequest) {
-  const { user, error } = requireApiAuth(req, ['guru', 'admin']);
+  const { user, error } = await requireApiAuth(req, ['guru', 'admin']);
   if (error) return error;
 
   let input: any = {};

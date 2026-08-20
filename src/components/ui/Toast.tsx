@@ -90,7 +90,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               className={`pointer-events-auto flex items-center gap-3 w-full sm:w-auto sm:max-w-md px-4 py-3 rounded-2xl shadow-lg border backdrop-blur-md animate-slide-in ${s.box}`}
             >
               <span className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${s.icon}`}>
-                <svg className="w-4.5 h-4.5 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={s.path} />
                 </svg>
               </span>

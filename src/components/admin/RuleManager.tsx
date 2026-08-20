@@ -126,7 +126,7 @@ export default function RuleManager({ initialRules }: { initialRules: Rule[] }) 
                   </span>
                   <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mt-1">{r.rule_name}</h3>
                 </div>
-                <button onClick={() => openEdit(r)} className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/40 text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-300 transition" title="Edit">
+                <button onClick={() => openEdit(r)} className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/40 text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-300 transition" title="Edit" aria-label="Edit">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                 </button>
               </div>

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $page_title = 'Dashboard Siswa';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/auth.php';
@@ -142,7 +142,7 @@ include __DIR__ . '/../includes/sidebar.php';
                     </span>
                     <h3 class="text-xl font-extrabold tracking-tight"><?= htmlspecialchars($user['full_name']) ?></h3>
                     <p class="text-xs text-emerald-200 font-mono">NISN: <?= htmlspecialchars($student['nisn'] ?? $user['identifier']) ?></p>
-                    <p class="text-xs text-emerald-100"><?= htmlspecialchars($student['class_name'] ?? 'SMA Terpadu Al-Mu\'min') ?></p>
+                    <p class="text-xs text-emerald-100"><?= htmlspecialchars($student['class_name'] ?? 'SMA Negeri Harapan Bangsa') ?></p>
                     
                     <div class="pt-3">
                         <a href="<?= $base_url ?>/siswa/kartu.php" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-emerald-800 font-bold text-xs shadow hover:bg-emerald-50 transition">

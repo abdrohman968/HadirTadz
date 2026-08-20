@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import pool from '@/lib/db';
 import type { RowDataPacket } from 'mysql2';
 import { requireApiAuth } from '@/lib/api-auth';
+import { rateLimit, clientIp } from '@/lib/rate-limit';
 import { parseDataUrl, ALLOWED_IMAGE_TYPES, type ParsedUpload } from '@/lib/uploads';
 import {
   getSetting,
@@ -23,8 +24,27 @@ export const dynamic = 'force-dynamic';
  * Method: POST, body JSON { latitude, longitude, photo_base64, action }
  */
 export async function POST(req: NextRequest) {
-  const { user, error } = requireApiAuth(req);
+  // Rate limit per IP & per akun: absen mandiri hanya boleh untuk masuk + pulang,
+  // sehingga batasan ketat mencegah spam panggilan API.
+  const ipKey = clientIp(req);
+  const ipLimit = rateLimit(`checkin-ip:${ipKey}`, { max: 20, windowMs: 60_000 });
+  if (!ipLimit.allowed) {
+    return NextResponse.json(
+      { success: false, message: 'Terlalu banyak permintaan. Silakan tunggu beberapa saat.' },
+      { status: 429 }
+    );
+  }
+
+  const { user, error } = await requireApiAuth(req);
   if (error) return error;
+
+  const userLimit = rateLimit(`checkin-user:${user!.id}`, { max: 5, windowMs: 60_000 });
+  if (!userLimit.allowed) {
+    return NextResponse.json(
+      { success: false, message: 'Terlalu sering mencoba absen. Silakan tunggu beberapa saat.' },
+      { status: 429 }
+    );
+  }
 
   let input: any = {};
   try {
@@ -163,7 +183,7 @@ export async function POST(req: NextRequest) {
     if (e?.name === 'UploadValidationError') {
       return NextResponse.json({ success: false, message: e?.message || 'Foto tidak valid' }, { status: 400 });
     }
-    // Balapan antar-tab/perangkat → baris duplikat dicegah oleh UNIQUE (user_id,date).
+    // Balapan antar-tab/perangkat â†’ baris duplikat dicegah oleh UNIQUE (user_id,date).
     if (e?.errno === 1062 && e?.code === 'ER_DUP_ENTRY') {
       return NextResponse.json(
         { success: false, message: 'Anda sudah melakukan presensi hari ini. Muat ulang halaman untuk melihat status terbaru.' },

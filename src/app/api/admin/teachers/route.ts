@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import type { RowDataPacket } from 'mysql2';
 import bcrypt from 'bcryptjs';
@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
  * CRUD Data Guru (teachers.php)
  */
 export async function POST(req: NextRequest) {
-  const { user, error } = requireApiAuth(req, ['admin']);
+  const { user, error } = await requireApiAuth(req, ['admin']);
   if (error) return error;
 
   let input: any = {};

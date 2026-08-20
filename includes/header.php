@@ -1,11 +1,11 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 $current_user = auth_user();
 $school = current_school($current_user['school_id'] ?? null);
-$school_name = $school['name'] ?? get_setting('schoolName', 'SMA Terpadu Al-Mu\'min');
+$school_name = $school['name'] ?? get_setting('schoolName', 'SMA Negeri Harapan Bangsa');
 $base_url = get_base_url();
 $page_title = $page_title ?? 'Absensi Digital';
 ?>

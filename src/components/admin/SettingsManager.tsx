@@ -13,6 +13,8 @@ const defaultSettings: Record<string, string> = {
   address: '',
   operatorName: '',
   operatorPhone: '',
+  principalName: '',
+  principalNip: '',
   latitude: '-6.92720000',
   longitude: '107.72250000',
   radiusMeters: '150',
@@ -126,6 +128,15 @@ export default function SettingsManager() {
             </Field>
             <Field label="No. Kontak Operator">
               <input type="text" className={`${inputCls} font-mono`} value={settings.operatorPhone} onChange={(e) => set('operatorPhone', e.target.value)} />
+            </Field>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="Nama Kepala Sekolah (ttd Laporan)">
+              <input type="text" className={inputCls} value={settings.principalName} onChange={(e) => set('principalName', e.target.value)} />
+            </Field>
+            <Field label="NIP Kepala Sekolah">
+              <input type="text" className={`${inputCls} font-mono`} value={settings.principalNip} onChange={(e) => set('principalNip', e.target.value)} />
             </Field>
           </div>
         </div>

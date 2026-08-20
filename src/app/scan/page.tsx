@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default async function ScanPage({ searchParams }: { searchParams: { school?: string } }) {
   const schoolId = Number(searchParams.school) || 1;
   const school = await getSchool(schoolId) || (await getSchool(1));
-  const schoolName = (await getSetting('schoolName', 'SMA Terpadu Al-Mu\'min', schoolId)) || school?.name || 'SMA Terpadu Al-Mu\'min';
+  const schoolName = (await getSetting('schoolName', 'SMA Negeri Harapan Bangsa', schoolId)) || school?.name || 'SMA Negeri Harapan Bangsa';
   const today = todayStr();
 
   const [recentScans] = await pool.query<RowDataPacket[]>(

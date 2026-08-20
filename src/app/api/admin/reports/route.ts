@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import type { RowDataPacket } from 'mysql2';
 import { requireApiAuth } from '@/lib/api-auth';
@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
  * Ekspor CSV Rekap Kehadiran (reports.php?format=csv).
  */
 export async function GET(req: NextRequest) {
-  const { user, error } = requireApiAuth(req, ['admin']);
+  const { user, error } = await requireApiAuth(req, ['admin']);
   if (error) return error;
 
   const sp = req.nextUrl.searchParams;

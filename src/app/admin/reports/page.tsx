@@ -24,8 +24,10 @@ export default async function AdminReportsPage({
   const filterClass = searchParams.class_id || '';
   const filterRole = searchParams.role_code || '';
 
-  const schoolName = (await getSetting('schoolName', 'SMA Terpadu Al-Mu\'min', schoolId)) || 'SMA Terpadu Al-Mu\'min';
+  const schoolName = (await getSetting('schoolName', 'SMA Negeri Harapan Bangsa', schoolId)) || 'SMA Negeri Harapan Bangsa';
   const address = (await getSetting('address', 'Bandung', schoolId)) || 'Bandung';
+  const principalName = (await getSetting('principalName', 'Drs. H. Ahmad Fauzi, M.M.', schoolId)) || 'Drs. H. Ahmad Fauzi, M.M.';
+  const principalNip = (await getSetting('principalNip', '196805121995121001', schoolId)) || '196805121995121001';
 
   const [classes] = await pool.query<RowDataPacket[]>(
     `SELECT * FROM classes WHERE school_id = ? AND deleted_at IS NULL ORDER BY grade, class_name`,
@@ -66,6 +68,8 @@ export default async function AdminReportsPage({
         operator={user}
         schoolName={schoolName}
         address={address}
+        principalName={principalName}
+        principalNip={principalNip}
         startDate={startDate}
         endDate={endDate}
         filterClass={filterClass}

@@ -14,8 +14,10 @@ interface SearchHit {
 
 /**
  * Search Bar global di header — mencari siswa & guru secara realtime.
+ * Hanya tersedia untuk admin: hasil pencarian (siswa/guru) diarahkan ke
+ * halaman kelola yang memang khusus admin.
  */
-export default function GlobalSearch() {
+export default function GlobalSearch({ role = 'admin' }: { role?: string }) {
   const router = useRouter();
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
@@ -77,6 +79,9 @@ export default function GlobalSearch() {
       window.removeEventListener('keydown', onKey);
     };
   }, []);
+
+  // Pencarian hanya diarahkan ke halaman admin; selain admin disembunyikan.
+  if (role !== 'admin') return null;
 
   const submit = (href: string) => {
     setOpen(false);

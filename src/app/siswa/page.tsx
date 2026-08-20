@@ -137,7 +137,7 @@ export default async function SiswaDashboardPage() {
             </span>
             <h3 className="text-xl font-extrabold tracking-tight">{user.full_name}</h3>
             <p className="text-xs text-emerald-200 font-mono">NISN: {student?.nisn || user.identifier}</p>
-            <p className="text-xs text-emerald-100">{student?.class_name || "SMA Terpadu Al-Mu'min"}</p>
+            <p className="text-xs text-emerald-100">{student?.class_name || "SMA Negeri Harapan Bangsa"}</p>
 
             <div className="pt-3">
               <a

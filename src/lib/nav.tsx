@@ -53,6 +53,7 @@ export const adminNavGroups: NavGroup[] = [
     items: [
       { href: '/admin/permissions', label: 'Izin & Sakit', icon: I.envelope },
       { href: '/admin/journals', label: 'Jurnal Mengajar', icon: I.book },
+      { href: '/admin/ekskul', label: 'Ekstrakurikuler', icon: I.calendar },
       { href: '/admin/cards', label: 'Cetak Kartu', icon: I.card },
     ],
   },
@@ -73,8 +74,9 @@ export const guruNavGroups: NavGroup[] = [
     items: [
       { href: '/guru', label: 'Dashboard', icon: I.dash },
       { href: '/guru/absen', label: 'Absen Saya (GPS)', icon: I.camera },
+      { href: '/guru/pelajaran', label: 'Presensi Pelajaran', icon: I.book },
       { href: '/guru/kelas', label: 'Presensi Kelas', icon: I.check2 },
-      { href: '/guru/jurnal', label: 'Jurnal Pembelajaran', icon: I.book },
+      { href: '/guru/jurnal', label: 'Jurnal Pembelajaran', icon: I.clipboard },
       { href: '/guru/riwayat', label: 'Riwayat Kehadiran', icon: I.calendar },
     ],
   },
@@ -87,6 +89,8 @@ export const siswaNavGroups: NavGroup[] = [
       { href: '/siswa', label: 'Dashboard', icon: I.dash },
       { href: '/siswa/kartu', label: 'Kartu Pelajar Digital', icon: I.card },
       { href: '/siswa/absen', label: 'Absen Mandiri (GPS)', icon: I.camera },
+      { href: '/siswa/pelajaran', label: 'Absen Pelajaran', icon: I.book },
+      { href: '/siswa/ekskul', label: 'Absen Ekskul', icon: I.clipboard },
       { href: '/siswa/izin', label: 'Pengajuan Izin / Sakit', icon: I.fileMed },
       { href: '/siswa/riwayat', label: 'Riwayat Kehadiran', icon: I.history },
     ],

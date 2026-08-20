@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { requireApiAuth } from '@/lib/api-auth';
 import { createQrTicket } from '@/lib/qr-auth';
 
@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
  * GET -> { ticket: "HT|v1|<exp>|<identifier>|<sig>" }
  */
 export async function GET(req: NextRequest) {
-  const { user, error } = requireApiAuth(req);
+  const { user, error } = await requireApiAuth(req);
   if (error) return error;
 
   try {

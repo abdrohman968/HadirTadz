@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/config/auth.php';
 require_once __DIR__ . '/config/helpers.php';
@@ -14,7 +14,7 @@ if (!function_exists('get_base_url')) {
     }
 }
 
-$school_name = get_setting('schoolName', 'SMA Terpadu Al-Mu\'min');
+$school_name = get_setting('schoolName', 'SMA Negeri Harapan Bangsa');
 $base_url = get_base_url();
 
 // Ambil 8 log absensi terbaru hari ini

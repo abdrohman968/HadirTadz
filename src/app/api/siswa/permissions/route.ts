@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 import pool from '@/lib/db';
@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
  * Body: { type, start_date, end_date, reason, attachment_base64?, attachment_name? }
  */
 export async function POST(req: NextRequest) {
-  const { user, error } = requireApiAuth(req, ['siswa']);
+  const { user, error } = await requireApiAuth(req, ['siswa']);
   if (error) return error;
 
   let input: any = {};
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const { user, error } = requireApiAuth(req, ['siswa']);
+  const { user, error } = await requireApiAuth(req, ['siswa']);
   if (error) return error;
 
   const [rows] = await pool.query<RowDataPacket[]>(

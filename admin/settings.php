@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $page_title = 'Pengaturan Sekolah & Sistem';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/auth.php';
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Current Settings
-$schoolName = get_setting('schoolName', 'SMA Terpadu Al-Mu\'min');
+$schoolName = get_setting('schoolName', 'SMA Negeri Harapan Bangsa');
 $npsn = get_setting('npsn', '20227912');
 $schoolLevel = get_setting('schoolLevel', 'SMA');
 $address = get_setting('address', 'Jl. Raya Pendidikan No. 123, Bandung');

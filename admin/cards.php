@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $page_title = 'Cetak Kartu Pelajar Digital';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/auth.php';
@@ -8,7 +8,7 @@ require_auth(['admin']);
 $base_url = get_base_url();
 
 $filter_class = $_GET['class_id'] ?? '';
-$school_name = get_setting('schoolName', 'SMA Terpadu Al-Mu\'min');
+$school_name = get_setting('schoolName', 'SMA Negeri Harapan Bangsa');
 $school_address = get_setting('address', 'Bandung');
 $npsn = get_setting('npsn', '20227912');
 
