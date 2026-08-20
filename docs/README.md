@@ -49,8 +49,7 @@ absensi_digital/
 ├── capacitor.config.json  # Konfigurasi Capacitor JS untuk Mobile App
 ├── manifest.json          # Web App Manifest PWA
 ├── service-worker.js      # Service Worker PWA Offline Caching
-├── MOBILE_APP_GUIDE.md    # Panduan Build Android APK & iOS IPA
-├── DEPLOYMENT.md          # Panduan go-live (hosting PHP + Vercel PHP)
+├── docs/                  # Dokumentasi proyek (panduan, changelog, dll.)
 └── src/                   # (Cadangan) Aplikasi Next.js — tidak dipakai aktif
 ```
 
