@@ -1,6 +1,10 @@
 <?php
 require_once __DIR__ . '/database.php';
 
+// P2.4 — Legal consent version constants
+define('TERMS_VERSION', '2026-08-21-v1');
+define('PRIVACY_VERSION', '2026-08-21-v1');
+
 /**
  * Dapatkan base URL aplikasi
  */
@@ -19,13 +23,133 @@ if (!function_exists('get_base_url')) {
  * Mendapatkan ID Sekolah yang sedang aktif (Multi-Tenant)
  */
 function auth_school_id() {
+    // Prioritas 1: konteks sekolah kiosk (anonym device yang ter-binding token)
+    if (isset($_SESSION['kiosk_school_id']) && !empty($_SESSION['kiosk_school_id'])) {
+        return (int)$_SESSION['kiosk_school_id'];
+    }
     if (isset($_SESSION['user_data']['school_id']) && !empty($_SESSION['user_data']['school_id'])) {
         return (int)$_SESSION['user_data']['school_id'];
     }
     if (isset($_SESSION['active_school_id']) && !empty($_SESSION['active_school_id'])) {
         return (int)$_SESSION['active_school_id'];
     }
-    return 1; // Default ke Sekolah ID 1
+    return 1; // Default ke Sekolah ID 1 (compat dev / legacy kiosk tanpa token)
+}
+
+/**
+ * Validasi token kiosk terhadap tabel kiosk_tokens.
+ * Token disimpan sebagai SHA-256 hash — token mentah TIDAK pernah disimpan.
+ *
+ * @param string $token Token kiosk mentah dari URL/request.
+ * @return array|null Array ['school_id','device_name','id'] jika valid,
+ *                    array ['error'=>'TOKEN_INVALID'|'TOKEN_REVOKED'|'TOKEN_EXPIRED'|'SCHOOL_INACTIVE']
+ *                    jika permintaan ditolak, atau null jika token kosong.
+ */
+function kiosk_validate_token($token) {
+    global $pdo;
+    $token = trim((string)$token);
+    if ($token === '') return null;
+
+    $hash = hash('sha256', $token);
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM kiosk_tokens WHERE token_hash = ? LIMIT 1");
+        $stmt->execute([$hash]);
+        $row = $stmt->fetch();
+    } catch (Exception $e) {
+        return ['error' => 'TOKEN_INVALID'];
+    }
+
+    if (!$row) return ['error' => 'TOKEN_INVALID'];
+    if ($row['status'] !== 'active') return ['error' => 'TOKEN_REVOKED'];
+    if (!empty($row['expires_at']) && $row['expires_at'] !== '0000-00-00 00:00:00' && strtotime($row['expires_at']) < time()) {
+        return ['error' => 'TOKEN_EXPIRED'];
+    }
+
+    // Pastikan sekolah yang dirujuk token masih aktif
+    try {
+        $sch = $pdo->prepare("SELECT id, name, is_active FROM schools WHERE id = ? AND deleted_at IS NULL LIMIT 1");
+        $sch->execute([(int)$row['school_id']]);
+        $school = $sch->fetch();
+    } catch (Exception $e) {
+        $school = false;
+    }
+    if (!$school || (int)$school['is_active'] !== 1) {
+        return ['error' => 'SCHOOL_INACTIVE'];
+    }
+
+    try {
+        $pdo->prepare("UPDATE kiosk_tokens SET last_used_at = NOW() WHERE id = ?")->execute([$row['id']]);
+    } catch (Exception $e) {}
+
+    return [
+        'school_id' => (int)$row['school_id'],
+        'school_name' => $school['name'],
+        'device_name' => $row['device_name'],
+        'id' => (int)$row['id']
+    ];
+}
+
+/**
+ * Bind konteks kiosk ke session berdasarkan token.
+ * Menyimpan $_SESSION['kiosk_school_id'] jika token valid; sebaliknya menghapusnya.
+ *
+ * @param string $token Token kiosk dari query string (?k=).
+ * @return array Hasil dari kiosk_validate_token() (atau null).
+ */
+function kiosk_bind_context($token) {
+    $result = kiosk_validate_token($token);
+    if ($result && isset($result['school_id']) && !isset($result['error'])) {
+        $_SESSION['kiosk_school_id'] = $result['school_id'];
+    } else {
+        unset($_SESSION['kiosk_school_id']);
+    }
+    return $result;
+}
+
+/**
+ * Mendapatkan konteks kiosk aktif dari sesi (tanpa memvalidasi ulang token).
+ */
+function kiosk_context() {
+    if (!empty($_SESSION['kiosk_school_id'])) {
+        return [
+            'school_id' => (int)$_SESSION['kiosk_school_id'],
+            'source' => 'session'
+        ];
+    }
+    return null;
+}
+
+/**
+ * Membuat token kiosk baru untuk sebuah sekolah.
+ * Menyimpan SHA-256 hash; mengembalikan token mentah HANYA sekali (untuk URL kiosk).
+ *
+ * @param int $school_id
+ * @param string $device_name
+ * @param string|null $expires_at Format 'Y-m-d H:i:s' atau null (tidak kedaluwarsa).
+ * @return array ['token'=>raw, 'id'=>row_id]
+ */
+function kiosk_generate_token($school_id, $device_name = 'Kiosk Gerbang', $expires_at = null) {
+    global $pdo;
+    $token = 'KTK-' . bin2hex(random_bytes(24));
+    $hash = hash('sha256', $token);
+    $stmt = $pdo->prepare("
+        INSERT INTO kiosk_tokens (school_id, token_hash, device_name, status, expires_at, created_at, updated_at)
+        VALUES (?, ?, ?, 'active', ?, NOW(), NOW())
+    ");
+    $stmt->execute([(int)$school_id, $hash, empty($device_name) ? 'Kiosk Gerbang' : $device_name, $expires_at]);
+    return [
+        'token' => $token,
+        'id' => (int)$pdo->lastInsertId()
+    ];
+}
+
+/**
+ * Mencabut (revoke) sebuah token kiosk milik sekolah tertentu.
+ */
+function kiosk_revoke_token($token_id, $school_id) {
+    global $pdo;
+    $stmt = $pdo->prepare("UPDATE kiosk_tokens SET status = 'revoked', updated_at = NOW() WHERE id = ? AND school_id = ?");
+    return $stmt->execute([(int)$token_id, (int)$school_id]);
 }
 
 /**
@@ -203,6 +327,42 @@ function set_setting($key, $value, $school_id = null) {
         ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), updated_at = NOW()
     ");
     return $stmt->execute([$sid, $key, $value]);
+}
+
+/**
+ * Canonical resolver: ambil aturan absensi yang berlaku untuk role tertentu (tenant-scoped).
+ * Prioritas: rule spesifik role_code, lalu fallback rule 'all'. Mengembalikan array row atau null.
+ */
+function get_attendance_rule($role_code = null, $school_id = null) {
+    global $pdo;
+    $sid = $school_id ?: auth_school_id();
+    if ($role_code === null && function_exists('auth_user')) {
+        $u = auth_user();
+        $role_code = $u['role_code'] ?? 'all';
+    }
+    $role_code = $role_code ?: 'all';
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM attendance_rules WHERE school_id = ? AND (role_code = ? OR role_code = 'all') ORDER BY (role_code = ?) DESC, id ASC LIMIT 1");
+        $stmt->execute([$sid, $role_code, $role_code]);
+        $rule = $stmt->fetch();
+        return $rule ?: null;
+    } catch (Exception $e) {
+        return null;
+    }
+}
+
+/**
+ * Canonical SUMBER radius GPS absensi (satu sumber kebenaran):
+ * 1. attendance_rules.radius_limit  -> rule spesifik role (writer: admin/rules.php)
+ * 2. school_settings.radiusMeters   -> fallback default sekolah (writer: admin/settings.php)
+ * 3. schools.radius_meters          -> fallback terakhir via get_setting()
+ */
+function get_attendance_radius($role_code = null, $default = 150, $school_id = null) {
+    $rule = get_attendance_rule($role_code, $school_id);
+    if ($rule && !empty($rule['radius_limit'])) {
+        return (int)$rule['radius_limit'];
+    }
+    return (int)get_setting('radiusMeters', $default, $school_id);
 }
 
 /**

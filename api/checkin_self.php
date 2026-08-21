@@ -10,6 +10,7 @@ if (!auth_check()) {
 }
 
 $user = auth_user();
+$school_id = (int)($user['school_id'] ?? auth_school_id());
 $input = json_decode(file_get_contents('php://input'), true);
 
 $latitude = isset($input['latitude']) ? (float)$input['latitude'] : null;
@@ -23,19 +24,13 @@ if ($latitude === null || $longitude === null) {
 }
 
 try {
-    // Ambil titik koordinat sekolah dan batas radius
+    // Ambil titik koordinat sekolah dan batas radius (canonical source)
     $school_lat = (float)get_setting('latitude', -6.9272);
     $school_lon = (float)get_setting('longitude', 107.7225);
-    $radius_limit = (int)get_setting('radiusMeters', 150);
 
-    // Ambil aturan absensi
-    $ruleStmt = $pdo->prepare("SELECT * FROM attendance_rules WHERE role_code = ? OR role_code = 'all' ORDER BY (role_code = ?) DESC LIMIT 1");
-    $ruleStmt->execute([$user['role_code'], $user['role_code']]);
-    $rule = $ruleStmt->fetch();
-
-    if ($rule && !empty($rule['radius_limit'])) {
-        $radius_limit = (int)$rule['radius_limit'];
-    }
+    // Aturan absensi & radius via canonical resolver: attendance_rules > school_settings > schools
+    $rule = get_attendance_rule($user['role_code'], $school_id) ?: [];
+    $radius_limit = get_attendance_radius($user['role_code'], 150, $school_id);
 
     // Hitung jarak pengguna ke sekolah
     $distance = calculate_distance($latitude, $longitude, $school_lat, $school_lon);
@@ -96,11 +91,11 @@ try {
         $status = ($current_time > $late_threshold) ? 'TERLAMBAT' : 'HADIR';
         $notes = ($status === 'TERLAMBAT') ? 'Absen mandiri GPS (Terlambat)' : 'Absen mandiri GPS (Tepat waktu)';
 
-        $ins = $pdo->prepare("
-            INSERT INTO attendance (user_id, class_id, date, time_in, status, method, identifier, latitude, longitude, distance_meters, is_within_radius, photo_url, notes, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, 'selfie', ?, ?, ?, ?, 1, ?, ?, NOW(), NOW())
+$ins = $pdo->prepare("
+            INSERT INTO attendance (school_id, user_id, class_id, date, time_in, status, method, identifier, latitude, longitude, distance_meters, is_within_radius, photo_url, notes, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, 'selfie', ?, ?, ?, ?, 1, ?, ?, NOW(), NOW())
         ");
-        $ins->execute([$user['id'], $class_id, $today, $current_time, $status, $user['identifier'], $latitude, $longitude, $distance, $photo_url, $notes]);
+        $ins->execute([$school_id, $user['id'], $class_id, $today, $current_time, $status, $user['identifier'], $latitude, $longitude, $distance, $photo_url, $notes]);
 
         echo json_encode([
             'success' => true,
@@ -121,8 +116,8 @@ try {
             exit;
         }
 
-        $upd = $pdo->prepare("UPDATE attendance SET time_out = ?, updated_at = NOW() WHERE id = ?");
-        $upd->execute([$current_time, $existing['id']]);
+        $upd = $pdo->prepare("UPDATE attendance SET time_out = ?, updated_at = NOW() WHERE id = ? AND school_id = ?");
+        $upd->execute([$current_time, $existing['id'], $school_id]);
 
         echo json_encode([
             'success' => true,

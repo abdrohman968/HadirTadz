@@ -8,6 +8,13 @@ if (!auth_check()) {
     exit;
 }
 
+$user = auth_user();
+if ($user && $user['role_code'] !== 'admin') {
+    echo json_encode(['error' => 'Forbidden']);
+    exit;
+}
+$school_id = auth_school_id();
+
 try {
     // 7 Days Attendance Trend
     $dates = [];
@@ -27,9 +34,9 @@ try {
                 SUM(CASE WHEN status IN ('IZIN', 'SAKIT') THEN 1 ELSE 0 END) AS izin_sakit,
                 SUM(CASE WHEN status = 'ALPHA' THEN 1 ELSE 0 END) AS alpha
             FROM attendance 
-            WHERE date = ?
+            WHERE date = ? AND school_id = ?
         ");
-        $stmt->execute([$d]);
+        $stmt->execute([$d, $school_id]);
         $row = $stmt->fetch();
 
         $hadir_counts[] = (int)($row['hadir'] ?? 0);

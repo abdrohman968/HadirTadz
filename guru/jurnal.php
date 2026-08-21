@@ -7,6 +7,7 @@ require_once __DIR__ . '/../config/helpers.php';
 require_auth(['guru']);
 $base_url = get_base_url();
 $user = auth_user();
+$school_id = auth_school_id();
 $error = '';
 
 // Dapatkan spesialisasi guru
@@ -29,12 +30,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $notes = trim($_POST['notes'] ?? '');
 
         try {
+            // Validasi kelas milik sekolah yang sama
+            $classCheck = $pdo->prepare("SELECT id FROM classes WHERE id = ? AND school_id = ?");
+            $classCheck->execute([$class_id, $school_id]);
+            if (!$classCheck->fetchColumn()) {
+                throw new Exception('Kelas tidak valid untuk sekolah ini.');
+            }
+
             $stmt = $pdo->prepare("
-                INSERT INTO journals (teacher_user_id, class_id, date, time, subject, topic, present_count, absent_count, notes, created_at, updated_at) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+                INSERT INTO journals (school_id, teacher_user_id, class_id, date, time, subject, topic, present_count, absent_count, notes, created_at, updated_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
             ");
-            $stmt->execute([$user['id'], $class_id, $date, $time, $subject, $topic, $present_count, $absent_count, $notes]);
-            log_audit('CREATE_JOURNAL', 'journals', $pdo->lastInsertId(), "Created journal for class $class_id");
+            $stmt->execute([$school_id, $user['id'], $class_id, $date, $time, $subject, $topic, $present_count, $absent_count, $notes]);
+            log_audit('CREATE_JOURNAL', 'journals', $pdo->lastInsertId(), "Created journal for class $class_id", $school_id);
             set_flash('success', 'Jurnal pembelajaran berhasil disimpan!');
             header("Location: jurnal.php");
             exit;
@@ -45,17 +53,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Fetch Classes
-$classes = $pdo->query("SELECT * FROM classes ORDER BY grade, class_name")->fetchAll();
+$classes = $pdo->prepare("SELECT * FROM classes WHERE school_id = ? ORDER BY grade, class_name");
+$classes->execute([$school_id]);
+$classes = $classes->fetchAll();
 
 // Fetch My Journals
 $myJournalsStmt = $pdo->prepare("
     SELECT j.*, c.class_name
     FROM journals j
     JOIN classes c ON j.class_id = c.id
-    WHERE j.teacher_user_id = ? AND j.deleted_at IS NULL
+    WHERE j.teacher_user_id = ? AND j.deleted_at IS NULL AND j.school_id = ?
     ORDER BY j.date DESC, j.created_at DESC
 ");
-$myJournalsStmt->execute([$user['id']]);
+$myJournalsStmt->execute([$user['id'], $school_id]);
 $my_journals = $myJournalsStmt->fetchAll();
 
 include __DIR__ . '/../includes/header.php';

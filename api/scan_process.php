@@ -18,6 +18,36 @@ if (empty($raw_identifier)) {
     exit;
 }
 
+// === KIOSK ACTIVE SCHOOL CONTEXT ===
+// Konteks sekolah kiosk dari sumber terpercaya (TOKEN terverifikasi), BUKAN dari
+// input school_id client. school_id dari request TIDAK PERNAH dijadikan authority.
+$kiosk_token = trim($input['kiosk_token'] ?? $_POST['kiosk_token'] ?? '');
+$kiosk_ctx = kiosk_validate_token($kiosk_token);
+
+if ($kiosk_token !== '' && $kiosk_ctx === null) {
+    echo json_encode(['success' => false, 'message' => 'Token kiosk tidak dikenali.', 'sound' => 'error']);
+    exit;
+}
+
+if ($kiosk_token !== '' && isset($kiosk_ctx['error'])) {
+    $reject_messages = [
+        'TOKEN_INVALID' => 'Token kiosk tidak valid.',
+        'TOKEN_REVOKED' => 'Token kiosk sudah dicabut (revoked).',
+        'TOKEN_EXPIRED' => 'Token kiosk sudah kedaluwarsa.',
+        'SCHOOL_INACTIVE' => 'Sekolah terkait token kiosk sedang tidak aktif.'
+    ];
+    echo json_encode([
+        'success' => false,
+        'message' => $reject_messages[$kiosk_ctx['error']] ?? 'Token kiosk ditolak.',
+        'sound' => 'error'
+    ]);
+    exit;
+}
+
+// Jika token kosong (legacy/compat): gunakan konteks sesi/auth (backward compat,
+// kiosk School 1 tanpa token tetap dapat berjalan seperti sebelumnya).
+$kiosk_school_id = $kiosk_ctx !== null ? (int)$kiosk_ctx['school_id'] : auth_school_id();
+
 try {
     // Cari user berdasarkan identifier (NISN / NIP / Username / ID Pelajar)
     $stmt = $pdo->prepare("
@@ -45,16 +75,29 @@ try {
         exit;
     }
 
+    // === CROSS-SCHOOL REJECTION ===
+    // Kartu/user yang di-scan WAJIB milik sekolah yang sama dengan kiosk.
+    // Admin siswa sekolah B di kiosk sekolah A (dan sebaliknya) ditolak.
+    $ident_user_school = (int)($user['school_id'] ?? 0);
+    if ($ident_user_school !== (int)$kiosk_school_id) {
+        log_audit('KIOSK_CROSS_SCHOOL_REJECT', 'attendance', $user['id'], "Kartu {$raw_identifier} ditolak di kiosk sekolah {$kiosk_school_id} (user sekolah {$ident_user_school})", $kiosk_school_id);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Kartu ini bukan milik sekolah kiosk ini. Presensi ditolak.',
+            'sound' => 'error'
+        ]);
+        exit;
+    }
+
     $today = date('Y-m-d');
     $current_time = date('H:i:s');
     $user_id = $user['id'];
     $class_id = $user['class_id'] ?? null;
     $role_code = $user['role_code'];
+    $school_id = $ident_user_school;
 
-    // Ambil aturan absensi yang berlaku untuk role ini
-    $ruleStmt = $pdo->prepare("SELECT * FROM attendance_rules WHERE role_code = ? OR role_code = 'all' ORDER BY (role_code = ?) DESC LIMIT 1");
-    $ruleStmt->execute([$role_code, $role_code]);
-    $rule = $ruleStmt->fetch();
+    // Ambil aturan absensi yang berlaku untuk role ini (tenant-scoped, canonical source)
+    $rule = get_attendance_rule($role_code, $school_id) ?: [];
 
     // Default rule jika tidak diset
     $late_threshold = $rule['late_threshold_time'] ?? '07:15:00';
@@ -82,8 +125,6 @@ try {
             $notes = 'Hadir tepat waktu';
             $sound = 'success';
         }
-
-        $school_id = $user['school_id'] ?? 1;
 
         $ins = $pdo->prepare("
             INSERT INTO attendance (school_id, user_id, class_id, date, time_in, status, method, identifier, is_within_radius, notes, created_at, updated_at)
@@ -152,12 +193,12 @@ try {
             $notes = $existing['notes'] . " | Pulang cepat pukul " . date('H:i', $now_ts);
         }
 
-        $upd = $pdo->prepare("UPDATE attendance SET time_out = ?, notes = ?, updated_at = NOW() WHERE id = ?");
-        $upd->execute([$current_time, $notes ?: $existing['notes'], $existing['id']]);
+        $upd = $pdo->prepare("UPDATE attendance SET time_out = ?, notes = ?, updated_at = NOW() WHERE id = ? AND school_id = ?");
+        $upd->execute([$current_time, $notes ?: $existing['notes'], $existing['id'], $school_id]);
 
         // Log
-        $log = $pdo->prepare("INSERT INTO attendance_logs (attendance_id, action, raw_payload, ip_address, created_at) VALUES (?, 'CHECK_OUT', ?, ?, NOW())");
-        $log->execute([$existing['id'], json_encode(['method' => $method, 'identifier' => $raw_identifier]), $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1']);
+        $log = $pdo->prepare("INSERT INTO attendance_logs (school_id, attendance_id, action, raw_payload, ip_address, created_at) VALUES (?, ?, 'CHECK_OUT', ?, ?, NOW())");
+        $log->execute([$school_id, $existing['id'], json_encode(['method' => $method, 'identifier' => $raw_identifier]), $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1']);
 
         $status = $existing['status'];
         $message = "Presensi Pulang Berhasil. Hati-hati di jalan!";

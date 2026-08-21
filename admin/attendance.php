@@ -6,6 +6,7 @@ require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['admin']);
 $base_url = get_base_url();
+$school_id = auth_school_id();
 
 // Filter parameters
 $filter_date = $_GET['date'] ?? date('Y-m-d');
@@ -29,8 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         try {
             // Get class_id if student
-            $clsStmt = $pdo->prepare("SELECT class_id FROM students WHERE user_id = ?");
-            $clsStmt->execute([$user_id]);
+            $clsStmt = $pdo->prepare("SELECT class_id FROM students WHERE user_id = ? AND school_id = ?");
+            $clsStmt->execute([$user_id, $school_id]);
             $class_id = $clsStmt->fetchColumn() ?: null;
 
             if ($att_id) {
@@ -38,20 +39,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $pdo->prepare("
                     UPDATE attendance 
                     SET time_in = ?, time_out = ?, status = ?, notes = ?, updated_at = NOW() 
-                    WHERE id = ?
+                    WHERE id = ? AND school_id = ?
                 ");
-                $stmt->execute([$time_in, $time_out, $status, $notes, $att_id]);
-                log_audit('UPDATE_ATTENDANCE', 'attendance', $att_id, "Status changed to $status");
+                $stmt->execute([$time_in, $time_out, $status, $notes, $att_id, $school_id]);
+                log_audit('UPDATE_ATTENDANCE', 'attendance', $att_id, "Status changed to $status", $school_id);
                 set_flash('success', 'Data presensi berhasil diperbarui!');
             } else {
                 // Insert
                 $stmt = $pdo->prepare("
-                    INSERT INTO attendance (user_id, class_id, date, time_in, time_out, status, method, identifier, is_within_radius, notes, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, 'manual', (SELECT identifier FROM users WHERE id = ?), 1, ?, NOW(), NOW())
+                    INSERT INTO attendance (school_id, user_id, class_id, date, time_in, time_out, status, method, identifier, is_within_radius, notes, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 'manual', (SELECT identifier FROM users WHERE id = ?), 1, ?, NOW(), NOW())
                     ON DUPLICATE KEY UPDATE time_in = VALUES(time_in), time_out = VALUES(time_out), status = VALUES(status), notes = VALUES(notes), updated_at = NOW()
                 ");
-                $stmt->execute([$user_id, $class_id, $date, $time_in, $time_out, $status, $user_id, $notes]);
-                log_audit('CREATE_ATTENDANCE', 'attendance', $pdo->lastInsertId(), "Manual attendance added for user $user_id");
+                $stmt->execute([$school_id, $user_id, $class_id, $date, $time_in, $time_out, $status, $user_id, $notes]);
+                log_audit('CREATE_ATTENDANCE', 'attendance', $pdo->lastInsertId(), "Manual attendance added for user $user_id", $school_id);
                 set_flash('success', 'Presensi berhasil disimpan!');
             }
             header("Location: attendance.php?date=$date");
@@ -62,8 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'delete_attendance') {
         $del_id = $_POST['attendance_id'] ?? '';
         if ($del_id) {
-            $stmt = $pdo->prepare("DELETE FROM attendance WHERE id = ?");
-            $stmt->execute([$del_id]);
+            $stmt = $pdo->prepare("DELETE FROM attendance WHERE id = ? AND school_id = ?");
+            $stmt->execute([$del_id, $school_id]);
             log_audit('DELETE_ATTENDANCE', 'attendance', $del_id, "Attendance record deleted");
             set_flash('success', 'Data presensi berhasil dihapus.');
             header("Location: attendance.php?date=$filter_date");
@@ -73,18 +74,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Fetch Classes for filter
-$classes = $pdo->query("SELECT * FROM classes ORDER BY grade, class_name")->fetchAll();
+$classesStmt = $pdo->prepare("SELECT * FROM classes WHERE school_id = ? ORDER BY grade, class_name");
+$classesStmt->execute([$school_id]);
+$classes = $classesStmt->fetchAll();
 
 // Fetch Users for manual entry modal dropdown
-$users_list = $pdo->query("
+$users_list = $pdo->prepare("
     SELECT u.id, u.identifier, u.full_name, r.role_name, c.class_name
     FROM users u
     JOIN roles r ON u.role_id = r.id
     LEFT JOIN students s ON u.id = s.user_id
     LEFT JOIN classes c ON s.class_id = c.id
-    WHERE u.status = 'active' AND u.deleted_at IS NULL
+    WHERE u.school_id = ? AND u.status = 'active' AND u.deleted_at IS NULL
     ORDER BY r.id, u.full_name
-")->fetchAll();
+");
+$users_list->execute([$school_id]);
+$users_list = $users_list->fetchAll();
 
 // Build Query
 $sql = "
@@ -93,9 +98,9 @@ $sql = "
     JOIN users u ON a.user_id = u.id
     JOIN roles r ON u.role_id = r.id
     LEFT JOIN classes c ON a.class_id = c.id
-    WHERE a.date = :date
+    WHERE a.date = :date AND a.school_id = :school_id
 ";
-$params = [':date' => $filter_date];
+$params = [':date' => $filter_date, ':school_id' => $school_id];
 
 if (!empty($filter_class)) {
     $sql .= " AND a.class_id = :class_id";

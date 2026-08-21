@@ -7,6 +7,7 @@ require_once __DIR__ . '/../config/helpers.php';
 require_auth(['siswa']);
 $base_url = get_base_url();
 $user = auth_user();
+$school_id = (int)($user['school_id'] ?? auth_school_id());
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -34,11 +35,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         try {
             $stmt = $pdo->prepare("
-                INSERT INTO permissions (user_id, type, start_date, end_date, reason, attachment_url, status, created_at, updated_at) 
-                VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW())
+                INSERT INTO permissions (school_id, user_id, type, start_date, end_date, reason, attachment_url, status, created_at, updated_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW())
             ");
-            $stmt->execute([$user['id'], $type, $start_date, $end_date, $reason, $attachment_url]);
-            log_audit('SUBMIT_PERMISSION', 'permissions', $pdo->lastInsertId(), "Submitted $type permission");
+            $stmt->execute([$school_id, $user['id'], $type, $start_date, $end_date, $reason, $attachment_url]);
+            log_audit('SUBMIT_PERMISSION', 'permissions', $pdo->lastInsertId(), "Submitted $type permission", $school_id);
             set_flash('success', 'Permohonan izin berhasil diajukan! Menunggu persetujuan admin/guru.');
             header("Location: izin.php");
             exit;

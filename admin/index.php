@@ -7,11 +7,16 @@ require_once __DIR__ . '/../config/helpers.php';
 require_auth(['admin']);
 $current_user = auth_user();
 $base_url = get_base_url();
+$school_id = auth_school_id();
 $today = date('Y-m-d');
 
 // 1. Hitung total siswa & guru
-$total_students = (int)$pdo->query("SELECT COUNT(*) FROM students WHERE deleted_at IS NULL")->fetchColumn();
-$total_teachers = (int)$pdo->query("SELECT COUNT(*) FROM teachers WHERE deleted_at IS NULL")->fetchColumn();
+$countStudents = $pdo->prepare("SELECT COUNT(*) FROM students WHERE school_id = ? AND deleted_at IS NULL");
+$countStudents->execute([$school_id]);
+$total_students = (int)$countStudents->fetchColumn();
+$countTeachers = $pdo->prepare("SELECT COUNT(*) FROM teachers WHERE school_id = ? AND deleted_at IS NULL");
+$countTeachers->execute([$school_id]);
+$total_teachers = (int)$countTeachers->fetchColumn();
 
 // 2. Hitung statistik absensi hari ini
 $stmt = $pdo->prepare("
@@ -23,9 +28,9 @@ $stmt = $pdo->prepare("
         SUM(CASE WHEN status = 'ALPHA' THEN 1 ELSE 0 END) AS alpha,
         COUNT(*) AS total_recorded
     FROM attendance 
-    WHERE date = ?
+    WHERE date = ? AND school_id = ?
 ");
-$stmt->execute([$today]);
+$stmt->execute([$today, $school_id]);
 $today_stats = $stmt->fetch();
 
 $hadir_count = (int)($today_stats['hadir'] ?? 0);
@@ -38,15 +43,17 @@ $total_att = $hadir_count + $terlambat_count;
 $attendance_rate = ($total_students > 0) ? round(($total_att / $total_students) * 100, 1) : 0;
 
 // 3. Izin Pending
-$pending_perm = $pdo->query("
+$pending_perm = $pdo->prepare("
     SELECT p.*, u.full_name, u.identifier, r.role_name
     FROM permissions p
     JOIN users u ON p.user_id = u.id
     JOIN roles r ON u.role_id = r.id
-    WHERE p.status = 'pending' AND p.deleted_at IS NULL
+    WHERE p.school_id = ? AND p.status = 'pending' AND p.deleted_at IS NULL
     ORDER BY p.created_at DESC
     LIMIT 5
-")->fetchAll();
+");
+$pending_perm->execute([$school_id]);
+$pending_perm = $pending_perm->fetchAll();
 
 // 4. Log Presensi Terkini Hari Ini
 $recent_attendance = $pdo->prepare("
@@ -55,11 +62,11 @@ $recent_attendance = $pdo->prepare("
     JOIN users u ON a.user_id = u.id
     JOIN roles r ON u.role_id = r.id
     LEFT JOIN classes c ON a.class_id = c.id
-    WHERE a.date = ?
+    WHERE a.date = ? AND a.school_id = ?
     ORDER BY a.updated_at DESC
     LIMIT 6
 ");
-$recent_attendance->execute([$today]);
+$recent_attendance->execute([$today, $school_id]);
 $recent_list = $recent_attendance->fetchAll();
 
 include __DIR__ . '/../includes/header.php';

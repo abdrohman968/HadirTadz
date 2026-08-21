@@ -6,6 +6,7 @@ require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['admin']);
 $base_url = get_base_url();
+$school_id = auth_school_id();
 
 $error = '';
 
@@ -26,17 +27,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $pdo->prepare("
                     UPDATE classes 
                     SET class_code = ?, class_name = ?, grade = ?, major = ?, homeroom_teacher_id = ?, academic_year = ?, updated_at = NOW() 
-                    WHERE id = ?
+                    WHERE id = ? AND school_id = ?
                 ");
-                $stmt->execute([$class_code, $class_name, $grade, $major, $teacher_id, $academic_year, $class_id]);
+                $stmt->execute([$class_code, $class_name, $grade, $major, $teacher_id, $academic_year, $class_id, $school_id]);
                 log_audit('UPDATE_CLASS', 'classes', $class_id, "Updated class $class_name");
                 set_flash('success', 'Data kelas berhasil diperbarui!');
             } else {
                 $stmt = $pdo->prepare("
-                    INSERT INTO classes (class_code, class_name, grade, major, homeroom_teacher_id, academic_year, created_at, updated_at) 
-                    VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
+                    INSERT INTO classes (school_id, class_code, class_name, grade, major, homeroom_teacher_id, academic_year, created_at, updated_at) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
                 ");
-                $stmt->execute([$class_code, $class_name, $grade, $major, $teacher_id, $academic_year]);
+                $stmt->execute([$school_id, $class_code, $class_name, $grade, $major, $teacher_id, $academic_year]);
                 log_audit('CREATE_CLASS', 'classes', $pdo->lastInsertId(), "Created class $class_name");
                 set_flash('success', 'Kelas baru berhasil ditambahkan!');
             }
@@ -48,8 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'delete_class') {
         $del_id = $_POST['class_id'] ?? '';
         if ($del_id) {
-            $stmt = $pdo->prepare("DELETE FROM classes WHERE id = ?");
-            $stmt->execute([$del_id]);
+            $stmt = $pdo->prepare("DELETE FROM classes WHERE id = ? AND school_id = ?");
+            $stmt->execute([$del_id, $school_id]);
             log_audit('DELETE_CLASS', 'classes', $del_id, "Deleted class");
             set_flash('success', 'Data kelas berhasil dihapus.');
             header("Location: classes.php");
@@ -58,20 +59,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch Teachers for Homeroom assignment
-$teachers = $pdo->query("SELECT * FROM teachers WHERE deleted_at IS NULL ORDER BY full_name")->fetchAll();
+// Fetch Teachers for Homeroom assignment (opsional untuk sekolah ini)
+$teachers = $pdo->prepare("SELECT * FROM teachers WHERE deleted_at IS NULL AND school_id = ? ORDER BY full_name");
+$teachers->execute([$school_id]);
+$teachers = $teachers->fetchAll();
 
 // Fetch Classes with Homeroom & Student count
-$classes = $pdo->query("
+$classes = $pdo->prepare("
     SELECT c.*, t.full_name AS homeroom_name, t.nip AS homeroom_nip,
            COUNT(s.id) AS student_count
     FROM classes c
-    LEFT JOIN teachers t ON c.homeroom_teacher_id = t.id
-    LEFT JOIN students s ON c.id = s.class_id AND s.deleted_at IS NULL
-    WHERE c.deleted_at IS NULL
+    LEFT JOIN teachers t ON c.homeroom_teacher_id = t.id AND t.school_id = c.school_id
+    LEFT JOIN students s ON c.id = s.class_id AND s.deleted_at IS NULL AND s.school_id = c.school_id
+    WHERE c.deleted_at IS NULL AND c.school_id = ?
     GROUP BY c.id
     ORDER BY c.grade, c.class_name
-")->fetchAll();
+");
+$classes->execute([$school_id]);
+$classes = $classes->fetchAll();
 
 include __DIR__ . '/../includes/header.php';
 include __DIR__ . '/../includes/sidebar.php';

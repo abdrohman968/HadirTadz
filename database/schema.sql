@@ -17,6 +17,9 @@ CREATE TABLE IF NOT EXISTS `schools` (
   `name` varchar(150) NOT NULL,
   `level` enum('SD','SMP','SMA','SMK','MA','MTS','MI','PESANTREN','LAINNYA') NOT NULL DEFAULT 'SMA',
   `address` text,
+  `city` varchar(100) DEFAULT NULL,
+  `province` varchar(100) DEFAULT NULL,
+  `postal_code` varchar(10) DEFAULT NULL,
   `phone` varchar(30) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
   `logo_url` varchar(255) DEFAULT NULL,
@@ -56,6 +59,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `password_hash` varchar(255) NOT NULL,
   `email` varchar(100) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
+  `nik` varchar(30) DEFAULT NULL,
   `avatar_url` varchar(255) DEFAULT NULL,
   `status` enum('active','inactive','suspended') NOT NULL DEFAULT 'active',
   `last_login_at` timestamp NULL DEFAULT NULL,
@@ -302,6 +306,50 @@ CREATE TABLE IF NOT EXISTS `audit_logs` (
   `user_agent` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ----------------------------------------------------------
+-- 14. Table structure for kiosk_tokens (Kiosk Device Identity)
+-- Token disimpan sebagai SHA-256 hash; raw token HANYA terlihat saat
+-- pembuatan / halaman admin (admin/kiosk.php). Setiap token terikat ke
+-- satu sekolah sehingga kiosk tanpa login tetap memiliki konteks sekolah.
+-- ----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `kiosk_tokens` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `school_id` bigint unsigned NOT NULL,
+  `token_hash` char(64) NOT NULL,
+  `device_name` varchar(100) NOT NULL DEFAULT 'Kiosk Gerbang',
+  `status` enum('active','revoked') NOT NULL DEFAULT 'active',
+  `expires_at` datetime DEFAULT NULL,
+  `last_used_at` datetime DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_token_hash` (`token_hash`),
+  KEY `fk_kiosk_tokens_school` (`school_id`),
+  CONSTRAINT `fk_kiosk_tokens_school` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ----------------------------------------------------------
+-- 15. Table structure for legal_consents (P2.2)
+-- Menyimpan bukti persetujuan Terms & Privacy saat pendaftaran sekolah.
+-- Satu baris per consent (terms / privacy) per user per versi.
+-- Tidak menyimpan password/token — hanya jejak audit persetujuan.
+-- ----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `legal_consents` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `school_id` bigint unsigned NOT NULL,
+  `user_id` bigint unsigned NOT NULL,
+  `consent_type` enum('terms','privacy') NOT NULL,
+  `consent_version` varchar(20) NOT NULL DEFAULT '1.0',
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` varchar(250) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_consent_school` (`school_id`),
+  KEY `idx_consent_user` (`user_id`),
+  CONSTRAINT `fk_consent_school` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_consent_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 SET FOREIGN_KEY_CHECKS = 1;

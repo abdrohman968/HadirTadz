@@ -6,12 +6,15 @@ require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['admin']);
 $base_url = get_base_url();
+$school_id = auth_school_id();
 
 $filter_class = $_GET['class_id'] ?? '';
 $filter_date = $_GET['date'] ?? '';
 
 // Fetch Classes
-$classes = $pdo->query("SELECT * FROM classes ORDER BY grade, class_name")->fetchAll();
+$classes = $pdo->prepare("SELECT * FROM classes WHERE school_id = ? ORDER BY grade, class_name");
+$classes->execute([$school_id]);
+$classes = $classes->fetchAll();
 
 // Build Query
 $sql = "
@@ -19,9 +22,9 @@ $sql = "
     FROM journals j
     JOIN users u ON j.teacher_user_id = u.id
     JOIN classes c ON j.class_id = c.id
-    WHERE j.deleted_at IS NULL
+    WHERE j.deleted_at IS NULL AND j.school_id = :school_id
 ";
-$params = [];
+$params = [':school_id' => $school_id];
 
 if (!empty($filter_class)) {
     $sql .= " AND j.class_id = :class_id";

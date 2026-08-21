@@ -12,7 +12,7 @@ $today = date('Y-m-d');
 // Koordinat Sekolah
 $school_lat = (float)get_setting('latitude', -6.9272);
 $school_lon = (float)get_setting('longitude', 107.7225);
-$radius_limit = (int)get_setting('radiusMeters', 150);
+$radius_limit = (int)get_attendance_radius($user['role_code'], 150);
 
 // Status hari ini
 $stmt = $pdo->prepare("SELECT * FROM attendance WHERE user_id = ? AND date = ?");

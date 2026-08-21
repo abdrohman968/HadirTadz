@@ -6,6 +6,7 @@ require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['admin']);
 $base_url = get_base_url();
+$school_id = auth_school_id();
 
 $error = '';
 $search = trim($_GET['search'] ?? '');
@@ -19,9 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $new_pass = $_POST['new_password'] ?? 'hadir123';
         if ($user_id) {
             $hash = password_hash($new_pass, PASSWORD_BCRYPT);
-            $stmt = $pdo->prepare("UPDATE users SET password_hash = ?, updated_at = NOW() WHERE id = ?");
-            $stmt->execute([$hash, $user_id]);
-            log_audit('RESET_PASSWORD', 'users', $user_id, "Password reset by admin");
+            $stmt = $pdo->prepare("UPDATE users SET password_hash = ?, updated_at = NOW() WHERE id = ? AND school_id = ?");
+            $stmt->execute([$hash, $user_id, $school_id]);
+            log_audit('RESET_PASSWORD', 'users', $user_id, "Password reset by admin", $school_id);
             set_flash('success', "Password pengguna berhasil direset menjadi: $new_pass");
             header("Location: users.php");
             exit;
@@ -30,9 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user_id = $_POST['user_id'] ?? '';
         $new_status = $_POST['status'] ?? 'active';
         if ($user_id) {
-            $stmt = $pdo->prepare("UPDATE users SET status = ?, updated_at = NOW() WHERE id = ?");
-            $stmt->execute([$new_status, $user_id]);
-            log_audit('UPDATE_USER_STATUS', 'users', $user_id, "Status changed to $new_status");
+            $stmt = $pdo->prepare("UPDATE users SET status = ?, updated_at = NOW() WHERE id = ? AND school_id = ?");
+            $stmt->execute([$new_status, $user_id, $school_id]);
+            log_audit('UPDATE_USER_STATUS', 'users', $user_id, "Status changed to $new_status", $school_id);
             set_flash('success', "Status akun berhasil diubah menjadi: $new_status");
             header("Location: users.php");
             exit;
@@ -48,9 +49,9 @@ $sql = "
     SELECT u.*, r.role_name, r.role_code
     FROM users u
     JOIN roles r ON u.role_id = r.id
-    WHERE u.deleted_at IS NULL
+    WHERE u.deleted_at IS NULL AND u.school_id = :school_id
 ";
-$params = [];
+$params = [':school_id' => $school_id];
 
 if (!empty($role_filter)) {
     $sql .= " AND u.role_id = :role_id";

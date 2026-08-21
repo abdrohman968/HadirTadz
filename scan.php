@@ -14,23 +14,60 @@ if (!function_exists('get_base_url')) {
     }
 }
 
-$school_name = get_setting('schoolName', 'SMA Negeri Harapan Bangsa');
+// === KIOSK ACTIVE SCHOOL CONTEXT ===
 $base_url = get_base_url();
+// Kiosk wajib punya konteks sekolah dari sumber terpercaya (TOKEN terverifikasi),
+// bukan dari input school_id client. Prioritas:
+//   1. Token kiosk (?k=TOKEN) -> divalidasi terhadap tabel kiosk_tokens.
+//   2. Legacy path (tanpa token): konteks sesi login/auth (backward compat) ->
+//      kiosk School 1 yang berfungsi sebelumnya tetap bekerja.
+$kiosk_token = trim($_GET['k'] ?? '');
+$kiosk_error = null;
+$school_id = null;
 
-// Ambil 8 log absensi terbaru hari ini
+if ($kiosk_token !== '') {
+    $kiosk_result = kiosk_bind_context($kiosk_token);
+    if ($kiosk_result === null) {
+        $kiosk_error = ['type' => 'error', 'title' => 'Token Kiosk Kosong', 'message' => 'Parameter k (%s) tidak boleh kosong. Periksa URL kiosk.'];
+    } elseif (isset($kiosk_result['error'])) {
+        $err_map = [
+            'TOKEN_INVALID' => ['title' => 'Token Kiosk Tidak Dikenal', 'message' => 'Token kiosk tidak valid atau sudah dihapus. Minta token baru dari halaman pengelolaan kiosk.'],
+            'TOKEN_REVOKED' => ['title' => 'Token Kiosk Dicabut', 'message' => 'Token kiosk sudah dicabut (revoked) oleh administrator.'],
+            'TOKEN_EXPIRED' => ['title' => 'Token Kiosk Kedaluwarsa', 'message' => 'Token kiosk sudah melewati tanggal kedaluwarsa. Perbarui token di pengelolaan kiosk.'],
+            'SCHOOL_INACTIVE' => ['title' => 'Sekolah Tidak Aktif', 'message' => 'Sekolah yang terhubung dengan token kiosk ini sedang tidak aktif.']
+        ];
+        $e = $err_map[$kiosk_result['error']] ?? ['title' => 'Token Kiosk Ditolak', 'message' => 'Token kiosk tidak dapat diverifikasi.'];
+        $kiosk_error = ['type' => 'blocked', 'title' => $e['title'], 'message' => $e['message']];
+    } else {
+        $school_id = $kiosk_result['school_id'];
+        $kiosk_device_name = $kiosk_result['device_name'];
+    }
+} else {
+    // Legacy path (tanpa token) — backward compat: gunakan sesi/auth.
+    $school_id = auth_school_id();
+    $kiosk_token = '';
+}
+
+// Feed kiosk hanya tampil jika konteks sekolah ter-resolve
+$recent_scans = [];
 $today = date('Y-m-d');
-$stmt = $pdo->prepare("
-    SELECT a.*, u.full_name, u.identifier, r.role_name, c.class_name
-    FROM attendance a
-    JOIN users u ON a.user_id = u.id
-    JOIN roles r ON u.role_id = r.id
-    LEFT JOIN classes c ON a.class_id = c.id
-    WHERE a.date = ?
-    ORDER BY a.updated_at DESC
-    LIMIT 8
-");
-$stmt->execute([$today]);
-$recent_scans = $stmt->fetchAll();
+if ($school_id !== null) {
+    $stmt = $pdo->prepare("
+        SELECT a.*, u.full_name, u.identifier, r.role_name, c.class_name
+        FROM attendance a
+        JOIN users u ON a.user_id = u.id
+        JOIN roles r ON u.role_id = r.id
+        LEFT JOIN classes c ON a.class_id = c.id
+        WHERE a.date = ? AND a.school_id = ?
+        ORDER BY a.updated_at DESC
+        LIMIT 8
+    ");
+    $stmt->execute([$today, $school_id]);
+    $recent_scans = $stmt->fetchAll();
+}
+
+$school_name = $school_id !== null ? (current_school($school_id)['name'] ?? '') : '';
+if ($school_name === '') $school_name = get_setting('schoolName', 'SMA Negeri Harapan Bangsa');
 ?>
 <!DOCTYPE html>
 <html lang="id" class="h-full bg-slate-950">
@@ -90,7 +127,31 @@ $recent_scans = $stmt->fetchAll();
 
     <!-- Main Container -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
+
+        <?php if ($kiosk_error !== null): ?>
+            <!-- Kiosk Token Rejected / Blocked State -->
+            <div class="lg:col-span-12 w-full max-w-lg mx-auto">
+                <div class="bg-slate-900 border border-rose-800/50 rounded-3xl p-8 sm:p-10 shadow-2xl text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-3xl mx-auto mb-5 ring-4 ring-rose-500/10">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white mb-2"><?= htmlspecialchars($kiosk_error['title']) ?></h2>
+                    <p class="text-sm text-slate-400 leading-relaxed mb-6"><?= htmlspecialchars($kiosk_error['message']) ?></p>
+                    <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-left text-xs font-mono text-slate-500 mb-6 break-all">
+                        scan.php?k=<?= htmlspecialchars($kiosk_token) ?>
+                    </div>
+                    <div class="flex items-center justify-center gap-3">
+                        <a href="<?= $base_url ?>/admin/kiosk.php" class="px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold transition flex items-center gap-2">
+                            <i class="fa-solid fa-arrow-rotate-right"></i> Kelola Kiosk
+                        </a>
+                        <a href="<?= $base_url ?>/index.php" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition">
+                            Kembali ke Beranda
+                        </a>
+                    </div>
+                </div>
+            </div>
+        <?php else: ?>
+
         <!-- Left Column: Camera Scanner & Manual Input (7 Cols) -->
         <div class="lg:col-span-7 space-y-4">
             <!-- Camera Scanner Frame -->
@@ -239,6 +300,7 @@ $recent_scans = $stmt->fetchAll();
 
         </div>
     </main>
+    <?php endif; ?>
 
     <!-- App Scripts -->
     <script src="<?= $base_url ?>/assets/js/app.js"></script>
@@ -249,6 +311,7 @@ $recent_scans = $stmt->fetchAll();
         let lastScanTime = 0;
         let availableCameras = [];
         let currentCameraIndex = 0;
+        const KIOSK_TOKEN = <?= json_encode($kiosk_token, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
@@ -337,21 +400,24 @@ $recent_scans = $stmt->fetchAll();
         }
 
         // Switch Camera Button Click
-        document.getElementById('btn-switch-camera').addEventListener('click', () => {
-            if (availableCameras.length > 1) {
-                currentCameraIndex = (currentCameraIndex + 1) % availableCameras.length;
-                const select = document.getElementById('camera-select');
-                if (select) select.value = availableCameras[currentCameraIndex].id;
-                startScanning(availableCameras[currentCameraIndex].id);
-                showToast(`Beralih ke ${availableCameras[currentCameraIndex].label || 'Kamera ' + (currentCameraIndex + 1)}`, 'info');
-            } else {
-                // If only 1 or 0 enumerated, toggle between environment and user
-                currentCameraIndex = (currentCameraIndex === 0) ? 1 : 0;
-                const mode = (currentCameraIndex === 0) ? "environment" : "user";
-                startScanning({ facingMode: mode });
-                showToast(`Beralih ke kamera ${mode}`, 'info');
-            }
-        });
+        const switchBtn = document.getElementById('btn-switch-camera');
+        if (switchBtn) {
+            switchBtn.addEventListener('click', () => {
+                if (availableCameras.length > 1) {
+                    currentCameraIndex = (currentCameraIndex + 1) % availableCameras.length;
+                    const select = document.getElementById('camera-select');
+                    if (select) select.value = availableCameras[currentCameraIndex].id;
+                    startScanning(availableCameras[currentCameraIndex].id);
+                    showToast(`Beralih ke ${availableCameras[currentCameraIndex].label || 'Kamera ' + (currentCameraIndex + 1)}`, 'info');
+                } else {
+                    // If only 1 or 0 enumerated, toggle between environment and user
+                    currentCameraIndex = (currentCameraIndex === 0) ? 1 : 0;
+                    const mode = (currentCameraIndex === 0) ? "environment" : "user";
+                    startScanning({ facingMode: mode });
+                    showToast(`Beralih ke kamera ${mode}`, 'info');
+                }
+            });
+        }
 
         function onScanSuccess(decodedText, decodedResult) {
             const now = Date.now();
@@ -377,7 +443,7 @@ $recent_scans = $stmt->fetchAll();
                 const res = await fetch('<?= $base_url ?>/api/scan_process.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ identifier: identifier, method: method })
+                    body: JSON.stringify({ identifier: identifier, method: method, kiosk_token: KIOSK_TOKEN })
                 });
 
                 const data = await res.json();
@@ -478,19 +544,24 @@ $recent_scans = $stmt->fetchAll();
         }
 
         // Handle Manual Input & USB Barcode Gun Submit
-        document.getElementById('manual-scan-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const input = document.getElementById('manual-identifier-input');
-            const val = input.value.trim();
-            if (val) {
-                processScan(val, 'barcode');
-                input.value = '';
-                input.focus();
-            }
-        });
+        const manualScanForm = document.getElementById('manual-scan-form');
+        if (manualScanForm) {
+            manualScanForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const input = document.getElementById('manual-identifier-input');
+                const val = input.value.trim();
+                if (val) {
+                    processScan(val, 'barcode');
+                    input.value = '';
+                    input.focus();
+                }
+            });
+        }
 
         // Initialize on page load
+        const kioskAllowed = !<?= $kiosk_error !== null ? 'true' : 'false' ?>;
         document.addEventListener('DOMContentLoaded', () => {
+            if (!kioskAllowed) return;
             startScanning();
             const inputField = document.getElementById('manual-identifier-input');
             if (inputField) inputField.focus();

@@ -9,44 +9,91 @@ $base_url = get_base_url();
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $settings = [
-        'schoolName' => trim($_POST['schoolName'] ?? ''),
-        'npsn' => trim($_POST['npsn'] ?? ''),
-        'schoolLevel' => trim($_POST['schoolLevel'] ?? 'SMA'),
-        'address' => trim($_POST['address'] ?? ''),
-        'operatorName' => trim($_POST['operatorName'] ?? ''),
-        'operatorPhone' => trim($_POST['operatorPhone'] ?? ''),
-        'latitude' => trim($_POST['latitude'] ?? ''),
-        'longitude' => trim($_POST['longitude'] ?? ''),
-        'radiusMeters' => trim($_POST['radiusMeters'] ?? '150'),
-        'waApiKey' => trim($_POST['waApiKey'] ?? ''),
-        'waGatewayNumber' => trim($_POST['waGatewayNumber'] ?? ''),
-    ];
+    // P2.3: Profil Sekolah (canonical: schools — tenant-scoped dari session)
+    $name_in = trim($_POST['schoolName'] ?? '');
+    $npsn_in = trim($_POST['npsn'] ?? '');
+    $level_in = trim($_POST['schoolLevel'] ?? 'SMA');
+    $address_in = trim($_POST['address'] ?? '');
+    $city_in = trim($_POST['city'] ?? '');
+    $province_in = trim($_POST['province'] ?? '');
+    $postal_in = trim($_POST['postal_code'] ?? '');
+    $email_in = trim($_POST['schoolEmail'] ?? '');
+    $phone_in = trim($_POST['schoolPhone'] ?? '');
+    $logo_in = trim($_POST['logo_url'] ?? '');
 
-    try {
-        foreach ($settings as $key => $val) {
-            set_setting($key, $val);
+    $allowed_levels = ['SD','SMP','SMA','SMK','MA','MTS','MI','PESANTREN','LAINNYA'];
+    if (!in_array($level_in, $allowed_levels, true)) $level_in = 'SMA';
+
+    $error = '';
+    if (mb_strlen($name_in) > 150) $error = 'Nama sekolah maksimal 150 karakter.';
+    elseif (mb_strlen($npsn_in) > 20) $error = 'NPSN maksimal 20 karakter.';
+    elseif (mb_strlen($city_in) > 100) $error = 'Kota/Kabupaten maksimal 100 karakter.';
+    elseif (mb_strlen($province_in) > 100) $error = 'Provinsi maksimal 100 karakter.';
+    elseif (mb_strlen($postal_in) > 10) $error = 'Kode Pos maksimal 10 karakter.';
+    elseif (mb_strlen($email_in) > 100) $error = 'Email sekolah maksimal 100 karakter.';
+    elseif (mb_strlen($phone_in) > 30) $error = 'No. Telepon sekolah maksimal 30 karakter.';
+
+    if (!$error) {
+        try {
+            $school_id = auth_school_id();
+            $pdo->prepare("UPDATE schools SET name=?, npsn=?, level=?, address=?, city=?, province=?, postal_code=?, email=?, phone=?, logo_url=?, updated_at=NOW() WHERE id=?")
+                ->execute([$name_in, $npsn_in, $level_in, $address_in, $city_in, $province_in, $postal_in, $email_in, $phone_in, $logo_in, $school_id]);
+
+            // Write-through legacy keys agar reader lama (get_setting('schoolName') dll.) tetap sinkron
+            set_setting('schoolName', $name_in);
+            set_setting('npsn', $npsn_in);
+            set_setting('schoolLevel', $level_in);
+            set_setting('address', $address_in);
+
+            $settings = [
+                'operatorName' => trim($_POST['operatorName'] ?? ''),
+                'operatorPhone' => trim($_POST['operatorPhone'] ?? ''),
+                'latitude' => trim($_POST['latitude'] ?? ''),
+                'longitude' => trim($_POST['longitude'] ?? ''),
+                'radiusMeters' => trim($_POST['radiusMeters'] ?? '150'),
+                'waApiKey' => trim($_POST['waApiKey'] ?? ''),
+                'waGatewayNumber' => trim($_POST['waGatewayNumber'] ?? ''),
+            ];
+            foreach ($settings as $key => $val) {
+                set_setting($key, $val);
+            }
+
+            log_audit('UPDATE_SETTINGS', 'school_settings', 'all', 'Updated school profile + GPS settings');
+            set_flash('success', 'Pengaturan sekolah berhasil disimpan!');
+            header("Location: settings.php");
+            exit;
+        } catch (PDOException $e) {
+            $error = 'Gagal menyimpan pengaturan: ' . ($e->getCode() == 23000 ? 'NPSN sudah digunakan sekolah lain.' : $e->getMessage());
+        } catch (Exception $e) {
+            $error = 'Gagal menyimpan pengaturan: ' . $e->getMessage();
         }
-        log_audit('UPDATE_SETTINGS', 'school_settings', 'all', 'Updated school and GPS settings');
-        set_flash('success', 'Pengaturan sistem dan lokasi sekolah berhasil disimpan!');
-        header("Location: settings.php");
-        exit;
-    } catch (Exception $e) {
-        $error = 'Gagal menyimpan pengaturan: ' . $e->getMessage();
     }
 }
 
-// Current Settings
-$schoolName = get_setting('schoolName', 'SMA Negeri Harapan Bangsa');
-$npsn = get_setting('npsn', '20227912');
-$schoolLevel = get_setting('schoolLevel', 'SMA');
-$address = get_setting('address', 'Jl. Raya Pendidikan No. 123, Bandung');
-$operatorName = get_setting('operatorName', 'Abdul Rohman');
-$operatorPhone = get_setting('operatorPhone', '083829089297');
-$latitude = get_setting('latitude', '-6.92720000');
-$longitude = get_setting('longitude', '107.72250000');
-$radiusMeters = get_setting('radiusMeters', '150');
-$waApiKey = get_setting('waApiKey', '');
+// P2.3: canonical profile reads dari schools table (tenant-scoped)
+$school_id = auth_school_id();
+$stmt = $pdo->prepare("SELECT * FROM schools WHERE id = ? AND deleted_at IS NULL LIMIT 1");
+$stmt->execute([$school_id]);
+$school_row = $stmt->fetch() ?: [];
+
+$schoolName  = $school_row['name'] ?? get_setting('schoolName', 'SMA Negeri Harapan Bangsa');
+$npsn        = $school_row['npsn'] ?? get_setting('npsn', '20227912');
+$schoolLevel = $school_row['level'] ?? get_setting('schoolLevel', 'SMA');
+$address     = $school_row['address'] ?? get_setting('address', '');
+$city        = $school_row['city'] ?? '';
+$province    = $school_row['province'] ?? '';
+$postalCode  = $school_row['postal_code'] ?? '';
+$schoolEmail = $school_row['email'] ?? '';
+$schoolPhone = $school_row['phone'] ?? '';
+$logoUrl     = $school_row['logo_url'] ?? '';
+
+// GPS & integrasi masih dari school_settings (legacy keys yang stabil)
+$operatorName    = get_setting('operatorName', 'Operator Sekolah');
+$operatorPhone   = get_setting('operatorPhone', '');
+$latitude        = get_setting('latitude', '-6.92720000');
+$longitude       = get_setting('longitude', '107.72250000');
+$radiusMeters    = get_setting('radiusMeters', '150');
+$waApiKey        = get_setting('waApiKey', '');
 $waGatewayNumber = get_setting('waGatewayNumber', '');
 
 include __DIR__ . '/../includes/header.php';
@@ -57,117 +104,114 @@ include __DIR__ . '/../includes/sidebar.php';
     <div class="max-w-4xl mx-auto space-y-6">
 
         <!-- Page Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Pengaturan Sekolah & Lokasi GPS</h1>
-                <p class="text-xs sm:text-sm text-slate-500">Konfigurasi profil institusi, koordinat Geofencing absensi mobile, dan integrasi WhatsApp.</p>
+                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Pengaturan Sekolah</h1>
+                <p class="text-xs sm:text-sm text-slate-500">Profil institusi, koordinat Geofencing absensi mobile, dan integrasi WhatsApp.</p>
             </div>
         </div>
 
         <?php if (!empty($error)): ?>
-            <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
-                <?= htmlspecialchars($error) ?>
-            </div>
+            <?= ds_alert($error, 'danger') ?>
         <?php endif; ?>
 
         <form method="POST" action="" class="space-y-6">
             <!-- Profil Sekolah -->
-            <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
-                <h3 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-school text-emerald-600"></i>
-                    <span>Identitas Sekolah / Madrasah</span>
-                </h3>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <?= ds_card_start('Profil Sekolah / Madrasah', 'fa-solid fa-school') ?>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                     <div class="sm:col-span-2">
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nama Resmi Sekolah</label>
-                        <input type="text" name="schoolName" value="<?= htmlspecialchars($schoolName) ?>" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <?= ds_input('schoolName', 'Nama Resmi Sekolah', 'text', $schoolName, ['required' => true]) ?>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">NPSN</label>
-                        <input type="text" name="npsn" value="<?= htmlspecialchars($npsn) ?>" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono">
+                        <?= ds_input('npsn', 'NPSN', 'text', $npsn, ['required' => true, 'class' => 'font-mono']) ?>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Alamat Lengkap</label>
-                    <textarea name="address" rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"><?= htmlspecialchars($address) ?></textarea>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <?php 
+                        $levels = ['SD'=>'SD','SMP'=>'SMP','SMA'=>'SMA','SMK'=>'SMK','MA'=>'MA','MTS'=>'MTs','MI'=>'MI','PESANTREN'=>'Pesantren','LAINNYA'=>'Lainnya'];
+                        echo ds_select('schoolLevel', $levels, $schoolLevel, 'Jenjang');
+                        ?>
+                    </div>
+                    <div>
+                        <?= ds_input('schoolEmail', 'Email Sekolah', 'email', $schoolEmail, ['maxlength' => 100, 'placeholder' => 'info@sekolah.sch.id']) ?>
+                    </div>
+                    <div>
+                        <?= ds_input('schoolPhone', 'No. Telepon Sekolah', 'text', $schoolPhone, ['maxlength' => 30, 'placeholder' => '021-xxxxxxx', 'class' => 'font-mono']) ?>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <?= ds_textarea('address', 'Alamat Lengkap', $address, ['rows' => 2]) ?>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <?= ds_input('city', 'Kota / Kabupaten', 'text', $city, ['maxlength' => 100, 'placeholder' => 'Contoh: Bandung']) ?>
+                    </div>
+                    <div>
+                        <?= ds_input('province', 'Provinsi', 'text', $province, ['maxlength' => 100, 'placeholder' => 'Contoh: Jawa Barat']) ?>
+                    </div>
+                    <div>
+                        <?= ds_input('postal_code', 'Kode Pos', 'text', $postalCode, ['maxlength' => 10, 'placeholder' => 'Contoh: 40123']) ?>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <?= ds_input('logo_url', 'Logo (URL gambar)', 'text', $logoUrl, ['placeholder' => 'https://...']) ?>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nama Petugas / Operator</label>
-                        <input type="text" name="operatorName" value="<?= htmlspecialchars($operatorName) ?>" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <?= ds_input('operatorName', 'Nama Petugas / Operator', 'text', $operatorName) ?>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">No. Kontak Operator</label>
-                        <input type="text" name="operatorPhone" value="<?= htmlspecialchars($operatorPhone) ?>" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono">
+                        <?= ds_input('operatorPhone', 'No. Kontak Operator', 'text', $operatorPhone, ['class' => 'font-mono']) ?>
                     </div>
                 </div>
-            </div>
+            <?= ds_card_end() ?>
 
             <!-- Titik Koordinat GPS & Geofencing -->
-            <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
                         <i class="fa-solid fa-location-dot text-rose-500"></i>
                         <span>Titik Koordinat GPS & Geofencing</span>
                     </h3>
-                    <button type="button" onclick="getCurrentLocation()" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 bg-emerald-50 px-3 py-1.5 rounded-xl">
-                        <i class="fa-solid fa-crosshairs"></i>
-                        <span>Gunakan Lokasi Saat Ini</span>
-                    </button>
+                    <?= ds_button('<i class="fa-solid fa-crosshairs"></i> Gunakan Lokasi Saat Ini', 'light', 'button', ['onclick' => 'getCurrentLocation()']) ?>
                 </div>
 
-                <p class="text-xs text-slate-500">
-                    Titik koordinat ini digunakan sebagai acuan validasi jarak (radius) saat siswa atau guru melakukan absen mandiri dari HP masing-masing.
-                </p>
+                <div class="p-6 space-y-4">
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Titik koordinat ini digunakan sebagai acuan validasi jarak (radius) saat siswa atau guru melakukan absen mandiri dari HP masing-masing.
+                    </p>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Latitude</label>
-                        <input type="text" id="gps-lat" name="latitude" value="<?= htmlspecialchars($latitude) ?>" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <?= ds_input('latitude', 'Latitude', 'text', $latitude, ['id' => 'gps-lat', 'required' => true, 'class' => 'font-mono']) ?>
+                        <?= ds_input('longitude', 'Longitude', 'text', $longitude, ['id' => 'gps-lon', 'required' => true, 'class' => 'font-mono']) ?>
+                        <div>
+                            <?= ds_input('radiusMeters', 'Batas Radius Default (Meter)', 'number', $radiusMeters, ['required' => true, 'class' => 'font-mono']) ?>
+                            <p class="mt-1.5 text-[10px] text-slate-400 leading-tight">Fallback default jika tidak ada aturan khusus per-role. Atur per-role di menu <b>Aturan Absensi</b>.</p>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Longitude</label>
-                        <input type="text" id="gps-lon" name="longitude" value="<?= htmlspecialchars($longitude) ?>" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Batas Radius (Meter)</label>
-                        <input type="number" name="radiusMeters" value="<?= htmlspecialchars($radiusMeters) ?>" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono">
-                    </div>
-                </div>
 
-                <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center gap-2">
-                    <i class="fa-solid fa-circle-info text-emerald-600"></i>
-                    <span>Koordinat saat ini: <a href="https://maps.google.com/?q=<?= htmlspecialchars($latitude) ?>,<?= htmlspecialchars($longitude) ?>" target="_blank" class="font-bold text-emerald-700 underline">Buka di Google Maps &rarr;</a></span>
+                    <?= ds_alert('Koordinat saat ini: <a href="https://maps.google.com/?q='.htmlspecialchars($latitude).','.htmlspecialchars($longitude).'" target="_blank" class="font-bold text-emerald-700 underline">Buka di Google Maps &rarr;</a>', 'info') ?>
                 </div>
             </div>
 
             <!-- WhatsApp Gateway Integrations -->
-            <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
-                <h3 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
-                    <i class="fa-brands fa-whatsapp text-emerald-600"></i>
-                    <span>Integrasi WhatsApp Gateway (Notifikasi Otomatis ke Ortu)</span>
-                </h3>
-
+            <?= ds_card_start('Integrasi WhatsApp Gateway', 'fa-brands fa-whatsapp') ?>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">API Key / Token WA Gateway</label>
-                        <input type="password" name="waApiKey" value="<?= htmlspecialchars($waApiKey) ?>" placeholder="Token API penyedia WA..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nomor Pengirim (Gateway)</label>
-                        <input type="text" name="waGatewayNumber" value="<?= htmlspecialchars($waGatewayNumber) ?>" placeholder="08xxxxxxxx" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono">
-                    </div>
+                    <?= ds_input('waApiKey', 'API Key / Token WA Gateway', 'password', $waApiKey, ['placeholder' => 'Token API penyedia WA...', 'class' => 'font-mono']) ?>
+                    <?= ds_input('waGatewayNumber', 'Nomor Pengirim (Gateway)', 'text', $waGatewayNumber, ['placeholder' => '08xxxxxxxx', 'class' => 'font-mono']) ?>
                 </div>
-            </div>
+            <?= ds_card_end() ?>
 
             <div class="flex justify-end pt-2">
-                <button type="submit" class="px-6 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-lg shadow-emerald-900/20 transition flex items-center gap-2">
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    <span>Simpan Seluruh Pengaturan</span>
-                </button>
+                <?= ds_button('<i class="fa-solid fa-floppy-disk"></i> Simpan Seluruh Pengaturan', 'primary', 'submit', ['class' => 'px-8 py-3.5 text-sm']) ?>
             </div>
         </form>
 

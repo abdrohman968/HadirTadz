@@ -7,6 +7,7 @@ require_once __DIR__ . '/../config/helpers.php';
 require_auth(['admin']);
 $current_user = auth_user();
 $base_url = get_base_url();
+$school_id = auth_school_id();
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -17,8 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo->beginTransaction();
 
-            $stmt = $pdo->prepare("SELECT * FROM permissions WHERE id = ?");
-            $stmt->execute([$perm_id]);
+            $stmt = $pdo->prepare("SELECT * FROM permissions WHERE id = ? AND school_id = ?");
+            $stmt->execute([$perm_id, $school_id]);
             $perm = $stmt->fetch();
 
             if ($perm) {
@@ -26,9 +27,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $upd = $pdo->prepare("
                     UPDATE permissions 
                     SET status = 'approved', verified_by_user_id = ?, verified_at = NOW(), updated_at = NOW() 
-                    WHERE id = ?
+                    WHERE id = ? AND school_id = ?
                 ");
-                $upd->execute([$current_user['id'], $perm_id]);
+                $upd->execute([$current_user['id'], $perm_id, $school_id]);
 
                 // Auto-sync into attendance table for the date range
                 $att_status = (strtoupper($perm['type']) === 'SAKIT') ? 'SAKIT' : 'IZIN';
@@ -36,8 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $end = strtotime($perm['end_date']);
 
                 // Find class_id if student
-                $clsStmt = $pdo->prepare("SELECT class_id FROM students WHERE user_id = ?");
-                $clsStmt->execute([$perm['user_id']]);
+                $clsStmt = $pdo->prepare("SELECT class_id FROM students WHERE user_id = ? AND school_id = ?");
+                $clsStmt->execute([$perm['user_id'], $school_id]);
                 $class_id = $clsStmt->fetchColumn() ?: null;
 
                 $userIdentifierStmt = $pdo->prepare("SELECT identifier FROM users WHERE id = ?");
@@ -47,16 +48,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 while ($cur <= $end) {
                     $d = date('Y-m-d', $cur);
                     $insAtt = $pdo->prepare("
-                        INSERT INTO attendance (user_id, class_id, date, status, method, identifier, notes, created_at, updated_at)
-                        VALUES (?, ?, ?, ?, 'manual', ?, ?, NOW(), NOW())
+                        INSERT INTO attendance (school_id, user_id, class_id, date, status, method, identifier, notes, created_at, updated_at)
+                        VALUES (?, ?, ?, ?, ?, 'manual', ?, ?, NOW(), NOW())
                         ON DUPLICATE KEY UPDATE status = VALUES(status), notes = VALUES(notes), updated_at = NOW()
                     ");
-                    $insAtt->execute([$perm['user_id'], $class_id, $d, $att_status, $identifier, "Izin disetujui: " . $perm['reason']]);
+                    $insAtt->execute([$school_id, $perm['user_id'], $class_id, $d, $att_status, $identifier, "Izin disetujui: " . $perm['reason']]);
                     $cur = strtotime('+1 day', $cur);
                 }
 
                 $pdo->commit();
-                log_audit('APPROVE_PERMISSION', 'permissions', $perm_id, "Permission approved as $att_status");
+                log_audit('APPROVE_PERMISSION', 'permissions', $perm_id, "Permission approved as $att_status", $school_id);
                 set_flash('success', 'Pengajuan izin berhasil disetujui dan disinkronkan ke rekaman presensi!');
             }
             header("Location: permissions.php");

@@ -5,6 +5,188 @@ Baru ditambahkan di paling atas. Tanggal mengikuti kalender WIB.
 
 ---
 
+## [2026-08-21] P2.4 — Terms, Privacy & Legal Consent
+
+- **Status:** SELESAI — php -l 44 files 0 errors, 139/139 E2E PASS.
+- **Version constants:** `TERMS_VERSION = '2026-08-21-v1'` and `PRIVACY_VERSION = '2026-08-21-v1'` defined in `config/helpers.php:5-6`.
+- **Legal pages:** `terms.php` + `privacy.php` at project root — public (no auth), green/white design, version in header, back-to-register links.
+- **Signup checkboxes:** Single `agree_terms` → two separate checkboxes (`agree_terms` + `agree_privacy`). Each links to its page (target=_blank). Backend + JS validation check both.
+- **Consent inserts:** Now use `TERMS_VERSION` / `PRIVACY_VERSION` constants (no hardcoded `'1.0'`). Two rows per registration, inside transaction.
+- **Admin consent viewer:** `admin/consents.php` — tenant-scoped table, paginated 20/page, shows user/type/version/IP/timestamp. Added to sidebar "Laporan & Sistem".
+- **Tests:** php -l 44 files 0 errors; E2E 139/139 PASS (no regressions).
+- **Docs updated:** `docs/LEGAL_CONSENT_REQUIREMENT.md` → FULLY IMPLEMENTED status.
+
+---
+
+## [2026-08-21] P2.3 — School Profile & Signup Data Completion
+
+- **Status:** SELESAI — 49/49 P2.3 tests PASS, 139/139 E2E PASS.
+- **Signup (register_school.php):** Field baru city/province/postal_code di Step 1, nik di Step 2. Server-side validation (max length). Review step + JS updated. Sekolah email/phone dipisah dari admin email/phone.
+- **Admin settings (admin/settings.php):** Profil Sekolah section baru — reads langsung dari `schools` table (canonical). Fields: jenjang select, kota, provinsi, kode pos, email/phone sekolah, logo URL. Tenant-scoped via `auth_school_id()`. Write-through sync legacy keys (schoolName/npsn/schoolLevel/address) agar reader lama tetap sinkron.
+- **Bug fixed:** schools.email/phone sebelumnya menyimpan data admin (P2.3 memperbaiki pemisahan).
+- **Tests:** 49/49 PASS (signup fields, admin profile edit, canonical read, write-through, tenant isolation, validation, existing data safety). E2E 139/139 PASS. PHP lint 41 files 0 errors.
+- **Docs created:** `docs/SCHOOL_PROFILE.md`.
+
+---
+
+## [2026-08-21] P2.2 — Safe School Profile Database Migration
+
+- **Status:** MIGRATION EXECUTED + REGRESSION PASS.
+- **Schema changes (semua nullable, backward compatible):**
+  - `schools.city` varchar(100) NULL
+  - `schools.province` varchar(100) NULL
+  - `schools.postal_code` varchar(10) NULL
+  - `users.nik` varchar(30) NULL
+  - Tabel baru `legal_consents` (FK schools/users ON DELETE CASCADE, index, enum terms/privacy, version, IP+UA).
+- **Migration mechanism:** `ensure_column()` existing di `database/migrate.php` + `CREATE TABLE IF NOT EXISTS` — idempotent, dijalankan 2x tanpa error.
+- **Consent persistence:** `auth/register_school.php` kini menyimpan bukti persetujuan Terms & Privacy (2 baris, v1.0, IP+user-agent) di dalam transaksi registrasi — gagal insert = rollback penuh.
+- **Existing data:** tidak ada yang diubah/dihapus (schools=2, users=9, attendance, rules, kiosk utuh).
+- **Tests:** php -l 41 files 0 errors; E2E P2.1.4 = 139/139 PASS; functional consent test 9/9 PASS; FK cascade verified.
+- **Rollback:** prosedur manual 3 skenario didokumentasikan di `docs/SCHOOL_DATA_MIGRATION_PLAN.md`.
+- **Follow-up P2.3/P2.4:** input UI field baru di signup/admin settings + halaman legal.
+
+---
+
+## [2026-08-21] P2.1 — School Data Model Enhancement (Audit)
+
+- **Status:** AUDIT + DESIGN + MIGRATION PLAN — no DB changes.
+- **Finding:** 4 fields truly missing: `schools.city`, `schools.province`, `schools.postal_code`, `users.nik`.
+- **Existing reusable:** 12 fields already in schema (email, address, phone, lat/long, etc.).
+- **Normalization:** Address/location duplicated in `schools` + `school_settings` — canonical = `schools`.
+- **Legal consent:** No terms/privacy page, no consent table — design documented.
+- **Migration plan:** 4 ALTER TABLE + 1 CREATE TABLE, all nullable, zero data loss, reversible.
+- **Risk:** LOW.
+- **Docs created:**
+  - `docs/SCHOOL_DATA_MODEL_AUDIT.md` — full field mapping matrix
+  - `docs/LEGAL_CONSENT_REQUIREMENT.md` — legal consent design
+  - `docs/SCHOOL_DATA_MIGRATION_PLAN.md` — migration SQL + rollback
+
+---
+
+## [2026-08-21] P1.4 — Auth & School Onboarding E2E QA
+
+- **Status:** PASS — 139/139 tests, 0 bugs found.
+- **Coverage:** signup → login → cross-tenant → kiosk → attendance → logout → session security → UI regression → DB integrity.
+- **Test script:** `tests/e2e_auth.php` (CLI, creates & cleans up E2E test data).
+- **Sections:** 15 (school signup, duplicate/validation, rollback, login, cross-tenant isolation, kiosk integration, attendance integration, logout/session security, registration success screen, login UI, register school UI, DB integrity, existing data safety, PHP lint, logout flow).
+- **Production data:** S1/S2 untouched. Test data uses `E2E-*` prefix, auto-cleaned.
+- **No bugs found.** No new fixes needed.
+
+---
+
+## [2026-08-21] P1.3 — Login UI/UX Redesign
+
+- **Design:** dark theme → white + green gradient modern (brand: #22C55E, #16A34A, #059669).
+- **Layout:** desktop split (left green branding panel + right white login card) | mobile single column.
+- **Left panel:** green gradient, logo, "HadirTadz", subtitle, tagline "Disiplin hari ini, sukses nanti.", 3 feature cards.
+- **Login card:** white, "Selamat Datang!" header, labeled inputs (Email/Username + Password), green gradient button, "Lupa Password?" toggle, register CTA.
+- **Typography:** Plus Jakarta Sans, Tailwind CSS CDN, Font Awesome icons.
+- **Accessibility:** labels on all inputs, aria-label on password toggle, focus-visible states.
+- **Responsive:** tested at 360px–1920px width, no horizontal overflow.
+- **Auth logic untouched:** session_regenerate_id, password_verify, role detection, redirect, audit log — all preserved.
+- **Step 4 success screen:** preserved from P1.2 (registration success on login.php).
+
+---
+
+## [2026-08-21] P1.2 — School Signup Multi-Step
+
+- **UI multi-step:** form tunggal di-upgrade menjadi 3-step wizard (Sekolah → Admin → Review)
+  dengan step indicator, frontend validation per-step, dan loading state.
+- **Layout:** desktop split (kiri branding hijau, kanan form) | mobile single column.
+- **Design:** white + green gradient, Plus Jakarta Sans, soft shadows, rounded corners.
+- **Success screen (Step 4):** ditampilkan di `login.php` via `$_SESSION['registration_success']`
+  — menampilkan nama sekolah, kode sekolah, jenjang, nama admin, username.
+- **Backend preserved:** transaction, password hashing, role assignment, school/admin/settings/
+  rules/kiosk creation — semuanya identik dengan versi sebelumnya.
+- **Terms checkbox:** validasi `agree_terms` ditambahkan ke backend.
+- **Backend error:** pesan error disederhanakan (tidak menampilkan raw SQL).
+- **Requirements gap:** field Kota/Provinsi/Kode Pos/NIK/NIP belum ada di schema
+  (didokumentasikan di `docs/SCHOOL_SIGNUP.md`). Terms/Privacy page masih placeholder.
+
+---
+
+## [2026-08-21] P1.1 — Auth Security Audit
+
+- **Session fixation (CRITICAL):** `session_regenerate_id(true)` setelah login
+  sukses (`auth/login.php:40`) — session ID berubah setelah autentikasi,
+  mencegah session hijacking via fixation.
+- **Cookie flags:** `session_set_cookie_params()` di `config/database.php` —
+  SameSite=Lax, HttpOnly=true, Secure otomatis berdasarkan HTTPS.
+- **Session hygiene:** `password_hash` tidak lagi disimpan di
+  `$_SESSION['user_data']` — dihapus via `unset()` di `login.php` dan
+  `auth_user()`.
+- **Password input:** `trim()` dihapus dari password di `login.php` dan
+  `register_school.php` — whitespace internal tidak lagi hilang.
+- **Login error:** message sudah generic — tidak membedakan "user tidak ada"
+  vs "password salah" → tidak ada info leakage.
+- **Authorization:** semua halaman `admin/*` `guru/*` `siswa/*` sudah
+  `require_auth([role])`; `api/stats.php` sudah cek admin role (BUG-201 closed).
+- **School context:** login set `school_id` dari DB user — tidak bisa dimanipulasi
+  oleh input client.
+- **Audit doc:** `docs/AUTH_SECURITY_AUDIT.md` (baru) — flow, session, role,
+  redirect, password, brute force gap, register integration.
+- Risiko tersisa: brute force (P2), session timeout (P2), password reset (P2).
+
+---
+
+## [2026-08-21] P0.4 — Attendance Source of Truth
+
+- **Canonical source ditetapkan** (dokumentasi: `docs/ATTENDANCE_SETTINGS_MAPPING.md`):
+  `attendance_rules` = aturan absensi terstruktur (waktu, telat, pulang cepat,
+  radius per-role); `school_settings` = konfigurasi umum (profil, koordinat GPS,
+  radius default fallback); `schools.*` hanya fallback via `get_setting()`.
+- **Resolver canonical baru di `config/helpers.php`:** `get_attendance_rule()`
+  (rule spesifik role → fallback rule `'all'`, tenant-scoped) dan
+  `get_attendance_radius()` (`attendance_rules.radius_limit` → fallback
+  `school_settings.radiusMeters` → fallback `schools.radius_meters`).
+- **Fix reader:** `api/checkin_self.php` & `api/scan_process.php` memakai
+  resolver canonical. **Bug tersembunyi diperbaiki:** UI `guru/absen.php` &
+  `siswa/absen.php` menghitung radius dari `school_settings.radiusMeters`
+  sementara server memakai `attendance_rules.radius_limit` → kini UI memakai
+  `get_attendance_radius($role)` sehingga keputusan klien == server.
+- **Fix writer/UX:** `admin/settings.php` field radius dilabel "Batas Radius
+  Default" + keterangan per-role diatur di menu Aturan Absensi.
+- **Tanpa migrasi data:** `school_settings.timeInStart/timeInEnd/lateThreshold/
+  timeOutStart` ditandai **ORPHAN legacy** (tidak pernah dibaca engine);
+  `attendance_rules.allow_late` & `days_of_week` placeholder kebijakan;
+  semuanya dipertahankan untuk kompatibilitas.
+- Verifikasi: `php -l` seluruh proyek 0 error; smoke test resolver radius
+  (rule `all` vs rule spesifik role) PASS.
+
+---
+
+## [2026-08-20] P0.3 — Kiosk Active School Context
+
+- **Root cause ditutup:** kiosk (`scan.php`) belum punya konteks sekolah eksplisit —
+  `auth_school_id()` fallback ke `1` bila tanpa sesi login (BUG-105). Kiosk kini
+  memiliki identitas perangkat terverifikasi (Kiosk Token).
+- **Tabel baru `kiosk_tokens`** (`database/schema.sql` seksi 14 + `database/migrate.php`):
+  token disimpan sebagai SHA-256 hash, terikat `school_id`, punya `status`
+  (active/revoked), `expires_at` (opsional), `last_used_at`. Seeder membuat token
+  untuk semua sekolah aktif (di-print saat migrate).
+- **`config/helpers.php`:** `auth_school_id()` memprioritaskan
+  `$_SESSION['kiosk_school_id']`; fungsi baru `kiosk_validate_token()` /
+  `kiosk_bind_context()` / `kiosk_context()` / `kiosk_generate_token()` /
+  `kiosk_revoke_token()`.
+- **`scan.php`:** resolve konteks dari `?k=TOKEN`; tampilkan *blocked state*
+  bila token invalid/expired/revoked (bukan scanner); feed di-scope sekolah
+  hasil resolve; JS mengirim `kiosk_token` ke API.
+- **`api/scan_process.php`:** validasi token (REJECT bila invalid/revoked/expired)
+  + **cross-school rejection** (kartu wajib sesekolah dengan kiosk); `school_id`
+  dari request tidak pernah dijadikan authority.
+- **`admin/kiosk.php` (baru):** generate token (ditampilkan sekali + URL kiosk
+  dapat disalin), revoke token; menu "Kiosk Scanner" di sidebar admin.
+- **`auth/register_school.php`:** auto-generate 1 token kiosk saat sekolah baru
+  (resilient bila tabel belum ada).
+- **Backward compat:** kiosk tanpa token tetap berfungsi (konteks sesi/auth,
+  default 1) — kiosk lama tidak rusak.
+- Verifikasi: `php -l` seluruh proyek 0 error; smoke test CLI **10/10 PASS**
+  (7 skenario keamanan wajib: valid S1/S2, cross-scan REJECT dua arah,
+  token invalid REJECT, token expired REJECT, manipulasi `school_id` REJECT,
+  + backward compat). Dokumentasi: `docs/KIOSK_SCHOOL_CONTEXT.md`.
+
+---
+
 ## [2026-08-18] Optimasi Tampilan & Fungsi Mobile (Web + PWA)
 
 - **Layout HP**: FAB tengah bottom nav diperbaiki (`w-13 h-13` invalid → `w-14 h-14`); viewport `viewport-fit=cover` + zoom aktif + `h-dvh` (layout valid di browser mobile); toast dipindah ke atas bottom nav di layar kecil; flash `showToast` + haptic `navigator.vibrate` (√ getar sukses/error).

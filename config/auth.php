@@ -29,6 +29,7 @@ function auth_user() {
         $stmt->execute([$_SESSION['user_id']]);
         $user = $stmt->fetch();
         if ($user) {
+            unset($user['password_hash']);
             $_SESSION['user_data'] = $user;
             $_SESSION['role'] = $user['role_code'];
             $_SESSION['school_id'] = $user['school_id'];

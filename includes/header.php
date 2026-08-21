@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
+require_once __DIR__ . '/design_system.php';
 
 $current_user = auth_user();
 $school = current_school($current_user['school_id'] ?? null);

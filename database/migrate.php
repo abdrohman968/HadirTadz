@@ -68,6 +68,9 @@ try {
               `name` varchar(150) NOT NULL,
               `level` enum('SD','SMP','SMA','SMK','MA','MTS','MI','PESANTREN','LAINNYA') NOT NULL DEFAULT 'SMA',
               `address` text,
+              `city` varchar(100) DEFAULT NULL,
+              `province` varchar(100) DEFAULT NULL,
+              `postal_code` varchar(10) DEFAULT NULL,
               `phone` varchar(30) DEFAULT NULL,
               `email` varchar(100) DEFAULT NULL,
               `logo_url` varchar(255) DEFAULT NULL,
@@ -81,6 +84,10 @@ try {
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         ");
+        // P2.2: kolom profil sekolah (idempotent untuk database existing)
+        ensure_column($pdo, 'schools', 'city', "varchar(100) DEFAULT NULL AFTER `address`");
+        ensure_column($pdo, 'schools', 'province', "varchar(100) DEFAULT NULL AFTER `city`");
+        ensure_column($pdo, 'schools', 'postal_code', "varchar(10) DEFAULT NULL AFTER `province`");
 
         // 2. ROLES
         log_msg("-> Menyiapkan tabel `roles`...");
@@ -109,6 +116,7 @@ try {
               `password_hash` varchar(255) NOT NULL,
               `email` varchar(100) DEFAULT NULL,
               `phone` varchar(20) DEFAULT NULL,
+              `nik` varchar(30) DEFAULT NULL,
               `avatar_url` varchar(255) DEFAULT NULL,
               `status` enum('active','inactive','suspended') NOT NULL DEFAULT 'active',
               `last_login_at` timestamp NULL DEFAULT NULL,
@@ -121,6 +129,8 @@ try {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         ");
         ensure_column($pdo, 'users', 'school_id', 'bigint unsigned NOT NULL DEFAULT 1 AFTER `id`');
+        // P2.2: NIK/NIP admin (admin belum tentu guru — tidak disimpan di teachers)
+        ensure_column($pdo, 'users', 'nik', "varchar(30) DEFAULT NULL AFTER `phone`");
 
         // 4. CLASSES
         log_msg("-> Menyiapkan tabel `classes`...");
@@ -355,6 +365,45 @@ try {
         ");
         ensure_column($pdo, 'audit_logs', 'school_id', 'bigint unsigned DEFAULT 1 AFTER `id`');
 
+        // 14. KIOSK TOKENS (Kiosk Device Identity - Active School Context)
+        log_msg("-> Menyiapkan tabel `kiosk_tokens`...");
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `kiosk_tokens` (
+              `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+              `school_id` bigint unsigned NOT NULL,
+              `token_hash` char(64) NOT NULL,
+              `device_name` varchar(100) NOT NULL DEFAULT 'Kiosk Gerbang',
+              `status` enum('active','revoked') NOT NULL DEFAULT 'active',
+              `expires_at` datetime DEFAULT NULL,
+              `last_used_at` datetime DEFAULT NULL,
+              `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+              `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              PRIMARY KEY (`id`),
+              UNIQUE KEY `unique_token_hash` (`token_hash`),
+              KEY `fk_kiosk_tokens_school` (`school_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        ");
+
+        // 15. LEGAL CONSENTS (P2.2 — bukti persetujuan Terms & Privacy)
+        log_msg("-> Menyiapkan tabel `legal_consents`...");
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `legal_consents` (
+              `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+              `school_id` bigint unsigned NOT NULL,
+              `user_id` bigint unsigned NOT NULL,
+              `consent_type` enum('terms','privacy') NOT NULL,
+              `consent_version` varchar(20) NOT NULL DEFAULT '1.0',
+              `ip_address` varchar(45) DEFAULT NULL,
+              `user_agent` varchar(250) DEFAULT NULL,
+              `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+              PRIMARY KEY (`id`),
+              KEY `idx_consent_school` (`school_id`),
+              KEY `idx_consent_user` (`user_id`),
+              CONSTRAINT `fk_consent_school` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
+              CONSTRAINT `fk_consent_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        ");
+
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
 
         // SEEDING MULTI-TENANT DATA
@@ -375,6 +424,21 @@ try {
             (2, 'guru', 'Guru Pengajar', 'Tenaga pendidik dan pengajar'),
             (3, 'siswa', 'Siswa', 'Peserta didik');
         ");
+
+        // 2b. Kiosk Tokens (Backward Compatibility)
+        // Pastikan setiap sekolah aktif punya setidaknya satu token kiosk aktif
+        // agar kiosk tetap punya konteks sekolah tanpa sesi login.
+        $rows = $pdo->query("SELECT id, name FROM schools WHERE is_active = 1")->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($rows as $s) {
+            $has = $pdo->prepare("SELECT COUNT(*) FROM kiosk_tokens WHERE school_id = ? AND status = 'active'");
+            $has->execute([$s['id']]);
+            if ((int)$has->fetchColumn() === 0) {
+                $raw = 'KTK-' . bin2hex(random_bytes(24));
+                $insTok = $pdo->prepare("INSERT INTO kiosk_tokens (school_id, token_hash, device_name, status, expires_at) VALUES (?, ?, 'Kiosk Gerbang', 'active', NULL)");
+                $insTok->execute([$s['id'], hash('sha256', $raw)]);
+                log_msg("[KIOSK] Token kiosk `{$s['name']}` (school_id={$s['id']}) => scan.php?k=$raw");
+            }
+        }
 
         // Password hash default: hadir123
         $pass_hash = password_hash('hadir123', PASSWORD_BCRYPT);

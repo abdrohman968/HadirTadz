@@ -6,6 +6,7 @@ require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['admin']);
 $base_url = get_base_url();
+$school_id = auth_school_id();
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -28,19 +29,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $pdo->prepare("
                     UPDATE attendance_rules 
                     SET rule_name = ?, role_code = ?, check_in_start = ?, work_start_time = ?, late_threshold_time = ?, early_leave_threshold = ?, check_out_start = ?, work_end_time = ?, radius_limit = ?, updated_at = NOW() 
-                    WHERE id = ?
+                    WHERE id = ? AND school_id = ?
                 ");
-                $stmt->execute([$rule_name, $role_code, $check_in_start, $work_start_time, $late_threshold_time, $early_leave_threshold, $check_out_start, $work_end_time, $radius_limit, $rule_id]);
-                log_audit('UPDATE_RULE', 'attendance_rules', $rule_id, "Updated attendance rule $rule_name");
+                $stmt->execute([$rule_name, $role_code, $check_in_start, $work_start_time, $late_threshold_time, $early_leave_threshold, $check_out_start, $work_end_time, $radius_limit, $rule_id, $school_id]);
+                log_audit('UPDATE_RULE', 'attendance_rules', $rule_id, "Updated attendance rule $rule_name", $school_id);
                 set_flash('success', 'Aturan absensi berhasil diperbarui!');
             } else {
                 $rule_code = 'rule-' . time();
                 $stmt = $pdo->prepare("
-                    INSERT INTO attendance_rules (rule_code, rule_name, role_code, check_in_start, work_start_time, late_threshold_time, early_leave_threshold, check_out_start, work_end_time, radius_limit, created_at, updated_at) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+                    INSERT INTO attendance_rules (school_id, rule_code, rule_name, role_code, check_in_start, work_start_time, late_threshold_time, early_leave_threshold, check_out_start, work_end_time, radius_limit, created_at, updated_at) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
                 ");
-                $stmt->execute([$rule_code, $rule_name, $role_code, $check_in_start, $work_start_time, $late_threshold_time, $early_leave_threshold, $check_out_start, $work_end_time, $radius_limit]);
-                log_audit('CREATE_RULE', 'attendance_rules', $pdo->lastInsertId(), "Created attendance rule $rule_name");
+                $stmt->execute([$school_id, $rule_code, $rule_name, $role_code, $check_in_start, $work_start_time, $late_threshold_time, $early_leave_threshold, $check_out_start, $work_end_time, $radius_limit]);
+                log_audit('CREATE_RULE', 'attendance_rules', $pdo->lastInsertId(), "Created attendance rule $rule_name", $school_id);
                 set_flash('success', 'Aturan absensi baru berhasil ditambahkan!');
             }
             header("Location: rules.php");
@@ -51,7 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$rules = $pdo->query("SELECT * FROM attendance_rules ORDER BY id")->fetchAll();
+$ruleListStmt = $pdo->prepare("SELECT * FROM attendance_rules WHERE school_id = ? ORDER BY id");
+$ruleListStmt->execute([$school_id]);
+$rules = $ruleListStmt->fetchAll();
 
 include __DIR__ . '/../includes/header.php';
 include __DIR__ . '/../includes/sidebar.php';

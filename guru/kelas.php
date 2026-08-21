@@ -6,6 +6,7 @@ require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['guru', 'admin']);
 $base_url = get_base_url();
+$school_id = auth_school_id();
 
 $filter_class = $_GET['class_id'] ?? '';
 $filter_date = $_GET['date'] ?? date('Y-m-d');
@@ -27,15 +28,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_class_attendance
                 $identifier = $userIdentifierStmt->fetchColumn();
 
                 $ins = $pdo->prepare("
-                    INSERT INTO attendance (user_id, class_id, date, time_in, status, method, identifier, is_within_radius, notes, created_at, updated_at)
-                    VALUES (?, ?, ?, '07:00:00', ?, 'manual', ?, 1, 'Presensi oleh Guru di Kelas', NOW(), NOW())
+                    INSERT INTO attendance (school_id, user_id, class_id, date, time_in, status, method, identifier, is_within_radius, notes, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, '07:00:00', ?, 'manual', ?, 1, 'Presensi oleh Guru di Kelas', NOW(), NOW())
                     ON DUPLICATE KEY UPDATE status = VALUES(status), updated_at = NOW()
                 ");
-                $ins->execute([$student_user_id, $class_id, $date, $st, $identifier]);
+                $ins->execute([$school_id, $student_user_id, $class_id, $date, $st, $identifier]);
             }
 
             $pdo->commit();
-            log_audit('CLASS_ATTENDANCE', 'classes', $class_id, "Recorded class attendance for $date");
+            log_audit('CLASS_ATTENDANCE', 'classes', $class_id, "Recorded class attendance for $date", $school_id);
             set_flash('success', 'Presensi seluruh siswa kelas berhasil disimpan!');
             header("Location: kelas.php?class_id=$class_id&date=$date");
             exit;
@@ -46,8 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_class_attendance
     }
 }
 
-// Fetch all classes
-$classes = $pdo->query("SELECT * FROM classes ORDER BY grade, class_name")->fetchAll();
+// Fetch all classes for this school
+$classes = $pdo->prepare("SELECT * FROM classes WHERE school_id = ? ORDER BY grade, class_name");
+$classes->execute([$school_id]);
+$classes = $classes->fetchAll();
 if (empty($filter_class) && !empty($classes)) {
     $filter_class = $classes[0]['id'];
 }
@@ -61,10 +64,10 @@ if (!empty($filter_class)) {
         FROM students s
         JOIN users u ON s.user_id = u.id
         LEFT JOIN attendance a ON s.user_id = a.user_id AND a.date = ?
-        WHERE s.class_id = ? AND s.deleted_at IS NULL
+        WHERE s.class_id = ? AND s.school_id = ? AND s.deleted_at IS NULL
         ORDER BY s.full_name
     ");
-    $stmt->execute([$filter_date, $filter_class]);
+    $stmt->execute([$filter_date, $filter_class, $school_id]);
     $students = $stmt->fetchAll();
 }
 

@@ -75,7 +75,9 @@ function nav_item($url, $icon, $label, $isActive, $badge = '') {
                 <div class="space-y-1">
                     <?= nav_item("$base_url/admin/reports.php", "fa-solid fa-file-invoice", "Rekap Laporan", is_nav_active('admin', 'reports.php')) ?>
                     <?= nav_item("$base_url/admin/rules.php", "fa-solid fa-clock-rotate-left", "Aturan Absensi", is_nav_active('admin', 'rules.php')) ?>
+                    <?= nav_item("$base_url/admin/kiosk.php", "fa-solid fa-qrcode", "Kiosk Scanner", is_nav_active('admin', 'kiosk.php')) ?>
                     <?= nav_item("$base_url/admin/settings.php", "fa-solid fa-sliders", "Pengaturan Sekolah", is_nav_active('admin', 'settings.php')) ?>
+                    <?= nav_item("$base_url/admin/consents.php", "fa-solid fa-file-shield", "Legal & Persetujuan", is_nav_active('admin', 'consents.php')) ?>
                 </div>
             </div>
 

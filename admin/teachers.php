@@ -6,6 +6,7 @@ require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['admin']);
 $base_url = get_base_url();
+$school_id = auth_school_id();
 
 $error = '';
 $search = trim($_GET['search'] ?? '');
@@ -28,19 +29,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($teacher_id) {
                 // UPDATE
-                $stmt = $pdo->prepare("SELECT user_id FROM teachers WHERE id = ?");
-                $stmt->execute([$teacher_id]);
+                $stmt = $pdo->prepare("SELECT user_id FROM teachers WHERE id = ? AND school_id = ?");
+                $stmt->execute([$teacher_id, $school_id]);
                 $user_id = $stmt->fetchColumn();
 
-                $updUser = $pdo->prepare("UPDATE users SET full_name = ?, identifier = ?, phone = ?, email = ?, updated_at = NOW() WHERE id = ?");
-                $updUser->execute([$full_name, $nip, $phone, $email, $user_id]);
+                if (!$user_id) {
+                    throw new Exception('Guru tidak ditemukan pada sekolah ini.');
+                }
+
+                $updUser = $pdo->prepare("UPDATE users SET full_name = ?, identifier = ?, phone = ?, email = ?, updated_at = NOW() WHERE id = ? AND school_id = ?");
+                $updUser->execute([$full_name, $nip, $phone, $email, $user_id, $school_id]);
 
                 $updTeacher = $pdo->prepare("
                     UPDATE teachers 
                     SET full_name = ?, nip = ?, gender = ?, subject_specialty = ?, updated_at = NOW() 
-                    WHERE id = ?
+                    WHERE id = ? AND school_id = ?
                 ");
-                $updTeacher->execute([$full_name, $nip, $gender, $subject, $teacher_id]);
+                $updTeacher->execute([$full_name, $nip, $gender, $subject, $teacher_id, $school_id]);
 
                 $pdo->commit();
                 log_audit('UPDATE_TEACHER', 'teachers', $teacher_id, "Updated teacher $full_name");
@@ -49,17 +54,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // INSERT
                 $default_pass = password_hash('hadir123', PASSWORD_BCRYPT);
                 $insUser = $pdo->prepare("
-                    INSERT INTO users (role_id, identifier, full_name, password_hash, email, phone, status, created_at, updated_at) 
-                    VALUES (2, ?, ?, ?, ?, ?, 'active', NOW(), NOW())
+                    INSERT INTO users (school_id, role_id, identifier, full_name, password_hash, email, phone, status, created_at, updated_at) 
+                    VALUES (?, 2, ?, ?, ?, ?, ?, 'active', NOW(), NOW())
                 ");
-                $insUser->execute([$nip, $full_name, $default_pass, $email, $phone]);
+                $insUser->execute([$school_id, $nip, $full_name, $default_pass, $email, $phone]);
                 $user_id = $pdo->lastInsertId();
 
                 $insTeacher = $pdo->prepare("
-                    INSERT INTO teachers (user_id, full_name, nip, gender, subject_specialty, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+                    INSERT INTO teachers (school_id, user_id, full_name, nip, gender, subject_specialty, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
                 ");
-                $insTeacher->execute([$user_id, $full_name, $nip, $gender, $subject]);
+                $insTeacher->execute([$school_id, $user_id, $full_name, $nip, $gender, $subject]);
 
                 $pdo->commit();
                 log_audit('CREATE_TEACHER', 'teachers', $pdo->lastInsertId(), "Created teacher $full_name");
@@ -76,13 +81,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $del_id = $_POST['teacher_id'] ?? '';
         if ($del_id) {
             $pdo->beginTransaction();
-            $stmt = $pdo->prepare("SELECT user_id FROM teachers WHERE id = ?");
-            $stmt->execute([$del_id]);
+            $stmt = $pdo->prepare("SELECT user_id FROM teachers WHERE id = ? AND school_id = ?");
+            $stmt->execute([$del_id, $school_id]);
             $user_id = $stmt->fetchColumn();
 
-            $pdo->prepare("DELETE FROM teachers WHERE id = ?")->execute([$del_id]);
+            if (!$user_id) {
+                $pdo->rollBack();
+                set_flash('error', 'Guru tidak ditemukan pada sekolah ini.');
+                header("Location: teachers.php");
+                exit;
+            }
+
+            $pdo->prepare("DELETE FROM teachers WHERE id = ? AND school_id = ?")->execute([$del_id, $school_id]);
             if ($user_id) {
-                $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$user_id]);
+                $pdo->prepare("DELETE FROM users WHERE id = ? AND school_id = ?")->execute([$user_id, $school_id]);
             }
             $pdo->commit();
             log_audit('DELETE_TEACHER', 'teachers', $del_id, "Deleted teacher");
@@ -98,9 +110,9 @@ $sql = "
     SELECT t.*, u.phone, u.email, u.last_login_at
     FROM teachers t
     JOIN users u ON t.user_id = u.id
-    WHERE t.deleted_at IS NULL
+    WHERE t.deleted_at IS NULL AND t.school_id = :school_id
 ";
-$params = [];
+$params = [':school_id' => $school_id];
 
 if (!empty($search)) {
     $sql .= " AND (t.full_name LIKE :s OR t.nip LIKE :s OR t.subject_specialty LIKE :s)";

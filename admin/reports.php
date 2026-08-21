@@ -7,6 +7,7 @@ require_once __DIR__ . '/../config/helpers.php';
 require_auth(['admin']);
 $current_user = auth_user();
 $base_url = get_base_url();
+$school_id = auth_school_id();
 
 $start_date = $_GET['start_date'] ?? date('Y-m-01');
 $end_date = $_GET['end_date'] ?? date('Y-m-d');
@@ -27,9 +28,9 @@ if ($format === 'csv') {
         JOIN users u ON a.user_id = u.id
         JOIN roles r ON u.role_id = r.id
         LEFT JOIN classes c ON a.class_id = c.id
-        WHERE a.date BETWEEN :start AND :end
+        WHERE a.date BETWEEN :start AND :end AND a.school_id = :school_id
     ";
-    $params = [':start' => $start_date, ':end' => $end_date];
+    $params = [':start' => $start_date, ':end' => $end_date, ':school_id' => $school_id];
     if (!empty($filter_class)) {
         $sql .= " AND a.class_id = :class_id";
         $params[':class_id'] = $filter_class;
@@ -62,7 +63,9 @@ if ($format === 'csv') {
 }
 
 // Fetch Classes
-$classes = $pdo->query("SELECT * FROM classes ORDER BY grade, class_name")->fetchAll();
+$classesStmt = $pdo->prepare("SELECT * FROM classes WHERE school_id = ? ORDER BY grade, class_name");
+$classesStmt->execute([$school_id]);
+$classes = $classesStmt->fetchAll();
 
 // Main Query for Page View
 $sql = "
@@ -71,9 +74,9 @@ $sql = "
     JOIN users u ON a.user_id = u.id
     JOIN roles r ON u.role_id = r.id
     LEFT JOIN classes c ON a.class_id = c.id
-    WHERE a.date BETWEEN :start AND :end
+    WHERE a.date BETWEEN :start AND :end AND a.school_id = :school_id
 ";
-$params = [':start' => $start_date, ':end' => $end_date];
+$params = [':start' => $start_date, ':end' => $end_date, ':school_id' => $school_id];
 if (!empty($filter_class)) {
     $sql .= " AND a.class_id = :class_id";
     $params[':class_id'] = $filter_class;
