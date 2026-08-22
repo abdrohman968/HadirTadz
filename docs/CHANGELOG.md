@@ -5,6 +5,80 @@ Baru ditambahkan di paling atas. Tanggal mengikuti kalender WIB.
 
 ---
 
+## [2026-08-22] P3.1C Phase 3 — Design System Rollout: admin/teachers.php + ds_icon_button
+
+- **Status:** SELESAI — php -l 45 files 0 errors, 139/139 E2E PASS.
+- **Scope:** Controlled rollout to admin teachers page (Phase 3 of 10).
+- **New component:** `ds_icon_button()` added to `design_system.php` — justified by 6+ instances across admin modules (students, teachers, attendance, classes, rules, users) with identical pattern (p-1.5 rounded-lg + FA icon + variant colors).
+- **Components migrated in teachers.php:**
+  - "Tambah Guru" button → `ds_button('primary')`
+  - Error alert → `ds_alert('danger')`
+  - Search input → `ds_input()` with icon prefix
+  - "Cari" button → `ds_button('secondary')`
+  - Subject badge → `ds_badge('success')`
+  - Gender badge → `ds_badge('info'|'danger')`
+  - Edit icon button → `ds_icon_button('primary')` with aria-label
+  - Delete icon button → `ds_icon_button('danger')` with aria-label
+  - Add/Edit modal → `ds_modal_start/end` + `ds_modal_js()`
+  - Modal form inputs → `ds_input()` × 5, `ds_select()` × 1
+  - Modal cancel/save buttons → `ds_button('ghost'|'primary')`
+- **Components intentionally NOT migrated:**
+  - Search bar wrapper — custom card layout
+  - Table card — custom header layout
+- **Business logic changed:** 0
+- **SQL changed:** 0
+- **Tests:** php -l 45 files 0 errors; E2E 139/139 PASS.
+
+---
+
+## [2026-08-22] P3.1C Phase 2 — Design System Rollout: admin/students.php
+
+- **Status:** SELESAI — php -l 45 files 0 errors, 139/139 E2E PASS.
+- **Scope:** Controlled rollout to admin students page (Phase 2 of 10).
+- **Components migrated:**
+  - "Tambah Siswa" button → `ds_button('primary')`
+  - Error alert → `ds_alert($error, 'danger')`
+  - Filter class select → `ds_select()`
+  - Search input → `ds_input()`
+  - "Terapkan" button → `ds_button('secondary')`
+  - Gender badge → `ds_badge('info'|'danger')`
+  - Add/Edit modal → `ds_modal_start/end` + `ds_modal_js()`
+  - Modal form inputs → `ds_input()`, `ds_select()`
+  - Modal cancel/save buttons → `ds_button('ghost'|'primary')`
+- **Components intentionally NOT migrated:**
+  - "Cetak Kartu Pelajar" link — `<a>` navigation, not `<button>`
+  - Reset link — `<a>` navigation
+  - Edit/delete icon buttons — too small for ds_button (candidate: `ds_icon_button`)
+  - Filter card — custom form layout
+  - Table card — custom header layout
+- **Business logic changed:** 0
+- **SQL changed:** 0
+- **New file:** `docs/DESIGN_SYSTEM_CANDIDATES.md` — documents 5 UI patterns not yet in DS
+- **Tests:** php -l 45 files 0 errors; E2E 139/139 PASS.
+
+---
+
+## [2026-08-22] P3.1C Phase 1 — Design System Rollout: admin/index.php
+
+- **Status:** SELESAI — php -l 45 files 0 errors, 139/139 E2E PASS.
+- **Scope:** Controlled rollout to admin dashboard (Phase 1 of 10).
+- **Component migrated:** Permission type badge → `ds_badge(strtoupper($p['type']), 'info')`.
+- **Components NOT migrated (by design):**
+  - Kiosk Scanner / Input Manual / Review links — these are `<a>` navigation elements, not `<button>`. `ds_button()` renders `<button>` tags. Converting `<a>` to `<button>` changes semantics (navigation vs action).
+  - Stat cards — custom layout with icon-in-body structure; `ds_card_start/end` adds bordered header section. Forcing would break visual design.
+  - Chart cards — internal header layout differs from `ds_card_start`.
+  - Feed/pending cards — have link-based headers ("Lihat Semua", "Kelola") that `ds_card_start` doesn't support.
+  - Empty states — no `ds_empty_state` component exists.
+  - Welcome banner — unique gradient design, no matching ds_* component.
+- **Business logic changed:** 0
+- **SQL changed:** 0
+- **Accessibility:** heading hierarchy h1→h2→h4 verified, all links have text labels, focus states present.
+- **Responsive:** grid layout (2→4 cols for stat cards, 12-col grid for charts/feed) tested at all breakpoints.
+- **Tests:** php -l 45 files 0 errors; E2E 139/139 PASS.
+- **Docs updated:** `docs/DESIGN_SYSTEM.md`, `docs/IMPLEMENTATION_ROADMAP.md`.
+
+---
+
 ## [2026-08-21] P2.4 — Terms, Privacy & Legal Consent
 
 - **Status:** SELESAI — php -l 44 files 0 errors, 139/139 E2E PASS.

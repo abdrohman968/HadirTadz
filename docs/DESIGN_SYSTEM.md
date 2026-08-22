@@ -101,6 +101,39 @@ ds_button($label, $variant = 'primary', $type = 'button', $attributes = [])
 
 ---
 
+### 4.1b Icon Buttons (Tables)
+
+```php
+ds_icon_button($icon, $variant = 'neutral', $type = 'button', $attributes = [])
+```
+
+**Variants:** `neutral`, `primary`, `danger`, `success`
+
+**Special attributes:**
+- `aria-label` — REQUIRED for accessibility
+- `title` — tooltip for hover
+- `disabled` — adds disabled attribute + opacity
+- `class` — appended to base classes
+
+**Example:**
+```php
+// Edit icon (primary)
+<?= ds_icon_button('fa-solid fa-pen', 'primary', 'button', [
+    'aria-label' => 'Edit',
+    'onclick' => "editStudent(json_encode($row))"
+]) ?>
+
+// Delete icon (danger)
+<?= ds_icon_button('fa-solid fa-trash', 'danger', 'submit', [
+    'aria-label' => 'Hapus',
+    'onclick' => "return confirm('Hapus siswa ini?')"
+]) ?>
+```
+
+**Use case:** Table row actions (edit, delete, view, etc.) — too small for `ds_button`.
+
+---
+
 ### 4.2 Inputs
 
 ```php
@@ -370,3 +403,23 @@ Canonical green palette used in: `login.php`, `register_school.php`, `terms.php`
 - `$type` in `ds_button()` is escaped to prevent type attribute injection.
 - Modal IDs are escaped to prevent attribute injection.
 - No new JS frameworks introduced — vanilla JS only.
+
+---
+
+## 11. Rollout Status
+
+| Phase | File | Components Migrated | Date |
+|-------|------|---------------------|------|
+| P3.1B | includes/design_system.php | All 10 functions hardened | 22 Aug 2026 |
+| P3.1C-1 | admin/index.php | ds_badge (permission type) | 22 Aug 2026 |
+| P3.1C-2 | admin/students.php | ds_button, ds_alert, ds_select, ds_input, ds_badge, ds_modal, ds_modal_js | 22 Aug 2026 |
+| P3.1C-3 | admin/teachers.php | ds_button, ds_alert, ds_input, ds_select, ds_badge, ds_icon_button, ds_modal, ds_modal_js | 22 Aug 2026 |
+| P3.1C-4 | admin/classes.php | — | PENDING |
+| P3.1C-5 | admin/attendance.php | — | PENDING |
+| P3.1C-6 | admin/rules.php | — | PENDING |
+| P3.1C-7 | admin/permissions.php | — | PENDING |
+| P3.1C-8 | admin/reports.php | — | PENDING |
+| P3.1C-9 | admin/cards.php | — | PENDING |
+| P3.1C-10 | admin/kiosk.php | — | PENDING |
+
+**Note:** Many admin pages use `<a>` navigation links styled as buttons, not `<button>` elements. `ds_button()` renders `<button>` tags. These links are intentionally NOT migrated to preserve navigation semantics. Card layouts with custom internal structures (stat cards, chart cards, feed cards) are also kept as-is when `ds_card_start/end` would break the visual design.

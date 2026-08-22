@@ -1,6 +1,6 @@
 <?php
 /**
- * HADIRTADZ DESIGN SYSTEM HELPERS (v.1.1-hardened)
+ * HADIRTADZ DESIGN SYSTEM HELPERS (v1.2.0 — Phase 3: ds_icon_button)
  * Centralized UI components to ensure consistency across Admin, Guru, Siswa, and Auth.
  *
  * ESCAPING RULES:
@@ -75,6 +75,67 @@ function ds_button($label, $variant = 'primary', $type = 'button', $attributes =
     }
 
     return '<button type="' . $type_escaped . '" class="' . $base_classes . ' ' . $class . '"' . $attr_str . '>' . $label . '</button>';
+}
+}
+
+if (!function_exists('ds_icon_button')) {
+/**
+ * Render a small icon-only button (for table row actions, card actions).
+ *
+ * @param string $icon FontAwesome icon class (e.g. 'fa-solid fa-pen-to-square') or HTML
+ * @param string $variant neutral|primary|danger|success
+ * @param string $type button|submit|reset
+ * @param array $attributes Extra HTML attributes. Special keys:
+ *   - 'class': appended to base classes
+ *   - 'title': tooltip text (also used as accessible name fallback)
+ *   - 'aria_label': explicit accessible name (overrides title)
+ *   - 'onclick': JavaScript onclick handler
+ *   - 'disabled': boolean
+ * @return string HTML button element
+ */
+function ds_icon_button($icon, $variant = 'neutral', $type = 'button', $attributes = []) {
+    $base_classes = "p-1.5 rounded-lg text-xs transition inline-flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-1";
+
+    $variants = [
+        'neutral' => "bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 focus:ring-slate-400",
+        'primary' => "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 focus:ring-emerald-500",
+        'danger'  => "bg-rose-50 text-rose-600 hover:bg-rose-100 focus:ring-rose-500",
+        'success' => "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 focus:ring-emerald-500",
+    ];
+
+    $class = $variants[$variant] ?? $variants['neutral'];
+
+    $is_disabled = !empty($attributes['disabled']);
+    unset($attributes['disabled']);
+
+    if ($is_disabled) {
+        $class .= " opacity-50 cursor-not-allowed pointer-events-none";
+    }
+
+    $title = $attributes['title'] ?? '';
+    $aria_label = $attributes['aria_label'] ?? $title;
+    unset($attributes['title'], $attributes['aria_label']);
+
+    if (isset($attributes['class'])) {
+        $class .= " " . $attributes['class'];
+        unset($attributes['class']);
+    }
+
+    $attr_str = "";
+    foreach ($attributes as $k => $v) {
+        $attr_str .= ' ' . htmlspecialchars($k) . '="' . htmlspecialchars($v) . '"';
+    }
+
+    if ($is_disabled) {
+        $attr_str .= ' disabled';
+    }
+
+    $aria_attr = $aria_label ? ' aria-label="' . htmlspecialchars($aria_label) . '"' : '';
+    $title_attr = $title ? ' title="' . htmlspecialchars($title) . '"' : '';
+
+    $icon_html = strpos($icon, '<') === 0 ? $icon : '<i class="' . htmlspecialchars($icon) . '"></i>';
+
+    return '<button type="' . htmlspecialchars($type) . '" class="' . $base_classes . ' ' . $class . '"' . $attr_str . $aria_attr . $title_attr . '>' . $icon_html . '</button>';
 }
 }
 

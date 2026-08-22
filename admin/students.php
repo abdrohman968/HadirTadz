@@ -152,10 +152,7 @@ include __DIR__ . '/../includes/sidebar.php';
                 <p class="text-xs sm:text-sm text-slate-500">Kelola informasi peserta didik, NISN, dan generate kartu pelajar digital.</p>
             </div>
             <div class="flex items-center gap-2.5">
-                <button onclick="openStudentModal()" class="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition flex items-center gap-2">
-                    <i class="fa-solid fa-user-plus"></i>
-                    <span>Tambah Siswa</span>
-                </button>
+                <?= ds_button('<i class="fa-solid fa-user-plus"></i> <span>Tambah Siswa</span>', 'primary', 'button', ['onclick' => 'openStudentModal()']) ?>
                 <a href="<?= $base_url ?>/admin/cards.php" class="px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold text-xs transition flex items-center gap-2">
                     <i class="fa-solid fa-id-card text-emerald-600"></i>
                     <span>Cetak Kartu Pelajar</span>
@@ -164,35 +161,22 @@ include __DIR__ . '/../includes/sidebar.php';
         </div>
 
         <?php if (!empty($error)): ?>
-            <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
-                <?= htmlspecialchars($error) ?>
-            </div>
+            <?= ds_alert($error, 'danger') ?>
         <?php endif; ?>
 
         <!-- Filter & Search Bar -->
         <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
             <form method="GET" action="" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter Kelas</label>
-                    <select name="class_id" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        <option value="">-- Semua Kelas --</option>
-                        <?php foreach ($classes as $c): ?>
-                            <option value="<?= $c['id'] ?>" <?= ($filter_class == $c['id']) ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($c['class_name']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                    <?= ds_select('class_id', ['' => '-- Semua Kelas --'] + array_column($classes, 'class_name', 'id'), $filter_class, 'Filter Kelas') ?>
                 </div>
 
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Cari Nama / NISN</label>
-                    <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Ketik nama atau NISN..." class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <?= ds_input('search', 'Cari Nama / NISN', 'text', $search, ['placeholder' => 'Ketik nama atau NISN...']) ?>
                 </div>
 
                 <div class="flex gap-2">
-                    <button type="submit" class="flex-1 py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs transition">
-                        Terapkan
-                    </button>
+                    <?= ds_button('Terapkan', 'secondary', 'submit', ['class' => 'flex-1']) ?>
                     <a href="students.php" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs transition" title="Reset">
                         <i class="fa-solid fa-rotate-left"></i>
                     </a>
@@ -250,9 +234,7 @@ include __DIR__ . '/../includes/sidebar.php';
                                         <span class="block text-[10px] text-slate-400"><?= htmlspecialchars($s['major'] ?? '') ?></span>
                                     </td>
                                     <td class="py-3 px-4" data-label="Gender">
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold <?= ($s['gender'] === 'L') ? 'bg-blue-100 text-blue-800' : 'bg-pink-100 text-pink-800' ?>">
-                                            <?= ($s['gender'] === 'L') ? 'Laki-laki' : 'Perempuan' ?>
-                                        </span>
+                                        <?= ds_badge(($s['gender'] === 'L') ? 'Laki-laki' : 'Perempuan', ($s['gender'] === 'L') ? 'info' : 'danger') ?>
                                     </td>
                                     <td class="py-3 px-4 text-slate-700" data-label="Orang Tua / Wali">
                                         <?= htmlspecialchars($s['parent_name'] ?: '-') ?>
@@ -286,72 +268,39 @@ include __DIR__ . '/../includes/sidebar.php';
 </main>
 
 <!-- Modal Add / Edit Student -->
-<div id="modal-student" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-            <h3 id="modal-student-title" class="text-base font-bold text-slate-800">Tambah Siswa Baru</h3>
-            <button onclick="closeModal('modal-student')" class="text-slate-400 hover:text-slate-600 text-sm">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
+<?= ds_modal_start('modal-student', 'Tambah Siswa Baru', 'lg') ?>
 
         <form method="POST" action="" class="space-y-4">
             <input type="hidden" name="action" value="save_student">
             <input type="hidden" id="form-student-id" name="student_id" value="">
 
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nama Lengkap Siswa</label>
-                <input type="text" name="full_name" id="form-full-name" required placeholder="Contoh: Ahmad Maulana" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-            </div>
+            <?= ds_input('full_name', 'Nama Lengkap Siswa', 'text', '', ['id' => 'form-full-name', 'required' => true, 'placeholder' => 'Contoh: Ahmad Maulana']) ?>
 
             <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">NISN / ID Siswa</label>
-                    <input type="text" name="nisn" id="form-nisn" required placeholder="Contoh: 12009105" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Jenis Kelamin</label>
-                    <select name="gender" id="form-gender" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        <option value="L">Laki-laki</option>
-                        <option value="P">Perempuan</option>
-                    </select>
-                </div>
+                <?= ds_input('nisn', 'NISN / ID Siswa', 'text', '', ['id' => 'form-nisn', 'required' => true, 'placeholder' => 'Contoh: 12009105', 'class' => 'font-mono']) ?>
+                <?= ds_select('gender', ['L' => 'Laki-laki', 'P' => 'Perempuan'], 'L', 'Jenis Kelamin', ['id' => 'form-gender']) ?>
             </div>
 
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Kelas</label>
-                <select name="class_id" id="form-class-id" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    <option value="">-- Pilih Kelas --</option>
-                    <?php foreach ($classes as $c): ?>
-                        <option value="<?= $c['id'] ?>">
-                            <?= htmlspecialchars($c['class_name']) ?> (<?= htmlspecialchars($c['major']) ?>)
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+            <?php
+            $class_options = ['' => '-- Pilih Kelas --'];
+            foreach ($classes as $c) {
+                $class_options[$c['id']] = htmlspecialchars($c['class_name']) . ' (' . htmlspecialchars($c['major']) . ')';
+            }
+            ?>
+            <?= ds_select('class_id', $class_options, '', 'Kelas', ['id' => 'form-class-id', 'required' => true]) ?>
 
             <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nama Orang Tua / Wali</label>
-                    <input type="text" name="parent_name" id="form-parent-name" placeholder="Nama ayah/ibu" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">No. WhatsApp Orang Tua</label>
-                    <input type="text" name="parent_phone" id="form-parent-phone" placeholder="08xxxxxxxx" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono">
-                </div>
+                <?= ds_input('parent_name', 'Nama Orang Tua / Wali', 'text', '', ['id' => 'form-parent-name', 'placeholder' => 'Nama ayah/ibu']) ?>
+                <?= ds_input('parent_phone', 'No. WhatsApp Orang Tua', 'text', '', ['id' => 'form-parent-phone', 'placeholder' => '08xxxxxxxx', 'class' => 'font-mono']) ?>
             </div>
 
             <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
-                <button type="button" onclick="closeModal('modal-student')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs">
-                    Batal
-                </button>
-                <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm">
-                    Simpan Data Siswa
-                </button>
+                <?= ds_button('Batal', 'ghost', 'button', ['onclick' => "closeModal('modal-student')"]) ?>
+                <?= ds_button('Simpan Data Siswa', 'primary', 'submit') ?>
             </div>
         </form>
-    </div>
-</div>
+
+<?= ds_modal_end() ?>
 
 <script>
     function openStudentModal() {
@@ -360,8 +309,7 @@ include __DIR__ . '/../includes/sidebar.php';
         document.getElementById('form-nisn').value = '';
         document.getElementById('form-parent-name').value = '';
         document.getElementById('form-parent-phone').value = '';
-        document.getElementById('modal-student-title').textContent = 'Tambah Siswa Baru';
-        document.getElementById('modal-student').classList.remove('hidden');
+        openModal('modal-student');
     }
 
     function editStudent(data) {
@@ -372,13 +320,10 @@ include __DIR__ . '/../includes/sidebar.php';
         document.getElementById('form-class-id').value = data.class_id || '';
         document.getElementById('form-parent-name').value = data.parent_name || '';
         document.getElementById('form-parent-phone').value = data.parent_phone || '';
-        document.getElementById('modal-student-title').textContent = `Edit Siswa: ${data.full_name}`;
-        document.getElementById('modal-student').classList.remove('hidden');
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).classList.add('hidden');
+        openModal('modal-student');
     }
 </script>
+
+<?= ds_modal_js() ?>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>

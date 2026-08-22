@@ -277,7 +277,7 @@ include __DIR__ . '/../includes/sidebar.php';
                                 <div>
                                     <div class="flex items-center gap-2">
                                         <span class="text-xs font-bold text-slate-800"><?= htmlspecialchars($p['full_name']) ?></span>
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-100 text-blue-800"><?= htmlspecialchars($p['type']) ?></span>
+                                         <?= ds_badge(strtoupper($p['type']), 'info') ?>
                                     </div>
                                     <p class="text-[11px] text-slate-500 mt-0.5 line-clamp-1"><?= htmlspecialchars($p['reason']) ?></p>
                                     <p class="text-[10px] text-slate-400 mt-1"><?= format_date_indo($p['start_date'], false) ?> s/d <?= format_date_indo($p['end_date'], false) ?></p>

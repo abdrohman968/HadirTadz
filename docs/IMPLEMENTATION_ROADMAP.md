@@ -249,6 +249,63 @@ Dokumentasi lengkap: `docs/SCHOOL_SIGNUP.md`.
 
 ---
 
+## FASE 3 — P3 Design System Hardening & Rollout
+
+### P3.1A — Design System Audit (✅ Selesai — 22 Agustus 2026)
+- 10 functions audited: naming, parameters, escaping, return values, HTML validity.
+- No function name collisions detected across 45 PHP files.
+- `status_badge()` in helpers.php — domain-specific, no conflict with `ds_badge()`.
+
+### P3.1B — Design System Hardening (✅ Selesai — 22 Agustus 2026)
+- `function_exists()` guards on all 11 functions (10 + ds_modal_js).
+- ds_button: `disabled`, `loading` states with aria-busy + spinner.
+- ds_input: `error`, `help_text`, `aria-describedby`, `aria-invalid`.
+- ds_textarea: `maxlength` passthrough, `error`, `help_text`.
+- ds_select: strict comparison, `placeholder`, `error`, `help_text`.
+- ds_alert: `dismissible`, `aria-live="polite"`.
+- ds_modal: keyboard Escape, focus trap, `aria-modal`, `aria-label`, `role="dialog"`.
+- ds_modal_js: new controller for modal behavior.
+- Brand palette consolidated: 4 conflicting brand palettes → canonical green.
+- PHP lint: 45/45 pass.
+
+### P3.1C Phase 1 — Design System Rollout: admin/index.php (✅ Selesai — 22 Agustus 2026)
+- Permission type badge migrated to `ds_badge('info')`.
+- `<a>` navigation links kept as-is (ds_button renders `<button>`, not `<a>`).
+- Stat/chart/feed cards kept as-is (custom layouts don't match ds_card_start).
+- Business logic: 0 changes. SQL: 0 changes.
+- E2E: 139/139 PASS.
+
+### P3.1C Phase 2 — Design System Rollout: admin/students.php (✅ Selesai — 22 Agustus 2026)
+- Migrated: button (Tambah Siswa), alert (error), filter select, search input, apply button, gender badge, add/edit modal (ds_modal + ds_modal_js), modal form inputs (ds_input, ds_select), modal buttons.
+- Kept as-is: "Cetak Kartu" link (`<a>`), reset link (`<a>`), edit/delete icon buttons (too small for ds_button), filter card (custom form layout), table card (custom header).
+- New: `docs/DESIGN_SYSTEM_CANDIDATES.md` — 5 UI patterns found but not yet in DS (stat card, filter bar, table card header, icon action button, table responsive).
+- Business logic: 0 changes. SQL: 0 changes.
+- E2E: 139/139 PASS.
+
+### P3.1C Phase 3 — Design System Rollout: admin/teachers.php + ds_icon_button (✅ Selesai — 22 Agustus 2026)
+- **New component:** `ds_icon_button()` created — justified by 6+ identical patterns across admin modules.
+- Migrated: button (Tambah Guru), alert (error), search input, search button, subject badge, gender badge, edit/delete icon buttons (ds_icon_button with aria-label), add/edit modal, modal form inputs, modal buttons.
+- Kept as-is: search bar wrapper (custom card layout), table card (custom header).
+- Business logic: 0 changes. SQL: 0 changes.
+- E2E: 139/139 PASS.
+
+**Rollout progress:**
+
+| Phase | File | Status |
+|-------|------|--------|
+| 1 | admin/index.php | ✅ DONE |
+| 2 | admin/students.php | ✅ DONE |
+| 3 | admin/teachers.php | ✅ DONE |
+| 4 | admin/classes.php | PENDING |
+| 5 | admin/attendance.php | PENDING |
+| 6 | admin/rules.php | PENDING |
+| 7 | admin/permissions.php | PENDING |
+| 8 | admin/reports.php | PENDING |
+| 9 | admin/cards.php | PENDING |
+| 10 | admin/kiosk.php | PENDING |
+
+---
+
 ## Risiko Tersisa (setelah FASE 1 + P0.2 + P0.3 + P0.4)
 
 1. ~~Kiosk belum punya pemilih sekolah aktif~~ → **SELESAI (P0.3)** dengan

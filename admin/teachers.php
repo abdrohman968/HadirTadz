@@ -137,16 +137,11 @@ include __DIR__ . '/../includes/sidebar.php';
                 <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Data Guru Pengajar</h1>
                 <p class="text-xs sm:text-sm text-slate-500">Kelola tenaga pendidik, NIP, mata pelajaran, dan kontak.</p>
             </div>
-            <button onclick="openTeacherModal()" class="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition flex items-center gap-2">
-                <i class="fa-solid fa-chalkboard-user"></i>
-                <span>Tambah Guru</span>
-            </button>
+            <?= ds_button('<i class="fa-solid fa-chalkboard-user"></i> <span>Tambah Guru</span>', 'primary', 'button', ['onclick' => 'openTeacherModal()']) ?>
         </div>
 
         <?php if (!empty($error)): ?>
-            <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
-                <?= htmlspecialchars($error) ?>
-            </div>
+            <?= ds_alert($error, 'danger') ?>
         <?php endif; ?>
 
         <!-- Search Bar -->
@@ -156,11 +151,9 @@ include __DIR__ . '/../includes/sidebar.php';
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                         <i class="fa-solid fa-magnifying-glass text-xs"></i>
                     </div>
-                    <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Cari nama guru, NIP, atau mata pelajaran..." class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <?= ds_input('search', '', 'text', $search, ['placeholder' => 'Cari nama guru, NIP, atau mata pelajaran...', 'class' => 'pl-9']) ?>
                 </div>
-                <button type="submit" class="py-2.5 px-5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs transition">
-                    Cari
-                </button>
+                <?= ds_button('Cari', 'secondary', 'submit', ['class' => 'py-2.5 px-5']) ?>
             </form>
         </div>
 
@@ -207,14 +200,10 @@ include __DIR__ . '/../includes/sidebar.php';
                                         </div>
                                     </td>
                                     <td class="py-3 px-4" data-label="Mata Pelajaran">
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <?= htmlspecialchars($t['subject_specialty'] ?: 'Umum') ?>
-                                        </span>
+                                        <?= ds_badge(htmlspecialchars($t['subject_specialty'] ?: 'Umum'), 'success') ?>
                                     </td>
                                     <td class="py-3 px-4" data-label="Gender">
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold <?= ($t['gender'] === 'L') ? 'bg-blue-100 text-blue-800' : 'bg-pink-100 text-pink-800' ?>">
-                                            <?= ($t['gender'] === 'L') ? 'Laki-laki' : 'Perempuan' ?>
-                                        </span>
+                                        <?= ds_badge(($t['gender'] === 'L') ? 'Laki-laki' : 'Perempuan', ($t['gender'] === 'L') ? 'info' : 'danger') ?>
                                     </td>
                                     <td class="py-3 px-4 text-slate-600" data-label="Email">
                                         <?= htmlspecialchars($t['email'] ?: '-') ?>
@@ -227,15 +216,11 @@ include __DIR__ . '/../includes/sidebar.php';
                                     </td>
                                     <td class="py-3 px-4 text-center" data-label="Aksi">
                                         <div class="flex items-center justify-center gap-1.5">
-                                            <button type="button" onclick="editTeacher(<?= htmlspecialchars(json_encode($t)) ?>)" class="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition" title="Edit">
-                                                <i class="fa-solid fa-pen-to-square text-xs"></i>
-                                            </button>
+                                            <?= ds_icon_button('fa-solid fa-pen-to-square', 'primary', 'button', ['onclick' => 'editTeacher(' . htmlspecialchars(json_encode($t)) . ')', 'title' => 'Edit', 'aria_label' => 'Edit ' . htmlspecialchars($t['full_name'])]) ?>
                                             <form method="POST" action="" onsubmit="return confirm('Hapus data guru ini?');" class="inline">
                                                 <input type="hidden" name="action" value="delete_teacher">
                                                 <input type="hidden" name="teacher_id" value="<?= $t['id'] ?>">
-                                                <button type="submit" class="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition" title="Hapus">
-                                                    <i class="fa-solid fa-trash text-xs"></i>
-                                                </button>
+                                                <?= ds_icon_button('fa-solid fa-trash', 'danger', 'submit', ['title' => 'Hapus', 'aria_label' => 'Hapus ' . htmlspecialchars($t['full_name'])]) ?>
                                             </form>
                                         </div>
                                     </td>
@@ -251,65 +236,33 @@ include __DIR__ . '/../includes/sidebar.php';
 </main>
 
 <!-- Modal Add / Edit Teacher -->
-<div id="modal-teacher" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-            <h3 id="modal-teacher-title" class="text-base font-bold text-slate-800">Tambah Guru Pengajar</h3>
-            <button onclick="closeModal('modal-teacher')" class="text-slate-400 hover:text-slate-600 text-sm">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
+<?= ds_modal_start('modal-teacher', 'Tambah Guru Pengajar', 'lg') ?>
 
         <form method="POST" action="" class="space-y-4">
             <input type="hidden" name="action" value="save_teacher">
             <input type="hidden" id="form-teacher-id" name="teacher_id" value="">
 
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nama Lengkap & Gelar</label>
-                <input type="text" name="full_name" id="form-teacher-name" required placeholder="Contoh: Budi Santoso, S.Kom" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-            </div>
+            <?= ds_input('full_name', 'Nama Lengkap & Gelar', 'text', '', ['id' => 'form-teacher-name', 'required' => true, 'placeholder' => 'Contoh: Budi Santoso, S.Kom']) ?>
 
             <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">NIP / ID Guru</label>
-                    <input type="text" name="nip" id="form-teacher-nip" required placeholder="19850315..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Jenis Kelamin</label>
-                    <select name="gender" id="form-teacher-gender" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        <option value="L">Laki-laki</option>
-                        <option value="P">Perempuan</option>
-                    </select>
-                </div>
+                <?= ds_input('nip', 'NIP / ID Guru', 'text', '', ['id' => 'form-teacher-nip', 'required' => true, 'placeholder' => '19850315...', 'class' => 'font-mono']) ?>
+                <?= ds_select('gender', ['L' => 'Laki-laki', 'P' => 'Perempuan'], 'L', 'Jenis Kelamin', ['id' => 'form-teacher-gender']) ?>
             </div>
 
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Mata Pelajaran yang Diampu</label>
-                <input type="text" name="subject_specialty" id="form-teacher-subject" placeholder="Contoh: Informatika / Matematika" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-            </div>
+            <?= ds_input('subject_specialty', 'Mata Pelajaran yang Diampu', 'text', '', ['id' => 'form-teacher-subject', 'placeholder' => 'Contoh: Informatika / Matematika']) ?>
 
             <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Email</label>
-                    <input type="email" name="email" id="form-teacher-email" placeholder="nama@sekolah.sch.id" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">No. HP / WhatsApp</label>
-                    <input type="text" name="phone" id="form-teacher-phone" placeholder="08xxxxxxxx" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono">
-                </div>
+                <?= ds_input('email', 'Email', 'email', '', ['id' => 'form-teacher-email', 'placeholder' => 'nama@sekolah.sch.id']) ?>
+                <?= ds_input('phone', 'No. HP / WhatsApp', 'text', '', ['id' => 'form-teacher-phone', 'placeholder' => '08xxxxxxxx', 'class' => 'font-mono']) ?>
             </div>
 
             <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
-                <button type="button" onclick="closeModal('modal-teacher')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs">
-                    Batal
-                </button>
-                <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm">
-                    Simpan Data Guru
-                </button>
+                <?= ds_button('Batal', 'ghost', 'button', ['onclick' => "closeModal('modal-teacher')"]) ?>
+                <?= ds_button('Simpan Data Guru', 'primary', 'submit') ?>
             </div>
         </form>
-    </div>
-</div>
+
+<?= ds_modal_end() ?>
 
 <script>
     function openTeacherModal() {
@@ -319,8 +272,7 @@ include __DIR__ . '/../includes/sidebar.php';
         document.getElementById('form-teacher-subject').value = '';
         document.getElementById('form-teacher-email').value = '';
         document.getElementById('form-teacher-phone').value = '';
-        document.getElementById('modal-teacher-title').textContent = 'Tambah Guru Pengajar';
-        document.getElementById('modal-teacher').classList.remove('hidden');
+        openModal('modal-teacher');
     }
 
     function editTeacher(data) {
@@ -331,13 +283,10 @@ include __DIR__ . '/../includes/sidebar.php';
         document.getElementById('form-teacher-subject').value = data.subject_specialty || '';
         document.getElementById('form-teacher-email').value = data.email || '';
         document.getElementById('form-teacher-phone').value = data.phone || '';
-        document.getElementById('modal-teacher-title').textContent = `Edit Guru: ${data.full_name}`;
-        document.getElementById('modal-teacher').classList.remove('hidden');
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).classList.add('hidden');
+        openModal('modal-teacher');
     }
 </script>
+
+<?= ds_modal_js() ?>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
