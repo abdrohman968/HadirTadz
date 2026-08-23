@@ -88,6 +88,52 @@ ds_icon_button($icon, $variant = 'neutral', $type = 'button', $attributes = [])
 
 ---
 
+## 6. Attendance Status Radio Group (Guru)
+
+**Pola:** Grup radio button untuk memilih status kehadiran (HADIR, TERLAMBAT, IZIN, SAKIT, ALPHA) dengan style `peer-checked:` Tailwind.
+
+**Contoh:** `guru/kelas.php` —5 radio buttons per siswa di tabel presensi kelas.
+
+**Kandidat function:**
+```php
+ds_status_radio_group($name, $options, $selected, $layout = 'horizontal')
+```
+
+**Prioritas:** SEDANG — digunakan di kelas.php, bisa reusable untuk any batch status selection.
+
+**Evidence:** Pattern identik di satu halaman, 5 opsi dengan warna berbeda per status.
+
+---
+
+## 7. Summary Counter Cards (Guru)
+
+**Pola:** Grid 4 kartu ringkasan (Tepat Waktu, Terlambat, Izin/Sakit, Alpha) dengan angka besar dan label.
+
+**Contoh:** `guru/riwayat.php` — summary counters. `guru/index.php` — stat cards (3 cards).
+
+**Kandidat function:**
+```php
+ds_summary_counters($counters) // $counters = [['value' => 5, 'label' => 'Tepat Waktu', 'color' => 'emerald'], ...]
+```
+
+**Prioritas:** SEDANG — digunakan di 2 halaman guru, pattern umum untuk dashboard summary.
+
+**Evidence:** Grid `grid-cols-2 sm:grid-cols-4` dengan kartu identik.
+
+---
+
+## 8. Quick Batch Action Button (Guru)
+
+**Pola:** Tombol "Semua Hadir" untuk mengatur semua radio ke status tertentu sekaligus.
+
+**Contoh:** `guru/kelas.php` — tombol batch action di header tabel.
+
+**Kandidat function:** Tidak perlu function khusus — cukup `ds_button()` dengan onclick handler.
+
+**Prioritas:** RENDAH — cukup sederhana.
+
+---
+
 ## Rekap
 
 | # | Pattern | Prioritas | Status | Halaman |
@@ -97,3 +143,6 @@ ds_icon_button($icon, $variant = 'neutral', $type = 'button', $attributes = [])
 | 3 | Table Card Header | Rendah | Candidate | students, teachers, classes |
 | 4 | Icon Action Button | Tinggi | ✅ IMPLEMENTED | students, teachers, attendance, classes, rules, users |
 | 5 | Table Responsive | Selesai | ✅ CSS exists | semua tabel |
+| 6 | Attendance Status Radio Group | Sedang | Candidate | guru/kelas.php |
+| 7 | Summary Counter Cards | Sedang | Candidate | guru/riwayat.php, guru/index.php |
+| 8 | Quick Batch Action Button | Rendah | Candidate | guru/kelas.php |

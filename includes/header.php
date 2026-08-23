@@ -5,6 +5,7 @@ require_once __DIR__ . '/../config/helpers.php';
 require_once __DIR__ . '/design_system.php';
 
 $current_user = auth_user();
+$user = $current_user; // alias for page-level convenience
 $school = current_school($current_user['school_id'] ?? null);
 $school_name = $school['name'] ?? get_setting('schoolName', 'SMA Negeri Harapan Bangsa');
 $base_url = get_base_url();
@@ -60,8 +61,10 @@ $page_title = $page_title ?? 'Absensi Digital';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?= $base_url ?>/assets/css/custom.css">
-    <!-- ApexCharts CDN -->
+    <!-- ApexCharts CDN (page-level: set $load_apexcharts = true before including header) -->
+    <?php if (!empty($load_apexcharts)): ?>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <?php endif; ?>
 </head>
 <body class="h-dvh flex flex-col overflow-hidden bg-slate-50 text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
 
@@ -133,7 +136,7 @@ $page_title = $page_title ?? 'Absensi Digital';
                                 <p class="text-xs text-slate-500 font-medium">Masuk sebagai:</p>
                                 <p class="text-sm font-bold text-slate-800 truncate"><?= htmlspecialchars($current_user['full_name']) ?></p>
                                 <p class="text-xs text-emerald-600 font-mono"><?= htmlspecialchars($current_user['identifier']) ?></p>
-                                <p class="text-[10px] text-slate-400 truncate mt-0.5"><?= htmlspecialchars($school_name) ?></p>
+                                <p class="text-[10px] text-slate-500 truncate mt-0.5"><?= htmlspecialchars($school_name) ?></p>
                             </div>
                             <a href="<?= $base_url ?>/auth/profile.php" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition">
                                 <i class="fa-solid fa-user-gear text-slate-400 w-4"></i>

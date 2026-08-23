@@ -199,7 +199,7 @@ function ds_input($name, $label = '', $type = 'text', $value = '', $attributes =
     if ($error_msg) {
         $html .= '<p id="' . htmlspecialchars($error_id) . '" class="text-xs text-rose-600 mt-1" role="alert">' . htmlspecialchars($error_msg) . '</p>';
     } elseif ($help_text) {
-        $html .= '<p id="' . htmlspecialchars($help_id) . '" class="text-xs text-slate-400 mt-1">' . htmlspecialchars($help_text) . '</p>';
+        $html .= '<p id="' . htmlspecialchars($help_id) . '" class="text-xs text-slate-500 mt-1">' . htmlspecialchars($help_text) . '</p>';
     }
 
     $html .= '</div>';
@@ -273,7 +273,7 @@ function ds_textarea($name, $label = '', $value = '', $attributes = []) {
     if ($error_msg) {
         $html .= '<p id="' . htmlspecialchars($error_id) . '" class="text-xs text-rose-600 mt-1" role="alert">' . htmlspecialchars($error_msg) . '</p>';
     } elseif ($help_text) {
-        $html .= '<p id="' . htmlspecialchars($help_id) . '" class="text-xs text-slate-400 mt-1">' . htmlspecialchars($help_text) . '</p>';
+        $html .= '<p id="' . htmlspecialchars($help_id) . '" class="text-xs text-slate-500 mt-1">' . htmlspecialchars($help_text) . '</p>';
     }
 
     $html .= '</div>';
@@ -353,7 +353,7 @@ function ds_select($name, $options = [], $selected = '', $label = '', $attribute
     if ($error_msg) {
         $html .= '<p id="' . htmlspecialchars($error_id) . '" class="text-xs text-rose-600 mt-1" role="alert">' . htmlspecialchars($error_msg) . '</p>';
     } elseif ($help_text) {
-        $html .= '<p id="' . htmlspecialchars($help_id) . '" class="text-xs text-slate-400 mt-1">' . htmlspecialchars($help_text) . '</p>';
+        $html .= '<p id="' . htmlspecialchars($help_id) . '" class="text-xs text-slate-500 mt-1">' . htmlspecialchars($help_text) . '</p>';
     }
 
     $html .= '</div>';
@@ -384,6 +384,44 @@ function ds_badge($text, $variant = 'neutral', $icon = '') {
     $icon_html = $icon ? '<i class="' . htmlspecialchars($icon) . ' mr-1"></i>' : '';
 
     return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ' . $class . '">' . $icon_html . $text . '</span>';
+}
+}
+
+if (!function_exists('ds_page_header')) {
+/**
+ * Render standard page header with title, optional subtitle, and optional action slot.
+ *
+ * @param string $title Page title (escaped)
+ * @param string $subtitle Optional subtitle/description (escaped)
+ * @param string $action_html Optional action HTML slot (trusted — supports <a>, <button>, or mixed).
+ *   Pass raw HTML; it will NOT be escaped. Caller must ensure trust.
+ * @param string $icon Optional FontAwesome icon class to display before title (escaped)
+ * @return string HTML page header block
+ */
+function ds_page_header($title, $subtitle = '', $action_html = '', $icon = '') {
+    $icon_html = '';
+    if ($icon) {
+        $icon_html = '<i class="' . htmlspecialchars($icon) . ' text-emerald-600"></i> ';
+    }
+
+    $subtitle_html = '';
+    if ($subtitle) {
+        $subtitle_html = '<p class="text-xs sm:text-sm text-slate-500">' . $subtitle . '</p>';
+    }
+
+    $action_html_block = '';
+    if ($action_html) {
+        $action_html_block = '<div class="flex items-center gap-2.5">' . $action_html . '</div>';
+    }
+
+    return '
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">' . $icon_html . $title . '</h1>
+            ' . $subtitle_html . '
+        </div>
+        ' . $action_html_block . '
+    </div>';
 }
 }
 
@@ -450,7 +488,7 @@ function ds_alert($message, $variant = 'info', $icon = '', $dismissible = false)
         'info'    => ['bg' => 'bg-blue-50', 'border' => 'border-blue-200', 'text' => 'text-blue-800', 'icon' => 'fa-circle-info'],
     ];
 
-    $v = $variants[$variant] ?? $variants['info'];
+    $v = $variants[$variant] ?? $variants[($variant === 'error') ? 'danger' : 'info'];
     $i = $icon ?: $v['icon'];
 
     $dismiss_html = '';
@@ -499,7 +537,7 @@ function ds_modal_start($id, $title, $size = 'md') {
         <div class="bg-white rounded-3xl shadow-2xl w-full ' . $size_class . ' overflow-hidden transform transition-all duration-300 max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 flex-shrink-0">
                 <h3 class="text-base font-bold text-slate-800">' . $title . '</h3>
-                <button type="button" onclick="closeModal(\'' . $id_escaped . '\')" class="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-100 flex items-center justify-center transition shadow-sm" aria-label="Tutup">
+                <button type="button" onclick="closeModal(\'' . $id_escaped . '\')" class="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-rose-600 hover:border-rose-100 flex items-center justify-center transition shadow-sm" aria-label="Tutup">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>

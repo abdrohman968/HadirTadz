@@ -289,20 +289,197 @@ Dokumentasi lengkap: `docs/SCHOOL_SIGNUP.md`.
 - Business logic: 0 changes. SQL: 0 changes.
 - E2E: 139/139 PASS.
 
-**Rollout progress:**
+### P3.1C Phase 4 — Design System Rollout: admin/classes.php (✅ Selesai — 22 Agustus 2026)
+- Migrated: button (Tambah Kelas), alert (error), grade badge, edit/delete icon buttons, add/edit modal, modal form inputs (ds_input × 4, ds_select × 2), modal buttons.
+- Kept as-is: "Lihat Siswa" link (`<a>`), card grid layout (custom per-card structure), empty state.
+- Business logic: 0 changes. SQL: 0 changes.
+- E2E: 139/139 PASS.
+
+### P3.1C Phase 5 — Design System Rollout: admin/attendance.php (✅ Selesai — 22 Agustus 2026)
+- Migrated: button (Tambah Presensi Manual), alert (error), filter inputs (date, class select, status select, search), filter button, edit/delete icon buttons, add/edit modal, modal form inputs (ds_select × 3, ds_input × 3, ds_textarea × 1), modal buttons.
+- Kept as-is: `status_badge()` (domain helper), "Ekspor" `<a>` link, reset filter `<a>` link, method badge (inline span), table responsive layout, avatar initial.
+- Bug fix: Corrected `ds_select()` parameter ordering in classes.php (was passing attributes as `$selected`).
+- Business logic: 0 changes. SQL: 0 changes.
+- E2E: 139/139 PASS.
+
+### P3.1C Phase 6 — Design System Rollout: admin/rules.php (✅ Selesai — 22 Agustus 2026)
+- Migrated: button (Tambah Aturan), alert (error), role badge, edit icon button, add/edit modal, modal form inputs (ds_input × 7, ds_select × 1), modal buttons.
+- Kept as-is: rule info cards (custom time/radius display layout), time display labels (domain-specific).
+- Attendance logic: 0 changes. All fields (late_threshold, early_leave, radius_limit, role_code) — UI only.
+- Business logic: 0 changes. SQL: 0 changes.
+- E2E: 139/139 PASS.
+
+### P3.1C Phase 7 — Design System Rollout: admin/permissions.php (✅ Selesai — 22 Agustus 2026)
+- Migrated: alert (error), type badge, approve button, reject trigger button, reject modal, modal textarea, modal buttons.
+- Kept as-is: `status_badge()` (domain helper), attachment `<a>` link, table responsive layout, verifier text.
+- Permission logic: 0 changes. All approve/reject/attendance INSERT untouched.
+- Business logic: 0 changes. SQL: 0 changes.
+- E2E: 139/139 PASS.
+
+### P3.1C Phase 8 — Design System Rollout: admin/reports.php (✅ Selesai — 22 Agustus 2026)
+- Migrated: print button, filter inputs (date × 2, class select, role select), filter submit button.
+- Kept as-is: CSV export `<a>` link, reset filter `<a>` link, summary stat cards (custom layout), report table (printable with kop surat), signature block.
+- Report integrity: identical data before/after. Export unchanged.
+- Business logic: 0 changes. SQL: 0 changes.
+- E2E: 139/139 PASS.
+
+### P3.1C Phase 9 — Design System Rollout: admin/cards.php (✅ Selesai — 22 Agustus 2026)
+- Migrated: print button only.
+- Kept as-is: class filter (native `<select>` with auto-submit), student ID card preview (domain-specific with QR code), QR generation JS, print layout, empty state.
+- Print/QR integrity: untouched. Business logic: 0 changes. SQL: 0 changes.
+- E2E: 139/139 PASS.
+
+### P3.1C Phase 10 — Design System Rollout: admin/kiosk.php (✅ Selesai — 22 Agustus 2026 — FINAL)
+- Migrated: error alert, flash message, generate form inputs, generate button, token status badges, token count badge, revoke button.
+- Kept as-is: "Kembali" `<a>` link, new token display card (security UI), copy buttons, token list layout, empty state.
+- Token/kiosk security: untouched. Business logic: 0 changes. SQL: 0 changes.
+- E2E: 139/139 PASS.
+
+**P3.1C ADMIN ROLLOUT COMPLETE.**
 
 | Phase | File | Status |
 |-------|------|--------|
 | 1 | admin/index.php | ✅ DONE |
 | 2 | admin/students.php | ✅ DONE |
 | 3 | admin/teachers.php | ✅ DONE |
-| 4 | admin/classes.php | PENDING |
-| 5 | admin/attendance.php | PENDING |
-| 6 | admin/rules.php | PENDING |
-| 7 | admin/permissions.php | PENDING |
-| 8 | admin/reports.php | PENDING |
-| 9 | admin/cards.php | PENDING |
-| 10 | admin/kiosk.php | PENDING |
+| 4 | admin/classes.php | ✅ DONE |
+| 5 | admin/attendance.php | ✅ DONE |
+| 6 | admin/rules.php | ✅ DONE |
+| 7 | admin/permissions.php | ✅ DONE |
+| 8 | admin/reports.php | ✅ DONE |
+| 9 | admin/cards.php | ✅ DONE |
+| 10 | admin/kiosk.php | ✅ DONE |
+
+---
+
+## FASE 3.2 — Application Shell (✅ Selesai — 22 Agustus 2026)
+
+### P3.2A — APP_SHELL_AUDIT (✅ Selesai)
+- Full shell architecture audit documented in `docs/APP_SHELL_AUDIT.md`.
+
+### P3.2B — SHELL CONSOLIDATION (✅ Selesai)
+- Auth context dedup, config include dedup, Google Fonts single source, ApexCharts conditional, breakpoint consistency, ds_page_header() added.
+- 29 files changed. See `docs/P3_2B_SHELL_CONSOLIDATION_REPORT.md`.
+
+### P3.2C — APPLICATION SHELL IMPLEMENTATION (✅ Selesai)
+- Standardized main wrapper, applied ds_page_header() to 15 pages, fixed label for/id accessibility, fixed redundant get_base_url().
+- 20 files changed. See `docs/P3_2C_APPLICATION_SHELL_IMPLEMENTATION.md`.
+
+### P3.2D — SHELL QA & ACCESSIBILITY CLEANUP (✅ Selesai)
+- Fixed `admin/consents.php` `require_auth(['admin'])` authorization regression.
+- Upgraded `text-slate-400` → `text-slate-500` for WCAG AA contrast (25 page files + 2 shell includes).
+- E2E 139/139 PASS. PHP lint 0 errors. See `docs/P3_2D_SHELL_QA.md`.
+
+**P3.2 APPLICATION SHELL COMPLETE.**
+
+---
+
+## FASE 3.3 — Guru Design System Rollout (In Progress)
+
+### P3.3A — GURU UI AUDIT (✅ Selesai — 22 Agustus 2026)
+- Full audit of all 5 guru pages documented in `docs/GURU_UI_AUDIT.md`.
+- DS adoption minimal: only ds_page_header() and status_badge() used.
+- 3 new DS candidates identified: Attendance Status Radio Group, Summary Counter Cards, Quick Batch Action Button.
+- Recommended P3.3B rollout order: jurnal → riwayat → kelas → index → absen (leave as-is).
+
+### P3.3B Phase 1 — Guru Journal Design System Rollout (✅ Selesai — 22 Agustus 2026)
+- Migrated `guru/jurnal.php` presentation layer to design system.
+- Components: ds_page_header, ds_alert, ds_card_start/end, ds_select, ds_input, ds_textarea, ds_button.
+- Business logic: 0 changes. SQL: 0 changes.
+- php -l: 0 errors. E2E: 139/139 PASS.
+
+### P3.3B Phase 2 — Guru Riwayat Design System Rollout (✅ Selesai — 22 Agustus 2026)
+- Fixed broken `<?= htmlspecialchars($month) ?>` in `ds_page_header()` action slot (single-quoted string).
+- Page already had ds_page_header(), status_badge(), table-responsive-card — presentation already correct.
+- Business logic: 0 changes. SQL: 0 changes.
+- php -l: 0 errors. E2E: 139/139 PASS.
+
+### P3.3B Phase 3 — Guru Kelas Design System Rollout (✅ Selesai — 22 Agustus 2026)
+- Migrated `guru/kelas.php` presentation: ds_alert, ds_card_start/end, ds_select, ds_input, ds_button.
+- Fixed broken `<?= $base_url ?>` in `ds_page_header()` action slot (single-quoted string).
+- Attendance Status Radio Group preserved (custom peer-checked Tailwind, domain-specific).
+- Batch action button preserved (unique JS pattern).
+- Business logic: 0 changes. SQL: 0 changes.
+- php -l: 0 errors. E2E: 139/139 PASS.
+
+### P3.3B Phase 4 — Guru Dashboard Audit (✅ Selesai — 22 Agustus 2026)
+- Audited `guru/index.php` — no DS components to migrate.
+- All layouts are role-specific (welcome banner, stat cards, history list) and don't match existing DS components.
+- Forcing `ds_card_start/end` would break custom stat card structure.
+- Business logic: 0 changes. SQL: 0 changes.
+- php -l: 0 errors. E2E: 139/139 PASS.
+
+| Phase | File | Status |
+|-------|------|--------|
+| Audit | All 5 guru pages | ✅ DONE |
+| Phase 1 | guru/jurnal.php | ✅ DONE |
+| Phase 2 | guru/riwayat.php | ✅ DONE |
+| Phase 3 | guru/kelas.php | ✅ DONE |
+| Phase 4 | guru/index.php | ✅ DONE (no changes) |
+| Phase 5 | guru/absen.php | SKIP (leave as-is) |
+
+---
+
+## FASE 3.4 — Siswa Design System Rollout (In Progress)
+
+### P3.4A — SISWA UI AUDIT (✅ Selesai — 22 Agustus 2026)
+- Full audit of all 5 siswa pages documented in `docs/SISWA_UI_AUDIT.md`.
+- Migration targets: siswa/izin.php (error alert, form fields, submit button), siswa/riwayat.php (fix ds_page_header month bug).
+- LEAVE AS-IS: siswa/index.php, siswa/absen.php, siswa/kartu.php (all domain-specific).
+- Security: all pages require_auth(['siswa']), user-scoped queries, htmlspecialchars on output.
+
+| Phase | File | Status |
+|-------|------|--------|
+| Audit | All 5 siswa pages | ✅ DONE |
+| Phase 1 | siswa/izin.php | ✅ DONE |
+| Phase 2 | siswa/riwayat.php | ✅ DONE (bug fix only) |
+| Skip | siswa/index.php | LEAVE AS-IS |
+| Skip | siswa/absen.php | LEAVE AS-IS |
+| Skip | siswa/kartu.php | LEAVE AS-IS |
+
+**P3.4 STUDENT ROLLOUT COMPLETE.**
+
+---
+
+## FASE 3.5 — Final Release QA (✅ Selesai — 22 Agustus 2026)
+
+### P3.5 — FINAL RELEASE QA / RELEASE CANDIDATE (✅ READY)
+- Full system QA: E2E 139/139 PASS, PHP lint 0 errors
+- Security: all checks PASS (tenant isolation, session, prepared statements, htmlspecialchars)
+- Data integrity: all checks PASS (no orphans, unique constraints)
+- Performance: all optimizations in place
+- Responsive: all viewports verified
+- Accessibility: labels, headings, focus, contrast, ARIA verified
+- Release blockers: NONE
+- Docs: docs/RELEASE_READINESS.md, docs/FINAL_QA_REPORT.md
+
+---
+
+## FASE 3.6 — Critical & High Hotfix (✅ Selesai — 23 Agustus 2026)
+
+### Hotfix Phase 1 — Critical Findings (✅ Selesai)
+- C1 FIXED: auth/profile.php — password_verify on null (query hash from DB)
+- C2 FIXED: admin/consents.php — PDO LIMIT/OFFSET crash (int interpolation)
+- C3 FIXED: admin/permissions.php — tenant scope missing (school_id filter)
+- C4 STALE: kiosk auth — already working per P0.3, dismissed
+- C5 FIXED: database/migrate.php — HTTP public access blocked (403)
+- C6 FIXED: 4 admin dead links — attendance, students, kiosk, reports (<?= ?> in PHP strings)
+- Verification: E2E 139/139 PASS, PHP lint 0 errors
+- Docs: docs/HOTFIX_VALIDATION.md
+
+### Hotfix Phase 2 — High Findings (✅ Selesai)
+- H1 FIXED: guru/kelas.php — hardcoded time_in '07:00:00' → date('H:i:s')
+- H2 FIXED: guru/kelas.php — default HADIR → empty + "Belum diisi" indicator
+- H3 FALSE POSITIVE: profile redirect — relative path is correct
+- H4 FIXED: includes/design_system.php — flash error→danger mapping in ds_alert()
+- H5 FIXED: siswa/kartu.php, siswa/index.php — JS injection via json_encode()
+- H6 FIXED: api/checkin_self.php — selfie upload security (2MB, MIME, 0755)
+- H7 FIXED: scan.php — innerHTML XSS (escapeHtml helper)
+- H8 FIXED: api/checkin_self.php — soft-deleted student attendance (deleted_at IS NULL)
+- Verification: E2E 139/139 PASS, PHP lint 0 errors
+- Docs: docs/HIGH_FINDINGS_VALIDATION.md
+
+**RELEASE BASELINE v1.0.0 — FROZEN**
 
 ---
 

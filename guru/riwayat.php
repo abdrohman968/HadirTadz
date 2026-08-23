@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['guru']);
-$base_url = get_base_url();
 $user = auth_user();
 
 $month = $_GET['month'] ?? date('Y-m');
@@ -33,16 +32,7 @@ include __DIR__ . '/../includes/sidebar.php';
 <main class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
     <div class="max-w-5xl mx-auto space-y-6">
 
-        <!-- Page Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Riwayat Kehadiran Saya</h1>
-                <p class="text-xs sm:text-sm text-slate-500">Rekapitulasi log presensi masuk dan pulang pribadi.</p>
-            </div>
-            <form method="GET" action="" class="flex items-center gap-2">
-                <input type="month" name="month" value="<?= htmlspecialchars($month) ?>" onchange="this.form.submit()" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
-            </form>
-        </div>
+        <?= ds_page_header('Riwayat Kehadiran Saya', 'Rekapitulasi log presensi masuk dan pulang pribadi.', '<form method="GET" action="" class="flex items-center gap-2"><input type="month" name="month" value="' . htmlspecialchars($month) . '" onchange="this.form.submit()" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"></form>') ?>
 
         <!-- Summary Cards -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -68,7 +58,7 @@ include __DIR__ . '/../includes/sidebar.php';
         <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden p-3 sm:p-0">
             <div class="table-responsive-card">
                 <table class="w-full text-left text-xs text-slate-600">
-                    <thead class="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
                         <tr>
                             <th class="py-3 px-4">Tanggal</th>
                             <th class="py-3 px-4">Jam Masuk</th>
@@ -81,7 +71,7 @@ include __DIR__ . '/../includes/sidebar.php';
                     <tbody class="divide-y divide-slate-100">
                         <?php if (empty($history)): ?>
                             <tr>
-                                <td colspan="6" class="text-center py-10 text-slate-400" data-label="">
+                                <td colspan="6" class="text-center py-10 text-slate-500" data-label="">
                                     Tidak ada rekaman presensi pada bulan ini.
                                 </td>
                             </tr>
@@ -100,7 +90,7 @@ include __DIR__ . '/../includes/sidebar.php';
                                     <td class="py-3.5 px-4" data-label="Status">
                                         <?= status_badge($item['status']) ?>
                                     </td>
-                                    <td class="py-3.5 px-4 uppercase text-[10px] font-bold text-slate-400 font-mono" data-label="Metode">
+                                    <td class="py-3.5 px-4 uppercase text-[10px] font-bold text-slate-500 font-mono" data-label="Metode">
                                         <?= htmlspecialchars($item['method'] ?: 'GPS') ?>
                                     </td>
                                     <td class="py-3.5 px-4 text-slate-500 text-xs italic" data-label="Catatan">

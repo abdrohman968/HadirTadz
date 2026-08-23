@@ -8,7 +8,9 @@
 $is_cli = (php_sapi_name() === 'cli');
 
 if (!$is_cli) {
-    echo '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Setup Database HadirTadz</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-slate-900 text-white p-8 font-mono text-xs"><div class="max-w-2xl mx-auto bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4"><h1 class="text-lg font-bold text-emerald-400">HadirTadz - Database Installer & Migration (v.1.0)</h1><pre class="bg-black/50 p-4 rounded-xl text-emerald-300 overflow-x-auto">';
+    http_response_code(403);
+    echo 'Forbidden: Migration script can only be run from CLI.';
+    exit(1);
 }
 
 function log_msg($msg) {
@@ -571,6 +573,4 @@ try {
     log_msg("\n[ERROR] Terjadi kesalahan: " . $e->getMessage());
 }
 
-if (!$is_cli) {
-    echo '</pre><a href="../index.php" class="inline-block px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-white font-bold text-xs">Menuju Aplikasi HadirTadz &rarr;</a></div></body></html>';
-}
+// CLI-only: no HTML closing needed

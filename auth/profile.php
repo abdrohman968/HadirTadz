@@ -35,7 +35,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $new_pass = $_POST['new_password'] ?? '';
         $confirm_pass = $_POST['confirm_password'] ?? '';
 
-        if (!password_verify($current_pass, $user['password_hash'])) {
+        // Query password_hash dari DB (tidak disimpan di session)
+        $hashStmt = $pdo->prepare("SELECT password_hash FROM users WHERE id = ?");
+        $hashStmt->execute([$user['id']]);
+        $current_hash = $hashStmt->fetchColumn();
+
+        if (!$current_hash || !password_verify($current_pass, $current_hash)) {
             $error = 'Kata sandi saat ini tidak sesuai!';
         } elseif (strlen($new_pass) < 6) {
             $error = 'Kata sandi baru minimal 6 karakter!';
@@ -88,17 +93,17 @@ include __DIR__ . '/../includes/sidebar.php';
                 
                 <div class="w-full mt-6 pt-6 border-t border-slate-100 space-y-3 text-left text-xs">
                     <div>
-                        <span class="text-slate-400 block font-medium">ID Pengguna</span>
+                        <span class="text-slate-500 block font-medium">ID Pengguna</span>
                         <span class="font-mono font-bold text-slate-700"><?= htmlspecialchars($user['identifier']) ?></span>
                     </div>
                     <div>
-                        <span class="text-slate-400 block font-medium">Status Akun</span>
+                        <span class="text-slate-500 block font-medium">Status Akun</span>
                         <span class="inline-flex items-center gap-1.5 font-bold text-emerald-600">
                             <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Aktif
                         </span>
                     </div>
                     <div>
-                        <span class="text-slate-400 block font-medium">Terakhir Masuk</span>
+                        <span class="text-slate-500 block font-medium">Terakhir Masuk</span>
                         <span class="text-slate-600"><?= format_date_indo($user['last_login_at'], true, true) ?></span>
                     </div>
                 </div>
@@ -116,12 +121,12 @@ include __DIR__ . '/../includes/sidebar.php';
                         <input type="hidden" name="action" value="update_profile">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Email</label>
-                                <input type="email" name="email" value="<?= htmlspecialchars($user['email'] ?? '') ?>" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <label for="field-profile-email" class="block text-xs font-bold text-slate-600 uppercase mb-1">Email</label>
+                                <input id="field-profile-email" type="email" name="email" value="<?= htmlspecialchars($user['email'] ?? '') ?>" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nomor WhatsApp / HP</label>
-                                <input type="text" name="phone" value="<?= htmlspecialchars($user['phone'] ?? '') ?>" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <label for="field-profile-phone" class="block text-xs font-bold text-slate-600 uppercase mb-1">Nomor WhatsApp / HP</label>
+                                <input id="field-profile-phone" type="text" name="phone" value="<?= htmlspecialchars($user['phone'] ?? '') ?>" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                             </div>
                         </div>
                         <div class="flex justify-end pt-2">
@@ -141,17 +146,17 @@ include __DIR__ . '/../includes/sidebar.php';
                     <form method="POST" action="" class="space-y-4">
                         <input type="hidden" name="action" value="change_password">
                         <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Kata Sandi Saat Ini</label>
-                            <input type="password" name="current_password" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            <label for="field-profile-current-password" class="block text-xs font-bold text-slate-600 uppercase mb-1">Kata Sandi Saat Ini</label>
+                            <input id="field-profile-current-password" type="password" name="current_password" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Kata Sandi Baru</label>
-                                <input type="password" name="new_password" required minlength="6" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <label for="field-profile-new-password" class="block text-xs font-bold text-slate-600 uppercase mb-1">Kata Sandi Baru</label>
+                                <input id="field-profile-new-password" type="password" name="new_password" required minlength="6" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Konfirmasi Kata Sandi Baru</label>
-                                <input type="password" name="confirm_password" required minlength="6" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <label for="field-profile-confirm-password" class="block text-xs font-bold text-slate-600 uppercase mb-1">Konfirmasi Kata Sandi Baru</label>
+                                <input id="field-profile-confirm-password" type="password" name="confirm_password" required minlength="6" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                             </div>
                         </div>
                         <div class="flex justify-end pt-2">

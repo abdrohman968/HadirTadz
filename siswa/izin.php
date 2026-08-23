@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['siswa']);
-$base_url = get_base_url();
 $user = auth_user();
 $school_id = (int)($user['school_id'] ?? auth_school_id());
 $error = '';
@@ -62,21 +61,25 @@ $my_permissions = $stmt->fetchAll();
 
 include __DIR__ . '/../includes/header.php';
 include __DIR__ . '/../includes/sidebar.php';
+
+$type_options = [
+    'izin' => 'Izin (Ada Keperluan)',
+    'sakit' => 'Sakit (Kondisi Kurang Sehat)',
+    'dispensasi' => 'Dispensasi Kegiatan Sekolah'
+];
 ?>
 
 <main class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
     <div class="max-w-4xl mx-auto space-y-6">
 
-        <!-- Page Header -->
-        <div>
-            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Pengajuan Izin & Sakit Siswa</h1>
-            <p class="text-xs sm:text-sm text-slate-500">Ajukan permohonan ketidakhadiran dengan melampirkan surat dokter atau alasan resmi.</p>
-        </div>
+        <?= ds_page_header('Pengajuan Izin & Sakit Siswa', 'Ajukan permohonan ketidakhadiran dengan melampirkan surat dokter atau alasan resmi.') ?>
 
         <?php if (!empty($error)): ?>
-            <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
-                <?= htmlspecialchars($error) ?>
-            </div>
+            <?= ds_alert(htmlspecialchars($error), 'danger') ?>
+        <?php endif; ?>
+
+        <?php if ($flash = get_flash()): ?>
+            <?= ds_alert(htmlspecialchars($flash['message']), $flash['type']) ?>
         <?php endif; ?>
 
         <!-- Form Pengajuan -->
@@ -90,40 +93,21 @@ include __DIR__ . '/../includes/sidebar.php';
                 <input type="hidden" name="action" value="submit_permission">
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Jenis Permohonan</label>
-                        <select name="type" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                            <option value="izin">Izin (Ada Keperluan)</option>
-                            <option value="sakit">Sakit (Kondisi Kurang Sehat)</option>
-                            <option value="dispensasi">Dispensasi Kegiatan Sekolah</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Mulai Tanggal</label>
-                        <input type="date" name="start_date" value="<?= date('Y-m-d') ?>" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Sampai Tanggal</label>
-                        <input type="date" name="end_date" value="<?= date('Y-m-d') ?>" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
+                    <?= ds_select('type', $type_options, 'izin', 'Jenis Permohonan', ['required' => true, 'id' => 'field-izin-type']) ?>
+                    <?= ds_input('start_date', 'Mulai Tanggal', 'date', date('Y-m-d'), ['required' => true, 'id' => 'field-izin-start-date']) ?>
+                    <?= ds_input('end_date', 'Sampai Tanggal', 'date', date('Y-m-d'), ['required' => true, 'id' => 'field-izin-end-date']) ?>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Alasan / Penjelasan</label>
-                    <textarea name="reason" required rows="3" placeholder="Tuliskan keterangan lengkap alasan ketidakhadiran..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
-                </div>
+                <?= ds_textarea('reason', 'Alasan / Penjelasan', '', ['required' => true, 'rows' => 3, 'placeholder' => 'Tuliskan keterangan lengkap alasan ketidakhadiran...', 'id' => 'field-izin-reason']) ?>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Unggah Surat / Bukti (Foto Surat Dokter / Surat Ortu)</label>
-                    <input type="file" name="attachment" accept="image/*,.pdf" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
-                    <p class="text-[10px] text-slate-400 mt-1">Format didukung: JPG, PNG, PDF (Maksimal 2MB)</p>
+                    <label for="field-izin-attachment" class="block text-xs font-bold text-slate-600 uppercase mb-1">Unggah Surat / Bukti (Foto Surat Dokter / Surat Ortu)</label>
+                    <input id="field-izin-attachment" type="file" name="attachment" accept="image/*,.pdf" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                    <p class="text-[10px] text-slate-500 mt-1">Format didukung: JPG, PNG, PDF (Maksimal 2MB)</p>
                 </div>
 
                 <div class="flex justify-end pt-2">
-                    <button type="submit" class="px-6 py-3 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-lg shadow-emerald-900/20 transition flex items-center gap-2">
-                        <i class="fa-solid fa-paper-plane"></i>
-                        <span>Kirim Permohonan</span>
-                    </button>
+                    <?= ds_button('<i class="fa-solid fa-paper-plane"></i> Kirim Permohonan', 'primary', 'submit') ?>
                 </div>
             </form>
         </div>
@@ -137,7 +121,7 @@ include __DIR__ . '/../includes/sidebar.php';
 
             <div class="space-y-3">
                 <?php if (empty($my_permissions)): ?>
-                    <div class="text-center py-8 text-slate-400 text-xs">
+                    <div class="text-center py-8 text-slate-500 text-xs">
                         Belum ada permohonan izin yang pernah diajukan.
                     </div>
                 <?php else: ?>
@@ -163,7 +147,7 @@ include __DIR__ . '/../includes/sidebar.php';
                                 </div>
                             <?php endif; ?>
 
-                            <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-400">
+                            <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
                                 <span>Diajukan pada: <?= date('d/m/Y H:i', strtotime($mp['created_at'])) ?></span>
                                 <?php if ($mp['attachment_url']): ?>
                                     <a href="<?= htmlspecialchars($mp['attachment_url']) ?>" target="_blank" class="text-emerald-700 font-bold hover:underline flex items-center gap-1">

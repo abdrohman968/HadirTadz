@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['admin']);
-$base_url = get_base_url();
 $school_id = auth_school_id();
 $error = '';
 
@@ -63,22 +62,10 @@ include __DIR__ . '/../includes/sidebar.php';
 <main class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
     <div class="max-w-6xl mx-auto space-y-6">
 
-        <!-- Page Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Aturan Absensi & Jam Kerja</h1>
-                <p class="text-xs sm:text-sm text-slate-500">Konfigurasi batas jam masuk, toleransi keterlambatan, jam pulang, dan radius geofencing GPS.</p>
-            </div>
-            <button onclick="openRuleModal()" class="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition flex items-center gap-2">
-                <i class="fa-solid fa-plus"></i>
-                <span>Tambah Aturan</span>
-            </button>
-        </div>
+        <?= ds_page_header('Aturan Absensi & Jam Kerja', 'Konfigurasi batas jam masuk, toleransi keterlambatan, jam pulang, dan radius geofencing GPS.', ds_button('<i class="fa-solid fa-plus"></i> <span>Tambah Aturan</span>', 'primary', 'button', ['onclick' => 'openRuleModal()'])) ?>
 
         <?php if (!empty($error)): ?>
-            <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
-                <?= htmlspecialchars($error) ?>
-            </div>
+            <?= ds_alert(htmlspecialchars($error), 'danger') ?>
         <?php endif; ?>
 
         <!-- Rules Cards -->
@@ -87,19 +74,19 @@ include __DIR__ . '/../includes/sidebar.php';
                 <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition space-y-5">
                     <div class="flex items-center justify-between">
                         <div>
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800">
-                                Target: <?= htmlspecialchars($r['role_code']) ?>
-                            </span>
+                            <?= ds_badge('Target: ' . htmlspecialchars($r['role_code']), 'success') ?>
                             <h3 class="text-lg font-bold text-slate-800 mt-1"><?= htmlspecialchars($r['rule_name']) ?></h3>
                         </div>
-                        <button onclick="editRule(<?= htmlspecialchars(json_encode($r)) ?>)" class="p-2 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 transition" title="Edit">
-                            <i class="fa-solid fa-pen-to-square text-sm"></i>
-                        </button>
+                        <?= ds_icon_button('fa-solid fa-pen-to-square', 'primary', 'button', [
+                            'onclick' => 'editRule(' . htmlspecialchars(json_encode($r), ENT_QUOTES) . ')',
+                            'title' => 'Edit',
+                            'aria-label' => 'Edit ' . htmlspecialchars($r['rule_name'])
+                        ]) ?>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3 text-xs">
                         <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                            <span class="text-slate-400 block font-medium">Buka Presensi Masuk</span>
+                            <span class="text-slate-500 block font-medium">Buka Presensi Masuk</span>
                             <span class="font-mono font-bold text-slate-700 text-sm"><?= format_time($r['check_in_start']) ?> WIB</span>
                         </div>
                         <div class="p-3 rounded-2xl bg-amber-50/60 border border-amber-100">
@@ -107,7 +94,7 @@ include __DIR__ . '/../includes/sidebar.php';
                             <span class="font-mono font-bold text-amber-700 text-sm"><?= format_time($r['late_threshold_time']) ?> WIB</span>
                         </div>
                         <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                            <span class="text-slate-400 block font-medium">Buka Presensi Pulang</span>
+                            <span class="text-slate-500 block font-medium">Buka Presensi Pulang</span>
                             <span class="font-mono font-bold text-slate-700 text-sm"><?= format_time($r['check_out_start']) ?> WIB</span>
                         </div>
                         <div class="p-3 rounded-2xl bg-emerald-50/60 border border-emerald-100">
@@ -123,87 +110,85 @@ include __DIR__ . '/../includes/sidebar.php';
 </main>
 
 <!-- Modal Add/Edit Rule -->
-<div id="modal-rule" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-            <h3 id="modal-rule-title" class="text-base font-bold text-slate-800">Tambah Aturan Absensi</h3>
-            <button onclick="closeModal('modal-rule')" class="text-slate-400 hover:text-slate-600 text-sm">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
+<?= ds_modal_start('modal-rule', 'Tambah Aturan Absensi', 'lg') ?>
 
         <form method="POST" action="" class="space-y-4">
             <input type="hidden" name="action" value="save_rule">
             <input type="hidden" id="form-rule-id" name="rule_id" value="">
 
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nama Aturan</label>
-                <input type="text" name="rule_name" id="form-rule-name" required placeholder="Contoh: Aturan Jam Masuk Siswa" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-            </div>
+            <?= ds_input('Nama Aturan', 'text', [
+                'name' => 'rule_name',
+                'id' => 'form-rule-name',
+                'required' => true,
+                'placeholder' => 'Contoh: Aturan Jam Masuk Siswa'
+            ]) ?>
 
             <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Berlaku Untuk</label>
-                    <select name="role_code" id="form-rule-role" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        <option value="siswa">Khusus Siswa</option>
-                        <option value="guru">Khusus Guru</option>
-                        <option value="all">Semua Pengguna</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Radius GPS (Meter)</label>
-                    <input type="number" name="radius_limit" id="form-rule-radius" required value="150" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
+                <?= ds_select('Berlaku Untuk', [
+                    'siswa' => 'Khusus Siswa',
+                    'guru' => 'Khusus Guru',
+                    'all' => 'Semua Pengguna'
+                ], '', '', [
+                    'name' => 'role_code',
+                    'id' => 'form-rule-role'
+                ]) ?>
+                <?= ds_input('Radius GPS (Meter)', 'number', [
+                    'name' => 'radius_limit',
+                    'id' => 'form-rule-radius',
+                    'required' => true,
+                    'value' => '150'
+                ]) ?>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Mulai Buka</label>
-                    <input type="time" name="check_in_start" id="form-rule-in-start" value="06:00" class="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Jam Masuk</label>
-                    <input type="time" name="work_start_time" id="form-rule-work-start" value="07:00" class="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Toleransi / Batas</label>
-                    <input type="time" name="late_threshold_time" id="form-rule-late" value="07:15" class="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
+                <?= ds_input('Mulai Buka', 'time', [
+                    'name' => 'check_in_start',
+                    'id' => 'form-rule-in-start',
+                    'value' => '06:00'
+                ]) ?>
+                <?= ds_input('Jam Masuk', 'time', [
+                    'name' => 'work_start_time',
+                    'id' => 'form-rule-work-start',
+                    'value' => '07:00'
+                ]) ?>
+                <?= ds_input('Toleransi / Batas', 'time', [
+                    'name' => 'late_threshold_time',
+                    'id' => 'form-rule-late',
+                    'value' => '07:15'
+                ]) ?>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Mulai Pulang</label>
-                    <input type="time" name="check_out_start" id="form-rule-out-start" value="14:00" class="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Pulang Cepat</label>
-                    <input type="time" name="early_leave_threshold" id="form-rule-early" value="13:30" class="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Selesai Jam Kerja</label>
-                    <input type="time" name="work_end_time" id="form-rule-work-end" value="15:30" class="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
+                <?= ds_input('Mulai Pulang', 'time', [
+                    'name' => 'check_out_start',
+                    'id' => 'form-rule-out-start',
+                    'value' => '14:00'
+                ]) ?>
+                <?= ds_input('Pulang Cepat', 'time', [
+                    'name' => 'early_leave_threshold',
+                    'id' => 'form-rule-early',
+                    'value' => '13:30'
+                ]) ?>
+                <?= ds_input('Selesai Jam Kerja', 'time', [
+                    'name' => 'work_end_time',
+                    'id' => 'form-rule-work-end',
+                    'value' => '15:30'
+                ]) ?>
             </div>
 
             <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
-                <button type="button" onclick="closeModal('modal-rule')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs">
-                    Batal
-                </button>
-                <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm">
-                    Simpan Aturan
-                </button>
+                <?= ds_button('Batal', 'ghost', 'button', ['onclick' => "closeModal('modal-rule')"]) ?>
+                <?= ds_button('Simpan Aturan', 'primary', 'submit') ?>
             </div>
         </form>
-    </div>
-</div>
+
+<?= ds_modal_end() ?>
 
 <script>
     function openRuleModal() {
         document.getElementById('form-rule-id').value = '';
         document.getElementById('form-rule-name').value = '';
-        document.getElementById('modal-rule-title').textContent = 'Tambah Aturan Absensi';
-        document.getElementById('modal-rule').classList.remove('hidden');
+        openModal('modal-rule');
     }
 
     function editRule(data) {
@@ -217,13 +202,10 @@ include __DIR__ . '/../includes/sidebar.php';
         document.getElementById('form-rule-out-start').value = data.check_out_start.substring(0, 5);
         document.getElementById('form-rule-early').value = data.early_leave_threshold.substring(0, 5);
         document.getElementById('form-rule-work-end').value = data.work_end_time.substring(0, 5);
-        document.getElementById('modal-rule-title').textContent = `Edit: ${data.rule_name}`;
-        document.getElementById('modal-rule').classList.remove('hidden');
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).classList.add('hidden');
+        openModal('modal-rule');
     }
 </script>
+
+<?= ds_modal_js() ?>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>

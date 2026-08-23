@@ -1,6 +1,6 @@
 <?php
 $flash = get_flash();
-$base_url = get_base_url();
+// $base_url already resolved by header.php
 ?>
     </div> <!-- End flex-1 flex overflow-hidden from header -->
 

@@ -105,7 +105,7 @@ if ($school_name === '') $school_name = get_setting('schoolName', 'SMA Negeri Ha
             <div>
                 <h1 class="text-base sm:text-lg font-bold text-white leading-tight flex items-center gap-2">
                     <span class="font-black"><span class="text-white">Hadir</span><span class="text-emerald-400">Tadz</span></span>
-                    <span class="text-slate-400 font-normal hidden sm:inline">&bull;</span>
+                    <span class="text-slate-500 font-normal hidden sm:inline">&bull;</span>
                     <span class="text-xs sm:text-sm font-semibold text-emerald-200"><?= htmlspecialchars($school_name) ?></span>
                     <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wide">Kiosk</span>
                 </h1>
@@ -136,7 +136,7 @@ if ($school_name === '') $school_name = get_setting('schoolName', 'SMA Negeri Ha
                         <i class="fa-solid fa-shield-halved"></i>
                     </div>
                     <h2 class="text-xl font-bold text-white mb-2"><?= htmlspecialchars($kiosk_error['title']) ?></h2>
-                    <p class="text-sm text-slate-400 leading-relaxed mb-6"><?= htmlspecialchars($kiosk_error['message']) ?></p>
+                    <p class="text-sm text-slate-500 leading-relaxed mb-6"><?= htmlspecialchars($kiosk_error['message']) ?></p>
                     <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-left text-xs font-mono text-slate-500 mb-6 break-all">
                         scan.php?k=<?= htmlspecialchars($kiosk_token) ?>
                     </div>
@@ -186,7 +186,7 @@ if ($school_name === '') $school_name = get_setting('schoolName', 'SMA Negeri Ha
                             <i class="fa-solid fa-video-slash"></i>
                         </div>
                         <h3 class="font-bold text-sm text-white">Kamera Belum Aktif / Tidak Terdeteksi</h3>
-                        <p class="text-xs text-slate-400 max-w-sm">
+                        <p class="text-xs text-slate-500 max-w-sm">
                             Pastikan Anda telah mengizinkan izin kamera di browser, atau gunakan <strong>Barcode Scanner USB</strong> / input NISN manual pada kolom di bawah.
                         </p>
                         <button onclick="startScanning()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition">
@@ -221,7 +221,7 @@ if ($school_name === '') $school_name = get_setting('schoolName', 'SMA Negeri Ha
             <div id="scan-result-card" class="bg-gradient-to-br from-slate-900 to-emerald-950/60 border border-emerald-700/50 rounded-3xl p-6 shadow-2xl transition-all duration-300">
                 <div class="flex items-center justify-between border-b border-emerald-900/50 pb-3 mb-4">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400">Status Pemindaian Terakhir</h3>
-                    <span id="result-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-800 text-slate-400">Menunggu Scan...</span>
+                    <span id="result-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-800 text-slate-500">Menunggu Scan...</span>
                 </div>
 
                 <div id="result-placeholder" class="text-center py-8">
@@ -246,11 +246,11 @@ if ($school_name === '') $school_name = get_setting('schoolName', 'SMA Negeri Ha
 
                     <div class="p-3.5 rounded-2xl bg-slate-950/80 border border-emerald-900/50 flex items-center justify-between text-xs font-mono">
                         <div>
-                            <span class="text-slate-400 block">Waktu Tercatat:</span>
+                            <span class="text-slate-500 block">Waktu Tercatat:</span>
                             <span id="record-time" class="text-base font-bold text-white">--:-- WIB</span>
                         </div>
                         <div class="text-right">
-                            <span class="text-slate-400 block">Tipe Presensi:</span>
+                            <span class="text-slate-500 block">Tipe Presensi:</span>
                             <span id="record-action" class="text-sm font-bold text-emerald-400">MASUK (CHECK-IN)</span>
                         </div>
                     </div>
@@ -265,7 +265,7 @@ if ($school_name === '') $school_name = get_setting('schoolName', 'SMA Negeri Ha
             <!-- Recent Scan Feed Table -->
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
                 <div class="flex items-center justify-between mb-3.5">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Riwayat Terkini Hari Ini</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Riwayat Terkini Hari Ini</h3>
                     <span class="text-[11px] text-emerald-400 font-medium"><?= count($recent_scans) ?> Terakhir</span>
                 </div>
 
@@ -283,7 +283,7 @@ if ($school_name === '') $school_name = get_setting('schoolName', 'SMA Negeri Ha
                                     </div>
                                     <div>
                                         <div class="font-bold text-slate-200"><?= htmlspecialchars($item['full_name']) ?></div>
-                                        <div class="text-[10px] text-slate-400"><?= htmlspecialchars($item['class_name'] ?? $item['role_name']) ?></div>
+                                        <div class="text-[10px] text-slate-500"><?= htmlspecialchars($item['class_name'] ?? $item['role_name']) ?></div>
                                     </div>
                                 </div>
                                 <div class="text-right">
@@ -518,26 +518,37 @@ if ($school_name === '') $school_name = get_setting('schoolName', 'SMA Negeri Ha
             }
         }
 
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
         function prependRecentScan(u) {
             const list = document.getElementById('recent-scans-list');
             const emptyMsg = document.getElementById('empty-recent-msg');
             if (emptyMsg) emptyMsg.remove();
+
+            const safeName = escapeHtml(u.name || '');
+            const safeClass = escapeHtml(u.class || '');
+            const safeTime = escapeHtml(u.time || '');
+            const safeStatus = escapeHtml(u.status || '');
 
             const item = document.createElement('div');
             item.className = 'p-2.5 rounded-xl bg-slate-950/60 border border-emerald-900/60 flex items-center justify-between text-xs animate-pulse';
             item.innerHTML = `
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-lg bg-emerald-800 text-emerald-200 flex items-center justify-center font-bold text-xs">
-                        ${u.name.charAt(0).toUpperCase()}
+                        ${safeName.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                        <div class="font-bold text-white">${u.name}</div>
-                        <div class="text-[10px] text-slate-400">${u.class}</div>
+                        <div class="font-bold text-white">${safeName}</div>
+                        <div class="text-[10px] text-slate-500">${safeClass}</div>
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="font-mono font-bold text-emerald-400">${u.time}</div>
-                    <div class="text-[10px] font-semibold ${u.status === 'TERLAMBAT' ? 'text-amber-400' : 'text-emerald-400'}">${u.status}</div>
+                    <div class="font-mono font-bold text-emerald-400">${safeTime}</div>
+                    <div class="text-[10px] font-semibold ${u.status === 'TERLAMBAT' ? 'text-amber-400' : 'text-emerald-400'}">${safeStatus}</div>
                 </div>
             `;
             list.insertBefore(item, list.firstChild);

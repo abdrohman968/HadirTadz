@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['siswa']);
-$base_url = get_base_url();
 $user = auth_user();
 $today = date('Y-m-d');
 
@@ -26,11 +25,7 @@ include __DIR__ . '/../includes/sidebar.php';
 <main class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
     <div class="max-w-3xl mx-auto space-y-6">
 
-        <!-- Page Header -->
-        <div>
-            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Presensi Mandiri Siswa (GPS & Kamera)</h1>
-            <p class="text-xs sm:text-sm text-slate-500">Lakukan absensi mandiri dari smartphone Anda saat berada di lingkungan sekolah.</p>
-        </div>
+        <?= ds_page_header('Presensi Mandiri Siswa (GPS & Kamera)', 'Lakukan absensi mandiri dari smartphone Anda saat berada di lingkungan sekolah.') ?>
 
         <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
             
@@ -47,7 +42,7 @@ include __DIR__ . '/../includes/sidebar.php';
                 </div>
                 <div class="text-right font-mono text-xs">
                     <span id="gps-distance" class="font-bold text-slate-700">-</span>
-                    <span class="block text-[10px] text-slate-400">Radius: <?= $radius_limit ?>m</span>
+                    <span class="block text-[10px] text-slate-500">Radius: <?= $radius_limit ?>m</span>
                 </div>
             </div>
 

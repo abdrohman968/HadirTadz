@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['siswa']);
-$base_url = get_base_url();
 $user = auth_user();
 
 $school_name = get_setting('schoolName', 'SMA Negeri Harapan Bangsa');
@@ -90,7 +89,7 @@ include __DIR__ . '/../includes/sidebar.php';
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         new QRCode(document.getElementById("fullscreen-qrcode"), {
-            text: "<?= $user['identifier'] ?>",
+            text: <?= json_encode($user['identifier']) ?>,
             width: 140,
             height: 140,
             colorDark: "#064e3b",

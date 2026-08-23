@@ -4,7 +4,7 @@
    Theme: Hadir (Dark Emerald) & Tadz (Bright Emerald)
    ========================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+/* Google Fonts loaded via <link> in header.php (parallel download, no render-blocking @import) */
 
 body {
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -74,8 +74,8 @@ main {
     border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
-/* Mobile App-like Card Layout for Tables */
-@media (max-width: 768px) {
+/* Mobile App-like Card Layout for Tables (matches Tailwind md breakpoint: < 768px) */
+@media (max-width: 767px) {
     .table-responsive-card table,
     .table-responsive-card thead,
     .table-responsive-card tbody,

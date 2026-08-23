@@ -49,15 +49,35 @@ try {
     // Simpan foto selfie jika ada
     $photo_url = null;
     if (!empty($photo_data) && strpos($photo_data, 'data:image') === 0) {
-        $upload_dir = __DIR__ . '/../assets/uploads/selfie/';
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
+        // Validate: max 2MB base64 payload (~2.67MB raw)
+        if (strlen($photo_data) > 3_500_000) {
+            echo json_encode(['success' => false, 'message' => 'Ukuran foto selfie terlalu besar (maks 2MB)']);
+            exit;
         }
         $parts = explode(',', $photo_data);
+        $header = $parts[0] ?? '';
         $data = base64_decode($parts[1] ?? '');
-        if ($data) {
-            $filename = 'selfie_' . $user['id'] . '_' . date('Ymd_His') . '.jpg';
-            file_put_contents($upload_dir . $filename, $data);
+        if (!$data) {
+            echo json_encode(['success' => false, 'message' => 'Data foto selfie tidak valid']);
+            exit;
+        }
+        // Validate MIME from decoded bytes (magic bytes)
+        $mime = null;
+        if (str_starts_with($data, "\xFF\xD8\xFF")) $mime = 'image/jpeg';
+        elseif (str_starts_with($data, "\x89PNG\r\n\x1A\n")) $mime = 'image/png';
+        elseif (str_starts_with($data, 'GIF87a') || str_starts_with($data, 'GIF89a')) $mime = 'image/gif';
+        elseif (str_starts_with($data, 'RIFF') && substr($data, 8, 4) === 'WEBP') $mime = 'image/webp';
+        if (!$mime) {
+            echo json_encode(['success' => false, 'message' => 'Format foto tidak didukung (hanya JPG, PNG, GIF, WebP)']);
+            exit;
+        }
+        $ext = match($mime) { 'image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp', default => 'jpg' };
+        $upload_dir = __DIR__ . '/../assets/uploads/selfie/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0755, true);
+        }
+        $filename = 'selfie_' . $user['id'] . '_' . date('Ymd_His') . '.' . $ext;
+        if (file_put_contents($upload_dir . $filename, $data) !== false) {
             $photo_url = get_base_url() . '/assets/uploads/selfie/' . $filename;
         }
     }
@@ -74,7 +94,7 @@ try {
     // Dapatkan class_id jika user adalah siswa
     $class_id = null;
     if ($user['role_code'] === 'siswa') {
-        $stdStmt = $pdo->prepare("SELECT class_id FROM students WHERE user_id = ?");
+        $stdStmt = $pdo->prepare("SELECT class_id FROM students WHERE user_id = ? AND deleted_at IS NULL");
         $stdStmt->execute([$user['id']]);
         $class_id = $stdStmt->fetchColumn() ?: null;
     }

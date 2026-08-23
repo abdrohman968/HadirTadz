@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['admin']);
-$base_url = get_base_url();
 $school_id = auth_school_id();
 
 $error = '';
@@ -145,20 +144,7 @@ include __DIR__ . '/../includes/sidebar.php';
 <main class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
     <div class="max-w-7xl mx-auto space-y-6">
 
-        <!-- Page Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Data Siswa</h1>
-                <p class="text-xs sm:text-sm text-slate-500">Kelola informasi peserta didik, NISN, dan generate kartu pelajar digital.</p>
-            </div>
-            <div class="flex items-center gap-2.5">
-                <?= ds_button('<i class="fa-solid fa-user-plus"></i> <span>Tambah Siswa</span>', 'primary', 'button', ['onclick' => 'openStudentModal()']) ?>
-                <a href="<?= $base_url ?>/admin/cards.php" class="px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold text-xs transition flex items-center gap-2">
-                    <i class="fa-solid fa-id-card text-emerald-600"></i>
-                    <span>Cetak Kartu Pelajar</span>
-                </a>
-            </div>
-        </div>
+        <?= ds_page_header('Data Siswa', 'Kelola informasi peserta didik, NISN, dan generate kartu pelajar digital.', ds_button('<i class="fa-solid fa-user-plus"></i> <span>Tambah Siswa</span>', 'primary', 'button', ['onclick' => 'openStudentModal()']) . '<a href="' . $base_url . '/admin/cards.php" class="px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold text-xs transition flex items-center gap-2"><i class="fa-solid fa-id-card text-emerald-600"></i><span>Cetak Kartu Pelajar</span></a>') ?>
 
         <?php if (!empty($error)): ?>
             <?= ds_alert($error, 'danger') ?>
@@ -194,7 +180,7 @@ include __DIR__ . '/../includes/sidebar.php';
 
             <div class="table-responsive-card">
                 <table class="w-full text-left text-xs text-slate-600">
-                    <thead class="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
                         <tr>
                             <th class="py-3 px-4">Nama Lengkap</th>
                             <th class="py-3 px-4">NISN</th>
@@ -208,7 +194,7 @@ include __DIR__ . '/../includes/sidebar.php';
                     <tbody class="divide-y divide-slate-100">
                         <?php if (empty($students)): ?>
                             <tr>
-                                <td colspan="7" class="text-center py-10 text-slate-400" data-label="">
+                                <td colspan="7" class="text-center py-10 text-slate-500" data-label="">
                                     Belum ada data siswa yang ditemukan.
                                 </td>
                             </tr>
@@ -231,7 +217,7 @@ include __DIR__ . '/../includes/sidebar.php';
                                     </td>
                                     <td class="py-3 px-4" data-label="Kelas & Jurusan">
                                         <span class="font-bold text-slate-700"><?= htmlspecialchars($s['class_name'] ?? 'Belum Ditentukan') ?></span>
-                                        <span class="block text-[10px] text-slate-400"><?= htmlspecialchars($s['major'] ?? '') ?></span>
+                                        <span class="block text-[10px] text-slate-500"><?= htmlspecialchars($s['major'] ?? '') ?></span>
                                     </td>
                                     <td class="py-3 px-4" data-label="Gender">
                                         <?= ds_badge(($s['gender'] === 'L') ? 'Laki-laki' : 'Perempuan', ($s['gender'] === 'L') ? 'info' : 'danger') ?>

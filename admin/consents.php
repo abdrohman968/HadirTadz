@@ -3,9 +3,8 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
-require_auth();
+require_auth(['admin']);
 $school_id = auth_school_id();
-$base_url = get_base_url();
 
 $page = max(1, (int)($_GET['page'] ?? 1));
 $per_page = 20;
@@ -22,26 +21,24 @@ $stmt = $pdo->prepare("
     LEFT JOIN users u ON u.id = lc.user_id AND u.school_id = lc.school_id
     WHERE lc.school_id = ?
     ORDER BY lc.created_at DESC
-    LIMIT ? OFFSET ?
+    LIMIT $per_page OFFSET $offset
 ");
-$stmt->execute([$school_id, $per_page, $offset]);
+$stmt->execute([$school_id]);
 $consents = $stmt->fetchAll();
 
 include __DIR__ . '/../includes/header.php';
 include __DIR__ . '/../includes/sidebar.php';
 ?>
 
-<main class="lg:ml-64 min-h-screen bg-slate-50 p-6">
-    <div class="max-w-4xl mx-auto">
+<main class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <div class="max-w-4xl mx-auto space-y-6">
 
-        <div class="mb-6">
-            <h1 class="text-2xl font-extrabold text-slate-900 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-                    <i class="fa-solid fa-file-shield text-emerald-600"></i>
-                </div>
-                Legal &amp; Persetujuan
-            </h1>
-            <p class="text-slate-500 text-sm mt-1">Riwayat persetujuan Syarat &amp; Ketentuan dan Kebijakan Privasi dari pengguna sekolah ini.</p>
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Legal &amp; Persetujuan</h1>
+                <p class="text-xs sm:text-sm text-slate-500">Riwayat persetujuan Syarat &amp; Ketentuan dan Kebijakan Privasi dari pengguna sekolah ini.</p>
+            </div>
         </div>
 
         <?php if (empty($consents)): ?>
@@ -50,7 +47,7 @@ include __DIR__ . '/../includes/sidebar.php';
                     <i class="fa-solid fa-inbox text-2xl text-slate-300"></i>
                 </div>
                 <p class="text-slate-500 font-medium">Belum ada catatan persetujuan</p>
-                <p class="text-slate-400 text-sm mt-1">Persetujuan akan tercatat saat ada pengguna baru yang mendaftar.</p>
+                <p class="text-slate-500 text-sm mt-1">Persetujuan akan tercatat saat ada pengguna baru yang mendaftar.</p>
             </div>
         <?php else: ?>
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -73,7 +70,7 @@ include __DIR__ . '/../includes/sidebar.php';
                             <tr class="hover:bg-slate-50 transition">
                                 <td class="px-4 py-3">
                                     <p class="font-semibold text-slate-800"><?= htmlspecialchars($c['full_name'] ?? '-') ?></p>
-                                    <p class="text-xs text-slate-400"><?= htmlspecialchars($c['identifier'] ?? '') ?></p>
+                                    <p class="text-xs text-slate-500"><?= htmlspecialchars($c['identifier'] ?? '') ?></p>
                                 </td>
                                 <td class="px-4 py-3">
                                     <?php if ($c['consent_type'] === 'terms'): ?>
@@ -97,7 +94,7 @@ include __DIR__ . '/../includes/sidebar.php';
 
                 <?php if ($total_pages > 1): ?>
                 <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
-                    <p class="text-xs text-slate-400">Halaman <?= $page ?> dari <?= $total_pages ?></p>
+                    <p class="text-xs text-slate-500">Halaman <?= $page ?> dari <?= $total_pages ?></p>
                     <div class="flex gap-2">
                         <?php if ($page > 1): ?>
                             <a href="?page=<?= $page - 1 ?>" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition">

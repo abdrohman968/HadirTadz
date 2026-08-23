@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['admin']);
-$base_url = get_base_url();
 $error = '';
 $new_token = null;
 
@@ -61,28 +60,15 @@ include __DIR__ . '/../includes/sidebar.php';
 <main class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
     <div class="max-w-4xl mx-auto space-y-6">
 
-        <!-- Page Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Pengelolaan Kiosk Scanner</h1>
-                <p class="text-xs sm:text-sm text-slate-500">Buat dan kelola token kiosk untuk perangkat presensi di gerbang <?= htmlspecialchars(current_school()['name'] ?? '') ?>.</p>
-            </div>
-            <a href="<?= $base_url ?>/admin/index.php" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1.5 bg-emerald-50 px-3 py-2 rounded-xl self-start">
-                <i class="fa-solid fa-arrow-left"></i> Kembali
-            </a>
-        </div>
+        <?= ds_page_header('Pengelolaan Kiosk Scanner', 'Buat dan kelola token kiosk untuk perangkat presensi di gerbang ' . htmlspecialchars(current_school()['name'] ?? '') . '.', '<a href="' . $base_url . '/admin/index.php" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1.5 bg-emerald-50 px-3 py-2 rounded-xl self-start"><i class="fa-solid fa-arrow-left"></i> Kembali</a>') ?>
 
         <?php if (!empty($error)): ?>
-            <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
-                <?= htmlspecialchars($error) ?>
-            </div>
+            <?= ds_alert(htmlspecialchars($error), 'danger') ?>
         <?php endif; ?>
 
         <?php $flash = get_flash(); ?>
         <?php if ($flash): ?>
-            <div class="p-4 rounded-xl <?= $flash['type'] === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700' ?> border text-xs">
-                <?= htmlspecialchars($flash['message']) ?>
-            </div>
+            <?= ds_alert(htmlspecialchars($flash['message']), $flash['type'] === 'success' ? 'success' : 'danger') ?>
         <?php endif; ?>
 
         <!-- Token Baru (Ditampilkan Sekali Setelah Generate) -->
@@ -101,7 +87,7 @@ include __DIR__ . '/../includes/sidebar.php';
                 </div>
                 <div class="mt-3 p-3 rounded-xl bg-black/30 border border-emerald-800/40 text-xs text-emerald-200 font-mono break-all flex items-center gap-2">
                     <i class="fa-solid fa-link text-emerald-400"></i>
-                    <span><?= htmlspecialchars(get_base_url()) ?>/scan.php?k=<?= htmlspecialchars($new_token) ?></span>
+                    <span><?= htmlspecialchars($base_url) ?>/scan.php?k=<?= htmlspecialchars($new_token) ?></span>
                     <button type="button" onclick="copyKioskUrl()" class="ml-auto px-3 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-[11px] font-bold transition">Salin URL</button>
                 </div>
             </div>
@@ -115,20 +101,19 @@ include __DIR__ . '/../includes/sidebar.php';
             </h3>
             <form method="POST" action="" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                 <div class="sm:col-span-2">
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nama Perangkat / Lokasi Kiosk</label>
-                    <input type="text" name="device_name" placeholder="Contoh: Kiosk Gerbang Utama" value="Kiosk Gerbang"
-                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <?= ds_input('Nama Perangkat / Lokasi Kiosk', 'text', [
+                        'name' => 'device_name',
+                        'placeholder' => 'Contoh: Kiosk Gerbang Utama',
+                        'value' => 'Kiosk Gerbang'
+                    ]) ?>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Kedaluwarsa (Opsional)</label>
-                    <input type="datetime-local" name="expires_at"
-                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <?= ds_input('Kedaluwarsa (Opsional)', 'datetime-local', [
+                        'name' => 'expires_at'
+                    ]) ?>
                 </div>
                 <div class="sm:col-span-3">
-                    <button type="submit" name="action" value="generate" class="px-6 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-lg shadow-emerald-900/20 transition flex items-center gap-2">
-                        <i class="fa-solid fa-key"></i>
-                        <span>Generate Token Kiosk</span>
-                    </button>
+                    <?= ds_button('<i class="fa-solid fa-key"></i> <span>Generate Token Kiosk</span>', 'primary', 'submit', ['name' => 'action', 'value' => 'generate']) ?>
                 </div>
             </form>
         </div>
@@ -138,11 +123,11 @@ include __DIR__ . '/../includes/sidebar.php';
             <h3 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-list-check text-emerald-600"></i>
                 <span>Daftar Token Kiosk</span>
-                <span class="ml-auto text-[11px] font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full"><?= count($tokens) ?> token</span>
+                <span class="ml-auto"><?= ds_badge(count($tokens) . ' token', 'neutral') ?></span>
             </h3>
 
             <?php if (empty($tokens)): ?>
-                <div class="text-center py-8 text-xs text-slate-400">
+                <div class="text-center py-8 text-xs text-slate-500">
                     <i class="fa-solid fa-qrcode text-3xl text-slate-300 mb-2"></i>
                     <p>Belum ada token kiosk. Buat token pertama di form di atas.</p>
                 </div>
@@ -157,10 +142,8 @@ include __DIR__ . '/../includes/sidebar.php';
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 flex-wrap">
                                     <span class="font-bold text-sm text-slate-800 truncate"><?= htmlspecialchars($t['device_name']) ?></span>
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase <?= $is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-600' ?>">
-                                        <?= $is_active ? ($is_expired ? 'Kedaluwarsa' : 'Aktif') : 'Dicabut' ?>
-                                    </span>
-                                    <span class="text-[10px] font-mono text-slate-400">#<?= (int)$t['id'] ?></span>
+                                    <?= ds_badge($is_active ? ($is_expired ? 'Kedaluwarsa' : 'Aktif') : 'Dicabut', $is_active ? ($is_expired ? 'warning' : 'success') : 'danger') ?>
+                                    <span class="text-[10px] font-mono text-slate-500">#<?= (int)$t['id'] ?></span>
                                 </div>
                                 <div class="text-[11px] text-slate-500 mt-1">
                                     Terakhir dipakai: <?= !empty($t['last_used_at']) ? format_date_indo($t['last_used_at'], true, true) : 'Belum pernah' ?>
@@ -172,9 +155,7 @@ include __DIR__ . '/../includes/sidebar.php';
                             <?php if ($is_active): ?>
                                 <form method="POST" action="" onsubmit="return confirm('Cabut token ini? Perangkat kiosk tidak akan bisa digunakan lagi.');" class="flex items-center gap-2">
                                     <input type="hidden" name="token_id" value="<?= (int)$t['id'] ?>">
-                                    <button type="submit" name="action" value="revoke" class="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold transition flex items-center gap-1.5">
-                                        <i class="fa-solid fa-ban"></i> Cabut
-                                    </button>
+                                    <?= ds_button('<i class="fa-solid fa-ban"></i> Cabut', 'danger', 'submit', ['name' => 'action', 'value' => 'revoke']) ?>
                                 </form>
                             <?php endif; ?>
                         </div>
@@ -193,7 +174,7 @@ include __DIR__ . '/../includes/sidebar.php';
         showToast('Token berhasil disalin.', 'success');
     }
     function copyKioskUrl() {
-        const url = '<?= htmlspecialchars(get_base_url()) ?>/scan.php?k=' + (document.getElementById('new-token-value').value || '');
+        const url = '<?= htmlspecialchars($base_url) ?>/scan.php?k=' + (document.getElementById('new-token-value').value || '');
         navigator.clipboard.writeText(url).then(() => showToast('URL Kiosk disalin.', 'success')).catch(() => showToast('Salin manual: ' + url, 'info'));
     }
 </script>

@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['admin']);
-$base_url = get_base_url();
 $school_id = auth_school_id();
 
 $error = '';
@@ -75,20 +74,14 @@ include __DIR__ . '/../includes/sidebar.php';
 <main class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
     <div class="max-w-7xl mx-auto space-y-6">
 
-        <!-- Page Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Kelola Akun Pengguna</h1>
-                <p class="text-xs sm:text-sm text-slate-500">Manajemen akun masuk sistem, hak akses, dan reset kata sandi.</p>
-            </div>
-        </div>
+        <?= ds_page_header('Kelola Akun Pengguna', 'Manajemen akun masuk sistem, hak akses, dan reset kata sandi.') ?>
 
         <!-- Filter Bar -->
         <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
             <form method="GET" action="" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter Peran (Role)</label>
-                    <select name="role_id" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <label for="field-admin-user-role" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter Peran (Role)</label>
+                    <select id="field-admin-user-role" name="role_id" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                         <option value="">-- Semua Role --</option>
                         <?php foreach ($roles as $r): ?>
                             <option value="<?= $r['id'] ?>" <?= ($role_filter == $r['id']) ? 'selected' : '' ?>>
@@ -99,8 +92,8 @@ include __DIR__ . '/../includes/sidebar.php';
                 </div>
 
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Cari Pengguna</label>
-                    <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Nama, ID, atau Email..." class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <label for="field-admin-user-search" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Cari Pengguna</label>
+                    <input id="field-admin-user-search" type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Nama, ID, atau Email..." class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 </div>
 
                 <div class="flex gap-2">
@@ -124,7 +117,7 @@ include __DIR__ . '/../includes/sidebar.php';
 
             <div class="table-responsive-card">
                 <table class="w-full text-left text-xs text-slate-600">
-                    <thead class="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
                         <tr>
                             <th class="py-3 px-4">Nama & ID Pengguna</th>
                             <th class="py-3 px-4">Peran (Role)</th>
@@ -144,7 +137,7 @@ include __DIR__ . '/../includes/sidebar.php';
                                         </div>
                                         <div>
                                             <div class="font-bold text-slate-800"><?= htmlspecialchars($u['full_name']) ?></div>
-                                            <div class="font-mono text-[10px] text-slate-400"><?= htmlspecialchars($u['identifier']) ?></div>
+                                            <div class="font-mono text-[10px] text-slate-500"><?= htmlspecialchars($u['identifier']) ?></div>
                                         </div>
                                     </div>
                                 </td>
@@ -156,7 +149,7 @@ include __DIR__ . '/../includes/sidebar.php';
                                 </td>
                                 <td class="py-3 px-4 text-slate-600" data-label="Kontak (Email / HP)">
                                     <div><?= htmlspecialchars($u['email'] ?: '-') ?></div>
-                                    <div class="font-mono text-[10px] text-slate-400"><?= htmlspecialchars($u['phone'] ?: '-') ?></div>
+                                    <div class="font-mono text-[10px] text-slate-500"><?= htmlspecialchars($u['phone'] ?: '-') ?></div>
                                 </td>
                                 <td class="py-3 px-4" data-label="Status Akun">
                                     <?php if ($u['status'] === 'active'): ?>
@@ -169,7 +162,7 @@ include __DIR__ . '/../includes/sidebar.php';
                                         </span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="py-3 px-4 text-slate-400 text-[11px]" data-label="Terakhir Masuk">
+                                <td class="py-3 px-4 text-slate-500 text-[11px]" data-label="Terakhir Masuk">
                                     <?= $u['last_login_at'] ? format_date_indo($u['last_login_at'], false, true) : 'Belum pernah' ?>
                                 </td>
                                 <td class="py-3 px-4 text-center" data-label="Aksi">

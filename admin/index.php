@@ -5,8 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['admin']);
-$current_user = auth_user();
-$base_url = get_base_url();
 $school_id = auth_school_id();
 $today = date('Y-m-d');
 
@@ -69,6 +67,7 @@ $recent_attendance = $pdo->prepare("
 $recent_attendance->execute([$today, $school_id]);
 $recent_list = $recent_attendance->fetchAll();
 
+$load_apexcharts = true;
 include __DIR__ . '/../includes/header.php';
 include __DIR__ . '/../includes/sidebar.php';
 ?>
@@ -226,7 +225,7 @@ include __DIR__ . '/../includes/sidebar.php';
 
                 <div class="divide-y divide-slate-100">
                     <?php if (empty($recent_list)): ?>
-                        <div class="text-center py-8 text-xs text-slate-400">
+                        <div class="text-center py-8 text-xs text-slate-500">
                             Belum ada rekaman presensi yang masuk hari ini.
                         </div>
                     <?php else: ?>
@@ -238,7 +237,7 @@ include __DIR__ . '/../includes/sidebar.php';
                                     </div>
                                     <div>
                                         <h4 class="text-xs font-bold text-slate-800"><?= htmlspecialchars($row['full_name']) ?></h4>
-                                        <p class="text-[11px] text-slate-400"><?= htmlspecialchars($row['class_name'] ?? $row['role_name']) ?> &bull; <span class="font-mono"><?= htmlspecialchars($row['identifier']) ?></span></p>
+                                        <p class="text-[11px] text-slate-500"><?= htmlspecialchars($row['class_name'] ?? $row['role_name']) ?> &bull; <span class="font-mono"><?= htmlspecialchars($row['identifier']) ?></span></p>
                                     </div>
                                 </div>
                                 <div class="text-right flex items-center gap-2.5">
@@ -267,7 +266,7 @@ include __DIR__ . '/../includes/sidebar.php';
 
                 <div class="space-y-3">
                     <?php if (empty($pending_perm)): ?>
-                        <div class="text-center py-8 text-xs text-slate-400">
+                        <div class="text-center py-8 text-xs text-slate-500">
                             <i class="fa-solid fa-circle-check text-emerald-500 text-2xl mb-2 block"></i>
                             Tidak ada pengajuan izin yang tertunda.
                         </div>
@@ -280,7 +279,7 @@ include __DIR__ . '/../includes/sidebar.php';
                                          <?= ds_badge(strtoupper($p['type']), 'info') ?>
                                     </div>
                                     <p class="text-[11px] text-slate-500 mt-0.5 line-clamp-1"><?= htmlspecialchars($p['reason']) ?></p>
-                                    <p class="text-[10px] text-slate-400 mt-1"><?= format_date_indo($p['start_date'], false) ?> s/d <?= format_date_indo($p['end_date'], false) ?></p>
+                                    <p class="text-[10px] text-slate-500 mt-1"><?= format_date_indo($p['start_date'], false) ?> s/d <?= format_date_indo($p['end_date'], false) ?></p>
                                 </div>
                                 <a href="<?= $base_url ?>/admin/permissions.php" class="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition">
                                     Review

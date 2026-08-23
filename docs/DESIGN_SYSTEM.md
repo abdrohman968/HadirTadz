@@ -414,12 +414,20 @@ Canonical green palette used in: `login.php`, `register_school.php`, `terms.php`
 | P3.1C-1 | admin/index.php | ds_badge (permission type) | 22 Aug 2026 |
 | P3.1C-2 | admin/students.php | ds_button, ds_alert, ds_select, ds_input, ds_badge, ds_modal, ds_modal_js | 22 Aug 2026 |
 | P3.1C-3 | admin/teachers.php | ds_button, ds_alert, ds_input, ds_select, ds_badge, ds_icon_button, ds_modal, ds_modal_js | 22 Aug 2026 |
-| P3.1C-4 | admin/classes.php | — | PENDING |
-| P3.1C-5 | admin/attendance.php | — | PENDING |
-| P3.1C-6 | admin/rules.php | — | PENDING |
-| P3.1C-7 | admin/permissions.php | — | PENDING |
-| P3.1C-8 | admin/reports.php | — | PENDING |
-| P3.1C-9 | admin/cards.php | — | PENDING |
-| P3.1C-10 | admin/kiosk.php | — | PENDING |
+| P3.1C-4 | admin/classes.php | ds_button, ds_alert, ds_badge, ds_icon_button, ds_input, ds_select, ds_modal, ds_modal_js | 22 Aug 2026 |
+| P3.1C-5 | admin/attendance.php | ds_button, ds_alert, ds_input, ds_select, ds_textarea, ds_icon_button, ds_modal, ds_modal_js | 22 Aug 2026 |
+| P3.1C-6 | admin/rules.php | ds_button, ds_alert, ds_badge, ds_icon_button, ds_input, ds_select, ds_modal, ds_modal_js | 22 Aug 2026 |
+| P3.1C-7 | admin/permissions.php | ds_alert, ds_badge, ds_button, ds_textarea, ds_modal, ds_modal_js | 22 Aug 2026 |
+| P3.1C-8 | admin/reports.php | ds_button, ds_input, ds_select | 22 Aug 2026 |
+| P3.1C-9 | admin/cards.php | ds_button | 22 Aug 2026 |
+| P3.1C-10 | admin/kiosk.php | ds_alert, ds_badge, ds_button, ds_input | 22 Aug 2026 |
+| P3.3A | Guru UI Audit | All 5 guru pages audited — DS adoption minimal, 3 candidates identified | 22 Aug 2026 |
+| P3.3B-1 | guru/jurnal.php | ds_page_header, ds_alert, ds_card_start/end, ds_select, ds_input, ds_textarea, ds_button | 22 Aug 2026 |
+| P3.3B-2 | guru/riwayat.php | Bug fix: ds_page_header action slot month value (already migrated) | 22 Aug 2026 |
+| P3.3B-3 | guru/kelas.php | ds_alert, ds_card_start/end, ds_select, ds_input, ds_button; bug fix: ds_page_header action slot base_url | 22 Aug 2026 |
+| P3.3B-4 | guru/index.php | No changes — all layouts role-specific, no DS components match | 22 Aug 2026 |
+| P3.4A | Siswa UI Audit | All 5 siswa pages audited — 2 migration targets, 3 leave as-is | 22 Aug 2026 |
+| P3.4B-1 | siswa/izin.php | ds_alert, ds_select, ds_input (×2), ds_textarea, ds_button; added flash display | 22 Aug 2026 |
+| P3.4B-2 | siswa/riwayat.php | Bug fix: ds_page_header action slot month value (already migrated) | 22 Aug 2026 |
 
 **Note:** Many admin pages use `<a>` navigation links styled as buttons, not `<button>` elements. `ds_button()` renders `<button>` tags. These links are intentionally NOT migrated to preserve navigation semantics. Card layouts with custom internal structures (stat cards, chart cards, feed cards) are also kept as-is when `ds_card_start/end` would break the visual design.

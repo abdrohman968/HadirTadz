@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['siswa']);
-$base_url = get_base_url();
 $user = auth_user();
 $today = date('Y-m-d');
 
@@ -90,7 +89,7 @@ include __DIR__ . '/../includes/sidebar.php';
                 <div>
                     <div class="flex items-center justify-between mb-4">
                         <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Status Kehadiran Hari Ini</span>
-                        <span class="text-xs font-mono text-slate-400"><?= format_date_indo($today, false) ?></span>
+                        <span class="text-xs font-mono text-slate-500"><?= format_date_indo($today, false) ?></span>
                     </div>
 
                     <?php if ($today_att): ?>
@@ -187,7 +186,7 @@ include __DIR__ . '/../includes/sidebar.php';
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         new QRCode(document.getElementById("student-qrcode"), {
-            text: "<?= $user['identifier'] ?>",
+            text: <?= json_encode($user['identifier']) ?>,
             width: 100,
             height: 100,
             colorDark: "#064e3b",

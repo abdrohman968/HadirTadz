@@ -1,8 +1,6 @@
 <?php
-require_once __DIR__ . '/../config/auth.php';
-$current_user = auth_user();
+// Auth context resolved once by header.php — reuse $current_user, $base_url
 $role = $current_user['role_code'] ?? 'guest';
-$base_url = get_base_url();
 
 $current_script = basename($_SERVER['PHP_SELF']);
 $current_dir = basename(dirname($_SERVER['PHP_SELF']));

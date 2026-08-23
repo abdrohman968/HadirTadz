@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['admin']);
-$base_url = get_base_url();
 $school_id = auth_school_id();
 
 // Filter parameters
@@ -130,71 +129,42 @@ include __DIR__ . '/../includes/sidebar.php';
 <main class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
     <div class="max-w-7xl mx-auto space-y-6">
 
-        <!-- Page Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Presensi Harian</h1>
-                <p class="text-xs sm:text-sm text-slate-500">Monitor dan kelola kehadiran siswa serta guru secara realtime.</p>
-            </div>
-            <div class="flex flex-wrap items-center justify-between gap-2">
-                <button onclick="openModal('modal-attendance')" class="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition flex items-center gap-2">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Tambah Presensi Manual</span>
-                </button>
-                <a href="<?= $base_url ?>/admin/reports.php?date=<?= urlencode($filter_date) ?>" class="px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold text-xs transition flex items-center gap-2">
-                    <i class="fa-solid fa-file-export text-slate-400"></i>
-                    <span>Ekspor</span>
-                </a>
-            </div>
-        </div>
+        <?= ds_page_header('Presensi Harian', 'Monitor dan kelola kehadiran siswa serta guru secara realtime.', ds_button('<i class="fa-solid fa-plus"></i> <span>Tambah Presensi Manual</span>', 'primary', 'button', ['onclick' => "openModal('modal-attendance')"]) . '<a href="' . $base_url . '/admin/reports.php?date=' . urlencode($filter_date) . '" class="px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold text-xs transition flex items-center gap-2"><i class="fa-solid fa-file-export text-slate-400"></i><span>Ekspor</span></a>') ?>
 
         <?php if (!empty($error)): ?>
-            <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
-                <?= htmlspecialchars($error) ?>
-            </div>
+            <?= ds_alert(htmlspecialchars($error), 'danger') ?>
         <?php endif; ?>
 
         <!-- Filters Bar -->
         <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
             <form method="GET" action="" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Tanggal</label>
-                    <input type="date" name="date" value="<?= htmlspecialchars($filter_date) ?>" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
+                <?= ds_input('Tanggal', 'date', [
+                    'name' => 'date',
+                    'value' => $filter_date
+                ]) ?>
 
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Kelas</label>
-                    <select name="class_id" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        <option value="">-- Semua Kelas --</option>
-                        <?php foreach ($classes as $c): ?>
-                            <option value="<?= $c['id'] ?>" <?= ($filter_class == $c['id']) ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($c['class_name']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+                <?= ds_select('Kelas', array_merge(['' => '-- Semua Kelas --'], array_combine(
+                    array_column($classes, 'id'),
+                    array_column($classes, 'class_name')
+                )), $filter_class, '', ['name' => 'class_id']) ?>
 
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Status</label>
-                    <select name="status" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        <option value="">-- Semua Status --</option>
-                        <option value="HADIR" <?= ($filter_status === 'HADIR') ? 'selected' : '' ?>>HADIR</option>
-                        <option value="TERLAMBAT" <?= ($filter_status === 'TERLAMBAT') ? 'selected' : '' ?>>TERLAMBAT</option>
-                        <option value="IZIN" <?= ($filter_status === 'IZIN') ? 'selected' : '' ?>>IZIN</option>
-                        <option value="SAKIT" <?= ($filter_status === 'SAKIT') ? 'selected' : '' ?>>SAKIT</option>
-                        <option value="ALPHA" <?= ($filter_status === 'ALPHA') ? 'selected' : '' ?>>ALPHA</option>
-                    </select>
-                </div>
+                <?= ds_select('Status', [
+                    '' => '-- Semua Status --',
+                    'HADIR' => 'HADIR',
+                    'TERLAMBAT' => 'TERLAMBAT',
+                    'IZIN' => 'IZIN',
+                    'SAKIT' => 'SAKIT',
+                    'ALPHA' => 'ALPHA'
+                ], $filter_status, '', ['name' => 'status']) ?>
 
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Cari Nama / ID</label>
-                    <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Ketik nama atau NISN..." class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
+                <?= ds_input('Cari Nama / ID', 'text', [
+                    'name' => 'search',
+                    'value' => $search,
+                    'placeholder' => 'Ketik nama atau NISN...'
+                ]) ?>
 
                 <div class="flex gap-2">
-                    <button type="submit" class="flex-1 py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs transition">
-                        Filter
-                    </button>
+                    <?= ds_button('Filter', 'secondary', 'submit', ['class' => 'flex-1']) ?>
                     <a href="attendance.php" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs transition" title="Reset Filter">
                         <i class="fa-solid fa-rotate-left"></i>
                     </a>
@@ -212,7 +182,7 @@ include __DIR__ . '/../includes/sidebar.php';
 
             <div class="table-responsive-card">
                 <table class="w-full text-left text-xs text-slate-600">
-                    <thead class="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
                         <tr>
                             <th class="py-3 px-4">Nama Pengguna</th>
                             <th class="py-3 px-4">Role & Kelas</th>
@@ -227,7 +197,7 @@ include __DIR__ . '/../includes/sidebar.php';
                     <tbody class="divide-y divide-slate-100">
                         <?php if (empty($attendance_list)): ?>
                             <tr>
-                                <td colspan="8" class="text-center py-10 text-slate-400" data-label="">
+                                <td colspan="8" class="text-center py-10 text-slate-500" data-label="">
                                     Tidak ada data presensi yang sesuai dengan filter.
                                 </td>
                             </tr>
@@ -241,13 +211,13 @@ include __DIR__ . '/../includes/sidebar.php';
                                             </div>
                                             <div>
                                                 <div class="font-bold text-slate-800"><?= htmlspecialchars($item['full_name']) ?></div>
-                                                <div class="font-mono text-[10px] text-slate-400"><?= htmlspecialchars($item['identifier']) ?></div>
+                                                <div class="font-mono text-[10px] text-slate-500"><?= htmlspecialchars($item['identifier']) ?></div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="py-3 px-4" data-label="Role & Kelas">
                                         <span class="font-medium text-slate-700"><?= htmlspecialchars($item['class_name'] ?? '-') ?></span>
-                                        <span class="block text-[10px] text-slate-400 capitalize"><?= htmlspecialchars($item['role_name']) ?></span>
+                                        <span class="block text-[10px] text-slate-500 capitalize"><?= htmlspecialchars($item['role_name']) ?></span>
                                     </td>
                                     <td class="py-3 px-4 font-mono font-semibold text-emerald-700" data-label="Masuk">
                                         <?= format_time($item['time_in']) ?>
@@ -268,15 +238,18 @@ include __DIR__ . '/../includes/sidebar.php';
                                     </td>
                                     <td class="py-3 px-4 text-center" data-label="Aksi">
                                         <div class="flex items-center justify-center gap-1.5">
-                                            <button type="button" onclick="editAttendance(<?= htmlspecialchars(json_encode($item)) ?>)" class="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition" title="Edit Presensi">
-                                                <i class="fa-solid fa-pen-to-square text-xs"></i>
-                                            </button>
+                                            <?= ds_icon_button('fa-solid fa-pen-to-square', 'primary', 'button', [
+                                                'onclick' => 'editAttendance(' . htmlspecialchars(json_encode($item), ENT_QUOTES) . ')',
+                                                'title' => 'Edit Presensi',
+                                                'aria-label' => 'Edit presensi ' . htmlspecialchars($item['full_name'])
+                                            ]) ?>
                                             <form method="POST" action="" onsubmit="return confirm('Hapus rekaman presensi ini?');" class="inline">
                                                 <input type="hidden" name="action" value="delete_attendance">
                                                 <input type="hidden" name="attendance_id" value="<?= $item['id'] ?>">
-                                                <button type="submit" class="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition" title="Hapus">
-                                                    <i class="fa-solid fa-trash text-xs"></i>
-                                                </button>
+                                                <?= ds_icon_button('fa-solid fa-trash', 'danger', 'submit', [
+                                                    'title' => 'Hapus',
+                                                    'aria-label' => 'Hapus presensi ' . htmlspecialchars($item['full_name'])
+                                                ]) ?>
                                             </form>
                                         </div>
                                     </td>
@@ -292,89 +265,71 @@ include __DIR__ . '/../includes/sidebar.php';
 </main>
 
 <!-- Modal Add / Edit Attendance -->
-<div id="modal-attendance" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-            <h3 id="modal-title" class="text-base font-bold text-slate-800">Tambah Presensi Manual</h3>
-            <button onclick="closeModal('modal-attendance')" class="text-slate-400 hover:text-slate-600 text-sm">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
+<?= ds_modal_start('modal-attendance', 'Tambah Presensi Manual') ?>
 
         <form method="POST" action="" class="space-y-4">
             <input type="hidden" name="action" value="save_attendance">
             <input type="hidden" id="form-attendance-id" name="attendance_id" value="">
 
             <div id="user-select-container">
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Pilih Siswa / Guru</label>
-                <select name="user_id" id="form-user-id" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    <option value="">-- Pilih Pengguna --</option>
-                    <?php foreach ($users_list as $u): ?>
-                        <option value="<?= $u['id'] ?>">
-                            <?= htmlspecialchars($u['full_name']) ?> (<?= htmlspecialchars($u['identifier']) ?> - <?= htmlspecialchars($u['class_name'] ?? $u['role_name']) ?>)
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                <?= ds_select('Siswa / Guru', array_merge(['' => '-- Pilih Pengguna --'], array_combine(
+                    array_column($users_list, 'id'),
+                    array_map(fn($u) => $u['full_name'] . ' (' . $u['identifier'] . ' - ' . ($u['class_name'] ?? $u['role_name']) . ')', $users_list)
+                )), '', 'Pilih Siswa / Guru', [
+                    'name' => 'user_id',
+                    'id' => 'form-user-id',
+                    'required' => true
+                ]) ?>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Tanggal</label>
-                    <input type="date" name="date" id="form-date" value="<?= htmlspecialchars($filter_date) ?>" required class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Status Kehadiran</label>
-                    <select name="status" id="form-status" required class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        <option value="HADIR">HADIR</option>
-                        <option value="TERLAMBAT">TERLAMBAT</option>
-                        <option value="IZIN">IZIN</option>
-                        <option value="SAKIT">SAKIT</option>
-                        <option value="ALPHA">ALPHA</option>
-                    </select>
-                </div>
+                <?= ds_input('Tanggal', 'date', [
+                    'name' => 'date',
+                    'id' => 'form-date',
+                    'value' => $filter_date,
+                    'required' => true
+                ]) ?>
+                <?= ds_select('Status Kehadiran', [
+                    'HADIR' => 'HADIR',
+                    'TERLAMBAT' => 'TERLAMBAT',
+                    'IZIN' => 'IZIN',
+                    'SAKIT' => 'SAKIT',
+                    'ALPHA' => 'ALPHA'
+                ], 'HADIR', '', [
+                    'name' => 'status',
+                    'id' => 'form-status',
+                    'required' => true
+                ]) ?>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Jam Masuk (HH:mm)</label>
-                    <input type="time" name="time_in" id="form-time-in" value="07:00" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Jam Pulang (HH:mm)</label>
-                    <input type="time" name="time_out" id="form-time-out" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
+                <?= ds_input('Jam Masuk (HH:mm)', 'time', [
+                    'name' => 'time_in',
+                    'id' => 'form-time-in',
+                    'value' => '07:00'
+                ]) ?>
+                <?= ds_input('Jam Pulang (HH:mm)', 'time', [
+                    'name' => 'time_out',
+                    'id' => 'form-time-out'
+                ]) ?>
             </div>
 
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Catatan / Keterangan</label>
-                <textarea name="notes" id="form-notes" rows="2" placeholder="Contoh: Lupa bawa kartu / presensi manual" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
-            </div>
+            <?= ds_textarea('Catatan / Keterangan', [
+                'name' => 'notes',
+                'id' => 'form-notes',
+                'rows' => 2,
+                'placeholder' => 'Contoh: Lupa bawa kartu / presensi manual'
+            ]) ?>
 
             <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
-                <button type="button" onclick="closeModal('modal-attendance')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs">
-                    Batal
-                </button>
-                <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm">
-                    Simpan Presensi
-                </button>
+                <?= ds_button('Batal', 'ghost', 'button', ['onclick' => "closeModal('modal-attendance')"]) ?>
+                <?= ds_button('Simpan Presensi', 'primary', 'submit') ?>
             </div>
         </form>
-    </div>
-</div>
+
+<?= ds_modal_end() ?>
 
 <script>
-    function openModal(id) {
-        document.getElementById(id).classList.remove('hidden');
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).classList.add('hidden');
-        // Reset form
-        document.getElementById('form-attendance-id').value = '';
-        document.getElementById('modal-title').textContent = 'Tambah Presensi Manual';
-        document.getElementById('user-select-container').style.display = 'block';
-    }
-
     function editAttendance(data) {
         document.getElementById('form-attendance-id').value = data.id;
         document.getElementById('form-user-id').value = data.user_id;
@@ -383,9 +338,26 @@ include __DIR__ . '/../includes/sidebar.php';
         document.getElementById('form-time-in').value = data.time_in ? data.time_in.substring(0, 5) : '';
         document.getElementById('form-time-out').value = data.time_out ? data.time_out.substring(0, 5) : '';
         document.getElementById('form-notes').value = data.notes || '';
-        document.getElementById('modal-title').textContent = `Edit Presensi: ${data.full_name}`;
+        document.getElementById('user-select-container').style.display = 'block';
         openModal('modal-attendance');
     }
+
+    const _origCloseModal = window.closeModal;
+    window.closeModal = function(id) {
+        _origCloseModal(id);
+        if (id === 'modal-attendance') {
+            document.getElementById('form-attendance-id').value = '';
+            document.getElementById('form-user-id').value = '';
+            document.getElementById('form-date').value = '<?= htmlspecialchars($filter_date) ?>';
+            document.getElementById('form-status').value = 'HADIR';
+            document.getElementById('form-time-in').value = '07:00';
+            document.getElementById('form-time-out').value = '';
+            document.getElementById('form-notes').value = '';
+            document.getElementById('user-select-container').style.display = 'block';
+        }
+    };
 </script>
+
+<?= ds_modal_js() ?>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>

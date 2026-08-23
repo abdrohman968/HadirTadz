@@ -5,8 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['admin']);
-$current_user = auth_user();
-$base_url = get_base_url();
 $school_id = auth_school_id();
 
 $start_date = $_GET['start_date'] ?? date('Y-m-01');
@@ -109,62 +107,34 @@ include __DIR__ . '/../includes/sidebar.php';
 <main class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
     <div class="max-w-7xl mx-auto space-y-6">
 
-        <!-- Page Header (Hidden on Print) -->
-        <div class="no-print flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Rekapitulasi Laporan Kehadiran</h1>
-                <p class="text-xs sm:text-sm text-slate-500">Filter, cetak laporan resmi, dan ekspor data presensi ke format Excel/CSV.</p>
-            </div>
-            <div class="flex items-center gap-2.5">
-                <button onclick="window.print()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs shadow-sm transition flex items-center gap-2">
-                    <i class="fa-solid fa-print"></i>
-                    <span>Cetak Laporan</span>
-                </button>
-                <a href="reports.php?start_date=<?= urlencode($start_date) ?>&end_date=<?= urlencode($end_date) ?>&class_id=<?= urlencode($filter_class) ?>&role_code=<?= urlencode($filter_role) ?>&format=csv" class="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition flex items-center gap-2">
-                    <i class="fa-solid fa-file-excel"></i>
-                    <span>Ekspor CSV</span>
-                </a>
-            </div>
-        </div>
+        <?= ds_page_header('Rekapitulasi Laporan Kehadiran', 'Filter, cetak laporan resmi, dan ekspor data presensi ke format Excel/CSV.', ds_button('<i class="fa-solid fa-print"></i> <span>Cetak Laporan</span>', 'secondary', 'button', ['onclick' => 'window.print()']) . '<a href="reports.php?start_date=' . urlencode($start_date) . '&end_date=' . urlencode($end_date) . '&class_id=' . urlencode($filter_class) . '&role_code=' . urlencode($filter_role) . '&format=csv" class="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition flex items-center gap-2"><i class="fa-solid fa-file-excel"></i><span>Ekspor CSV</span></a>') ?>
 
         <!-- Filter Bar (Hidden on Print) -->
         <div class="no-print bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
             <form method="GET" action="" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Dari Tanggal</label>
-                    <input type="date" name="start_date" value="<?= htmlspecialchars($start_date) ?>" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
+                <?= ds_input('Dari Tanggal', 'date', [
+                    'name' => 'start_date',
+                    'value' => $start_date
+                ]) ?>
 
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Sampai Tanggal</label>
-                    <input type="date" name="end_date" value="<?= htmlspecialchars($end_date) ?>" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
+                <?= ds_input('Sampai Tanggal', 'date', [
+                    'name' => 'end_date',
+                    'value' => $end_date
+                ]) ?>
 
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Kelas</label>
-                    <select name="class_id" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        <option value="">-- Semua Kelas --</option>
-                        <?php foreach ($classes as $c): ?>
-                            <option value="<?= $c['id'] ?>" <?= ($filter_class == $c['id']) ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($c['class_name']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+                <?= ds_select('Kelas', array_merge(['' => '-- Semua Kelas --'], array_combine(
+                    array_column($classes, 'id'),
+                    array_column($classes, 'class_name')
+                )), $filter_class, '', ['name' => 'class_id']) ?>
 
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Peran</label>
-                    <select name="role_code" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        <option value="">-- Semua Peran --</option>
-                        <option value="siswa" <?= ($filter_role === 'siswa') ? 'selected' : '' ?>>Siswa</option>
-                        <option value="guru" <?= ($filter_role === 'guru') ? 'selected' : '' ?>>Guru</option>
-                    </select>
-                </div>
+                <?= ds_select('Peran', [
+                    '' => '-- Semua Peran --',
+                    'siswa' => 'Siswa',
+                    'guru' => 'Guru'
+                ], $filter_role, '', ['name' => 'role_code']) ?>
 
                 <div class="flex gap-2">
-                    <button type="submit" class="flex-1 py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs transition">
-                        Tampilkan
-                    </button>
+                    <?= ds_button('Tampilkan', 'secondary', 'submit', ['class' => 'flex-1']) ?>
                     <a href="reports.php" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs transition" title="Reset">
                         <i class="fa-solid fa-rotate-left"></i>
                     </a>
@@ -231,7 +201,7 @@ include __DIR__ . '/../includes/sidebar.php';
                     <tbody>
                         <?php if (empty($records)): ?>
                             <tr>
-                                <td colspan="9" class="text-center py-8 text-slate-400 border border-slate-300" data-label="">
+                                <td colspan="9" class="text-center py-8 text-slate-500 border border-slate-300" data-label="">
                                     Tidak ada data presensi pada rentang waktu ini.
                                 </td>
                             </tr>

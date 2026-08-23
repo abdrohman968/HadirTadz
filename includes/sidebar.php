@@ -1,8 +1,6 @@
 <?php
-require_once __DIR__ . '/../config/auth.php';
-$current_user = auth_user();
+// Auth context resolved once by header.php — reuse $current_user, $base_url
 $role = $current_user['role_code'] ?? 'guest';
-$base_url = get_base_url();
 
 $current_script = basename($_SERVER['PHP_SELF']);
 $current_dir = basename(dirname($_SERVER['PHP_SELF']));
@@ -19,7 +17,7 @@ function nav_item($url, $icon, $label, $isActive, $badge = '') {
     $activeClass = $isActive 
         ? 'bg-emerald-700 text-white shadow-sm font-semibold' 
         : 'text-slate-600 hover:bg-emerald-50 hover:text-emerald-800 font-medium';
-    $iconColor = $isActive ? 'text-emerald-200' : 'text-slate-400 group-hover:text-emerald-600';
+    $iconColor = $isActive ? 'text-emerald-200' : 'text-slate-500 group-hover:text-emerald-600';
 
     return '
     <a href="' . $url . '" class="group flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all ' . $activeClass . '">
@@ -43,7 +41,7 @@ function nav_item($url, $icon, $label, $isActive, $badge = '') {
         <?php if ($role === 'admin'): ?>
             <!-- ADMIN MENU -->
             <div>
-                <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Utama</p>
+                <p class="px-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Utama</p>
                 <div class="space-y-1">
                     <?= nav_item("$base_url/admin/index.php", "fa-solid fa-gauge-high", "Dashboard", is_nav_active('admin', 'index.php')) ?>
                     <?= nav_item("$base_url/admin/attendance.php", "fa-solid fa-clipboard-user", "Presensi Harian", is_nav_active('admin', 'attendance.php')) ?>
@@ -52,7 +50,7 @@ function nav_item($url, $icon, $label, $isActive, $badge = '') {
             </div>
 
             <div>
-                <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Master Data</p>
+                <p class="px-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Master Data</p>
                 <div class="space-y-1">
                     <?= nav_item("$base_url/admin/students.php", "fa-solid fa-user-graduate", "Data Siswa", is_nav_active('admin', 'students.php')) ?>
                     <?= nav_item("$base_url/admin/teachers.php", "fa-solid fa-chalkboard-user", "Data Guru", is_nav_active('admin', 'teachers.php')) ?>
@@ -62,7 +60,7 @@ function nav_item($url, $icon, $label, $isActive, $badge = '') {
             </div>
 
             <div>
-                <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Aktivitas & Izin</p>
+                <p class="px-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Aktivitas & Izin</p>
                 <div class="space-y-1">
                     <?= nav_item("$base_url/admin/permissions.php", "fa-solid fa-envelope-open-text", "Izin & Sakit", is_nav_active('admin', 'permissions.php')) ?>
                     <?= nav_item("$base_url/admin/journals.php", "fa-solid fa-book-journal-whills", "Jurnal Mengajar", is_nav_active('admin', 'journals.php')) ?>
@@ -71,7 +69,7 @@ function nav_item($url, $icon, $label, $isActive, $badge = '') {
             </div>
 
             <div>
-                <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Laporan & Sistem</p>
+                <p class="px-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Laporan & Sistem</p>
                 <div class="space-y-1">
                     <?= nav_item("$base_url/admin/reports.php", "fa-solid fa-file-invoice", "Rekap Laporan", is_nav_active('admin', 'reports.php')) ?>
                     <?= nav_item("$base_url/admin/rules.php", "fa-solid fa-clock-rotate-left", "Aturan Absensi", is_nav_active('admin', 'rules.php')) ?>
@@ -84,7 +82,7 @@ function nav_item($url, $icon, $label, $isActive, $badge = '') {
         <?php elseif ($role === 'guru'): ?>
             <!-- GURU MENU -->
             <div>
-                <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Menu Guru</p>
+                <p class="px-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Menu Guru</p>
                 <div class="space-y-1">
                     <?= nav_item("$base_url/guru/index.php", "fa-solid fa-gauge-high", "Dashboard", is_nav_active('guru', 'index.php')) ?>
                     <?= nav_item("$base_url/guru/absen.php", "fa-solid fa-camera", "Absen Saya (GPS)", is_nav_active('guru', 'absen.php')) ?>
@@ -97,7 +95,7 @@ function nav_item($url, $icon, $label, $isActive, $badge = '') {
         <?php elseif ($role === 'siswa'): ?>
             <!-- SISWA MENU -->
             <div>
-                <p class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Portal Siswa</p>
+                <p class="px-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Portal Siswa</p>
                 <div class="space-y-1">
                     <?= nav_item("$base_url/siswa/index.php", "fa-solid fa-gauge-high", "Dashboard", is_nav_active('siswa', 'index.php')) ?>
                     <?= nav_item("$base_url/siswa/kartu.php", "fa-solid fa-id-card-clip", "Kartu Pelajar Digital", is_nav_active('siswa', 'kartu.php')) ?>

@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['admin']);
-$base_url = get_base_url();
 $school_id = auth_school_id();
 
 $filter_class = $_GET['class_id'] ?? '';
@@ -64,17 +63,14 @@ include __DIR__ . '/../includes/sidebar.php';
                         <?php endforeach; ?>
                     </select>
                 </form>
-                <button onclick="window.print()" class="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition flex items-center gap-2">
-                    <i class="fa-solid fa-print"></i>
-                    <span>Cetak Semua Kartu</span>
-                </button>
+                <?= ds_button('<i class="fa-solid fa-print"></i> <span>Cetak Semua Kartu</span>', 'primary', 'button', ['onclick' => 'window.print()']) ?>
             </div>
         </div>
 
         <!-- Cards Print Grid -->
         <div class="card-print-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <?php if (empty($students)): ?>
-                <div class="col-span-3 text-center py-12 bg-white rounded-3xl border border-slate-200 text-slate-400">
+                <div class="col-span-3 text-center py-12 bg-white rounded-3xl border border-slate-200 text-slate-500">
                     Tidak ada data siswa yang ditemukan untuk dicetak.
                 </div>
             <?php else: ?>

@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['guru']);
-$base_url = get_base_url();
 $user = auth_user();
 $today = date('Y-m-d');
 
@@ -177,7 +176,7 @@ include __DIR__ . '/../includes/sidebar.php';
 
             <div class="divide-y divide-slate-100">
                 <?php if (empty($recent_history)): ?>
-                    <div class="text-center py-6 text-xs text-slate-400">Belum ada riwayat absensi.</div>
+                    <div class="text-center py-6 text-xs text-slate-500">Belum ada riwayat absensi.</div>
                 <?php else: ?>
                     <?php foreach ($recent_history as $h): ?>
                         <div class="py-3 flex items-center justify-between text-xs">
@@ -187,7 +186,7 @@ include __DIR__ . '/../includes/sidebar.php';
                                 </div>
                                 <div>
                                     <div class="font-bold text-slate-800"><?= format_date_indo($h['date'], true) ?></div>
-                                    <div class="text-[11px] text-slate-400">Masuk: <?= format_time($h['time_in']) ?> &bull; Pulang: <?= format_time($h['time_out']) ?></div>
+                                    <div class="text-[11px] text-slate-500">Masuk: <?= format_time($h['time_in']) ?> &bull; Pulang: <?= format_time($h['time_out']) ?></div>
                                 </div>
                             </div>
                             <div>

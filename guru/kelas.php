@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['guru', 'admin']);
-$base_url = get_base_url();
 $school_id = auth_school_id();
 
 $filter_class = $_GET['class_id'] ?? '';
@@ -27,12 +26,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_class_attendance
                 $userIdentifierStmt->execute([$student_user_id]);
                 $identifier = $userIdentifierStmt->fetchColumn();
 
+                $recorded_time = date('H:i:s');
                 $ins = $pdo->prepare("
                     INSERT INTO attendance (school_id, user_id, class_id, date, time_in, status, method, identifier, is_within_radius, notes, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, '07:00:00', ?, 'manual', ?, 1, 'Presensi oleh Guru di Kelas', NOW(), NOW())
+                    VALUES (?, ?, ?, ?, ?, ?, 'manual', ?, 1, 'Presensi oleh Guru di Kelas', NOW(), NOW())
                     ON DUPLICATE KEY UPDATE status = VALUES(status), updated_at = NOW()
                 ");
-                $ins->execute([$school_id, $student_user_id, $class_id, $date, $st, $identifier]);
+                $ins->execute([$school_id, $student_user_id, $class_id, $date, $recorded_time, $st, $identifier]);
             }
 
             $pdo->commit();
@@ -71,6 +71,12 @@ if (!empty($filter_class)) {
     $students = $stmt->fetchAll();
 }
 
+// Build class options for ds_select
+$class_options = ['' => '-- Pilih Kelas --'];
+foreach ($classes as $c) {
+    $class_options[$c['id']] = $c['class_name'] . ' (' . $c['major'] . ')';
+}
+
 include __DIR__ . '/../includes/header.php';
 include __DIR__ . '/../includes/sidebar.php';
 ?>
@@ -78,50 +84,24 @@ include __DIR__ . '/../includes/sidebar.php';
 <main class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
     <div class="max-w-6xl mx-auto space-y-6">
 
-        <!-- Page Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Presensi Siswa di Kelas</h1>
-                <p class="text-xs sm:text-sm text-slate-500">Catat dan perbarui absensi kehadiran seluruh siswa dalam satu kelas per pertemuan.</p>
-            </div>
-            <a href="<?= $base_url ?>/guru/jurnal.php" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs shadow-sm transition flex items-center gap-2">
-                <i class="fa-solid fa-book-bookmark"></i>
-                <span>Tulis Jurnal Pembelajaran</span>
-            </a>
-        </div>
+        <?= ds_page_header('Presensi Siswa di Kelas', 'Catat dan perbarui absensi kehadiran seluruh siswa dalam satu kelas per pertemuan.', '<a href="' . $base_url . '/guru/jurnal.php" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs shadow-sm transition flex items-center gap-2"><i class="fa-solid fa-book-bookmark"></i><span>Tulis Jurnal Pembelajaran</span></a>') ?>
 
         <?php if (!empty($error)): ?>
-            <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
-                <?= htmlspecialchars($error) ?>
-            </div>
+            <?= ds_alert(htmlspecialchars($error), 'danger') ?>
         <?php endif; ?>
 
         <!-- Class Selector & Date -->
-        <div class="bg-white rounded-3xl border border-slate-200 p-4 sm:p-6 shadow-sm">
+        <?= ds_card_start('', '') ?>
             <form method="GET" action="" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Pilih Kelas</label>
-                    <select name="class_id" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        <?php foreach ($classes as $c): ?>
-                            <option value="<?= $c['id'] ?>" <?= ($filter_class == $c['id']) ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($c['class_name']) ?> (<?= htmlspecialchars($c['major']) ?>)
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+                <?= ds_select('class_id', $class_options, $filter_class, 'Pilih Kelas', ['required' => true, 'id' => 'field-kelas-class']) ?>
+
+                <?= ds_input('date', 'Tanggal Absensi', 'date', $filter_date, ['required' => true, 'id' => 'field-kelas-date']) ?>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Tanggal Absensi</label>
-                    <input type="date" name="date" value="<?= htmlspecialchars($filter_date) ?>" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
-
-                <div>
-                    <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition">
-                        Buka Daftar Siswa
-                    </button>
+                    <?= ds_button('Buka Daftar Siswa', 'primary', 'submit') ?>
                 </div>
             </form>
-        </div>
+        <?= ds_card_end() ?>
 
         <!-- Student Attendance Form -->
         <form method="POST" action="" class="space-y-4">
@@ -135,7 +115,7 @@ include __DIR__ . '/../includes/sidebar.php';
                         <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
                             Total Siswa: <strong class="text-slate-800 font-extrabold"><?= count($students) ?></strong> Orang
                         </span>
-                        <p class="text-[11px] text-slate-400">Pilih status kehadiran untuk setiap siswa di bawah</p>
+                        <p class="text-[11px] text-slate-500">Pilih status kehadiran untuk setiap siswa di bawah</p>
                     </div>
 
                     <!-- Quick Batch Action -->
@@ -148,7 +128,7 @@ include __DIR__ . '/../includes/sidebar.php';
 
                 <div class="table-responsive-card">
                     <table class="w-full text-left text-xs text-slate-600">
-                        <thead class="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
+                        <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
                             <tr>
                                 <th class="py-3 px-4 w-12 text-center">No</th>
                                 <th class="py-3 px-4">Nama Lengkap Siswa</th>
@@ -159,26 +139,26 @@ include __DIR__ . '/../includes/sidebar.php';
                         <tbody class="divide-y divide-slate-100">
                             <?php if (empty($students)): ?>
                                 <tr>
-                                    <td colspan="4" class="text-center py-10 text-slate-400">
+                                    <td colspan="4" class="text-center py-10 text-slate-500">
                                         Tidak ada data siswa dalam kelas ini.
                                     </td>
                                 </tr>
                             <?php else: ?>
                                 <?php $no = 1; foreach ($students as $s): 
-                                    $current_st = $s['attendance_status'] ?? 'HADIR';
+                                    $current_st = $s['attendance_status'] ?? '';
                                 ?>
                                     <tr class="hover:bg-slate-50/80 transition">
-                                        <td class="py-3.5 px-4 text-center font-mono text-slate-400" data-label="No"><?= $no++ ?></td>
+                                        <td class="py-3.5 px-4 text-center font-mono text-slate-500" data-label="No"><?= $no++ ?></td>
                                         <td class="py-3.5 px-4" data-label="Nama">
                                             <div class="font-bold text-slate-800 text-sm"><?= htmlspecialchars($s['full_name']) ?></div>
-                                            <div class="text-[10px] text-slate-400"><?= ($s['gender'] === 'L') ? 'Laki-laki' : 'Perempuan' ?></div>
+                                            <div class="text-[10px] text-slate-500"><?= ($s['gender'] === 'L') ? 'Laki-laki' : 'Perempuan' ?></div>
                                         </td>
                                         <td class="py-3.5 px-4 font-mono font-bold text-slate-700" data-label="NISN">
                                             <?= htmlspecialchars($s['nisn']) ?>
                                         </td>
                                         <td class="py-3.5 px-4" data-label="Status">
                                             <!-- Radio Status Buttons Grid (wrap di layar kecil) -->
-                                            <div class="flex flex-wrap items-center justify-start gap-1.5 sm:justify-center sm:gap-2">
+                                            <div class="flex flex-wrap items-center justify-start gap-1.5 sm:justify-center sm:gap-2 <?= empty($current_st) ? 'ring-1 ring-amber-300 rounded-xl p-1 bg-amber-50/50' : '' ?>">
                                                 <label class="cursor-pointer">
                                                     <input type="radio" name="status[<?= $s['user_id'] ?>]" value="HADIR" <?= ($current_st === 'HADIR') ? 'checked' : '' ?> class="peer sr-only status-radio" data-status="HADIR">
                                                     <span class="px-3 py-1.5 rounded-xl border text-xs font-bold transition peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-600 bg-slate-50 text-slate-600 border-slate-200">
@@ -210,6 +190,9 @@ include __DIR__ . '/../includes/sidebar.php';
                                                     </span>
                                                 </label>
                                             </div>
+                                            <?php if (empty($current_st)): ?>
+                                                <p class="text-[10px] text-amber-600 mt-1 font-semibold">Belum diisi</p>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -220,10 +203,7 @@ include __DIR__ . '/../includes/sidebar.php';
 
                 <?php if (!empty($students)): ?>
                     <div class="p-4 sm:p-6 bg-slate-50 border-t border-slate-100 flex justify-end">
-                        <button type="submit" class="px-6 py-3 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-lg shadow-emerald-900/20 transition flex items-center gap-2">
-                            <i class="fa-solid fa-floppy-disk"></i>
-                            <span>Simpan Presensi Kelas</span>
-                        </button>
+                        <?= ds_button('<i class="fa-solid fa-floppy-disk"></i> Simpan Presensi Kelas', 'primary', 'submit') ?>
                     </div>
                 <?php endif; ?>
             </div>

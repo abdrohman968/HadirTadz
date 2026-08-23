@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['guru']);
-$base_url = get_base_url();
 $user = auth_user();
 $school_id = auth_school_id();
 $error = '';
@@ -57,6 +56,12 @@ $classes = $pdo->prepare("SELECT * FROM classes WHERE school_id = ? ORDER BY gra
 $classes->execute([$school_id]);
 $classes = $classes->fetchAll();
 
+// Build class options for ds_select
+$class_options = ['' => '-- Pilih Kelas --'];
+foreach ($classes as $c) {
+    $class_options[$c['id']] = $c['class_name'];
+}
+
 // Fetch My Journals
 $myJournalsStmt = $pdo->prepare("
     SELECT j.*, c.class_name
@@ -75,99 +80,51 @@ include __DIR__ . '/../includes/sidebar.php';
 <main class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
     <div class="max-w-6xl mx-auto space-y-6">
 
-        <!-- Page Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Jurnal Pembelajaran Guru</h1>
-                <p class="text-xs sm:text-sm text-slate-500">Catat agenda materi pembelajaran, capaian siswa, dan kehadiran per pertemuan.</p>
-            </div>
-            <button onclick="document.getElementById('form-jurnal-card').scrollIntoView({ behavior: 'smooth' })" class="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition flex items-center gap-2">
-                <i class="fa-solid fa-plus"></i>
-                <span>Tulis Jurnal Hari Ini</span>
-            </button>
-        </div>
+        <?= ds_page_header(
+            'Jurnal Pembelajaran Guru',
+            'Catat agenda materi pembelajaran, capaian siswa, dan kehadiran per pertemuan.',
+            '<button onclick="document.getElementById(\'form-jurnal-card\').scrollIntoView({ behavior: \'smooth\' })" class="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition flex items-center gap-2"><i class="fa-solid fa-plus"></i> Tulis Jurnal Hari Ini</button>'
+        ) ?>
 
         <?php if (!empty($error)): ?>
-            <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
-                <?= htmlspecialchars($error) ?>
-            </div>
+            <?= ds_alert(htmlspecialchars($error), 'danger') ?>
         <?php endif; ?>
 
-        <!-- Form Input Jurnal -->
-        <div id="form-jurnal-card" class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
-            <h3 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
-                <i class="fa-solid fa-pen-nib text-emerald-600"></i>
-                <span>Formulir Jurnal Mengajar</span>
-            </h3>
+        <?php if ($flash = get_flash()): ?>
+            <?= ds_alert(htmlspecialchars($flash['message']), $flash['type']) ?>
+        <?php endif; ?>
 
+        <?= ds_card_start('Formulir Jurnal Mengajar', 'fa-solid fa-pen-nib', ['id' => 'form-jurnal-card']) ?>
             <form method="POST" action="" class="space-y-4">
                 <input type="hidden" name="action" value="save_journal">
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Kelas yang Diajar</label>
-                        <select name="class_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                            <option value="">-- Pilih Kelas --</option>
-                            <?php foreach ($classes as $c): ?>
-                                <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['class_name']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Tanggal</label>
-                        <input type="date" name="date" value="<?= date('Y-m-d') ?>" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Jam Pelajaran / Waktu</label>
-                        <input type="text" name="time" value="07:30 - 09:00" placeholder="Contoh: 07:30 - 09:00" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
+                    <?= ds_select('class_id', $class_options, '', 'Kelas yang Diajar', ['required' => true, 'id' => 'field-jurnal-class']) ?>
+                    <?= ds_input('date', 'Tanggal', 'date', date('Y-m-d'), ['required' => true, 'id' => 'field-jurnal-date']) ?>
+                    <?= ds_input('time', 'Jam Pelajaran / Waktu', 'text', '07:30 - 09:00', ['placeholder' => 'Contoh: 07:30 - 09:00', 'id' => 'field-jurnal-time']) ?>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Mata Pelajaran</label>
-                    <input type="text" name="subject" value="<?= htmlspecialchars($teacher['subject_specialty'] ?? 'Informatika') ?>" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
+                <?= ds_input('subject', 'Mata Pelajaran', 'text', $teacher['subject_specialty'] ?? 'Informatika', ['required' => true, 'id' => 'field-jurnal-subject']) ?>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Materi Pokok / Pembahasan Hari Ini</label>
-                    <textarea name="topic" required rows="3" placeholder="Jelaskan pokok bahasan, kompetensi dasar, atau aktivitas praktik siswa..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
-                </div>
+                <?= ds_textarea('topic', 'Materi Pokok / Pembahasan Hari Ini', '', ['required' => true, 'rows' => 3, 'placeholder' => 'Jelaskan pokok bahasan, kompetensi dasar, atau aktivitas praktik siswa...', 'id' => 'field-jurnal-topic']) ?>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Jumlah Siswa Hadir</label>
-                        <input type="number" name="present_count" value="30" min="0" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Jumlah Tidak Hadir (Izin/Sakit/Alpha)</label>
-                        <input type="number" name="absent_count" value="0" min="0" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono">
-                    </div>
+                    <?= ds_input('present_count', 'Jumlah Siswa Hadir', 'number', '30', ['min' => '0', 'class' => 'font-mono', 'id' => 'field-jurnal-present']) ?>
+                    <?= ds_input('absent_count', 'Jumlah Tidak Hadir (Izin/Sakit/Alpha)', 'number', '0', ['min' => '0', 'class' => 'font-mono', 'id' => 'field-jurnal-absent']) ?>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Catatan Khusus / Kejadian di Kelas</label>
-                    <textarea name="notes" rows="2" placeholder="Siswa antusias / tugas dikumpulkan tepat waktu / catatan remedial..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
-                </div>
+                <?= ds_textarea('notes', 'Catatan Khusus / Kejadian di Kelas', '', ['rows' => 2, 'placeholder' => 'Siswa antusias / tugas dikumpulkan tepat waktu / catatan remedial...', 'id' => 'field-jurnal-notes']) ?>
 
                 <div class="flex justify-end pt-2">
-                    <button type="submit" class="px-6 py-3 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-lg shadow-emerald-900/20 transition flex items-center gap-2">
-                        <i class="fa-solid fa-floppy-disk"></i>
-                        <span>Simpan Jurnal</span>
-                    </button>
+                    <?= ds_button('<i class="fa-solid fa-floppy-disk"></i> Simpan Jurnal', 'primary', 'submit') ?>
                 </div>
             </form>
-        </div>
+        <?= ds_card_end() ?>
 
-        <!-- History of My Journals -->
-        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
-            <h3 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
-                <i class="fa-solid fa-clock-rotate-left text-slate-400"></i>
-                <span>Riwayat Jurnal yang Pernah Anda Buat</span>
-            </h3>
-
+        <?= ds_card_start('Riwayat Jurnal yang Pernah Anda Buat', 'fa-solid fa-clock-rotate-left') ?>
             <div class="space-y-3">
                 <?php if (empty($my_journals)): ?>
-                    <div class="text-center py-8 text-slate-400 text-xs">
+                    <div class="text-center py-8 text-slate-500 text-xs">
                         Belum ada jurnal pembelajaran yang tersimpan.
                     </div>
                 <?php else: ?>
@@ -179,14 +136,14 @@ include __DIR__ . '/../includes/sidebar.php';
                             </div>
                             <p class="text-slate-700 font-medium"><?= nl2br(htmlspecialchars($mj['topic'])) ?></p>
                             <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
-                                <span>Hadir: <strong class="text-emerald-700"><?= $mj['present_count'] ?></strong> | Tidak Hadir: <strong class="text-rose-700"><?= $mj['absent_count'] ?></strong></span>
+                                <span>Hadir: <strong class="text-emerald-700"><?= (int)$mj['present_count'] ?></strong> | Tidak Hadir: <strong class="text-rose-700"><?= (int)$mj['absent_count'] ?></strong></span>
                                 <span>Dicatat: <?= date('d/m/Y H:i', strtotime($mj['created_at'])) ?></span>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>
-        </div>
+        <?= ds_card_end() ?>
 
     </div>
 </main>

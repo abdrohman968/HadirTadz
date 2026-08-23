@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['admin']);
-$base_url = get_base_url();
 $school_id = auth_school_id();
 
 $filter_class = $_GET['class_id'] ?? '';
@@ -48,20 +47,14 @@ include __DIR__ . '/../includes/sidebar.php';
 <main class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
     <div class="max-w-7xl mx-auto space-y-6">
 
-        <!-- Page Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Jurnal Mengajar Guru</h1>
-                <p class="text-xs sm:text-sm text-slate-500">Monitoring catatan kegiatan belajar mengajar, materi yang diajarkan, dan kehadiran siswa di kelas.</p>
-            </div>
-        </div>
+        <?= ds_page_header('Jurnal Mengajar Guru', 'Monitoring catatan kegiatan belajar mengajar, materi yang diajarkan, dan kehadiran siswa di kelas.') ?>
 
         <!-- Filter Bar -->
         <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
             <form method="GET" action="" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter Kelas</label>
-                    <select name="class_id" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <label for="field-admin-journal-class" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter Kelas</label>
+                    <select id="field-admin-journal-class" name="class_id" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                         <option value="">-- Semua Kelas --</option>
                         <?php foreach ($classes as $c): ?>
                             <option value="<?= $c['id'] ?>" <?= ($filter_class == $c['id']) ? 'selected' : '' ?>>
@@ -72,8 +65,8 @@ include __DIR__ . '/../includes/sidebar.php';
                 </div>
 
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Tanggal Kegiatan</label>
-                    <input type="date" name="date" value="<?= htmlspecialchars($filter_date) ?>" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <label for="field-admin-journal-date" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Tanggal Kegiatan</label>
+                    <input id="field-admin-journal-date" type="date" name="date" value="<?= htmlspecialchars($filter_date) ?>" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 </div>
 
                 <div class="flex gap-2">
@@ -90,7 +83,7 @@ include __DIR__ . '/../includes/sidebar.php';
         <!-- Journals Feed / Table -->
         <div class="space-y-4">
             <?php if (empty($journals)): ?>
-                <div class="text-center py-12 bg-white rounded-3xl border border-slate-200 text-slate-400">
+                <div class="text-center py-12 bg-white rounded-3xl border border-slate-200 text-slate-500">
                     Belum ada rekaman jurnal pembelajaran yang sesuai filter.
                 </div>
             <?php else: ?>
@@ -119,7 +112,7 @@ include __DIR__ . '/../includes/sidebar.php';
 
                         <div class="space-y-2 text-xs">
                             <div>
-                                <span class="font-bold text-slate-400 uppercase tracking-wider text-[10px] block">Materi Pokok / Bahasan:</span>
+                                <span class="font-bold text-slate-500 uppercase tracking-wider text-[10px] block">Materi Pokok / Bahasan:</span>
                                 <p class="text-slate-800 text-sm font-medium mt-0.5 leading-relaxed"><?= nl2br(htmlspecialchars($j['topic'])) ?></p>
                             </div>
 
@@ -142,7 +135,7 @@ include __DIR__ . '/../includes/sidebar.php';
                                     </span>
                                 <?php endif; ?>
                             </div>
-                            <span class="text-[11px] text-slate-400">Dicatat: <?= date('d/m/Y H:i', strtotime($j['created_at'])) ?></span>
+                            <span class="text-[11px] text-slate-500">Dicatat: <?= date('d/m/Y H:i', strtotime($j['created_at'])) ?></span>
                         </div>
                     </div>
                 <?php endforeach; ?>

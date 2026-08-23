@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/auth.php';
 require_once __DIR__ . '/../config/helpers.php';
 
 require_auth(['admin']);
-$base_url = get_base_url();
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -194,7 +193,7 @@ include __DIR__ . '/../includes/sidebar.php';
                         <?= ds_input('longitude', 'Longitude', 'text', $longitude, ['id' => 'gps-lon', 'required' => true, 'class' => 'font-mono']) ?>
                         <div>
                             <?= ds_input('radiusMeters', 'Batas Radius Default (Meter)', 'number', $radiusMeters, ['required' => true, 'class' => 'font-mono']) ?>
-                            <p class="mt-1.5 text-[10px] text-slate-400 leading-tight">Fallback default jika tidak ada aturan khusus per-role. Atur per-role di menu <b>Aturan Absensi</b>.</p>
+                            <p class="mt-1.5 text-[10px] text-slate-500 leading-tight">Fallback default jika tidak ada aturan khusus per-role. Atur per-role di menu <b>Aturan Absensi</b>.</p>
                         </div>
                     </div>
 
