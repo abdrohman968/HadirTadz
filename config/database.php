@@ -11,12 +11,12 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Konfigurasi Database
-// Mengutamakan environment variables (berguna untuk deploy Vercel/Cloud Hosting)
-$host = getenv('DB_HOST') ?: "localhost";
-$port = getenv('DB_PORT') ?: "3306";
-$user = getenv('DB_USER') ?: "root";
-$pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : "";
-$db   = getenv('DB_NAME') ?: "hadir_tadz"; // Default ke hadir_tadz (atau fallback ke absensi_sekolah)
+// Support Railway (MYSQL*), generic (DB_*), atau localhost defaults
+$host = getenv('MYSQLHOST') ?: (getenv('DB_HOST') ?: "localhost");
+$port = getenv('MYSQLPORT') ?: (getenv('DB_PORT') ?: "3306");
+$user = getenv('MYSQLUSER') ?: (getenv('DB_USER') ?: "root");
+$pass = getenv('MYSQLPASSWORD') !== false ? getenv('MYSQLPASSWORD') : (getenv('DB_PASS') !== false ? getenv('DB_PASS') : "");
+$db   = getenv('MYSQLDATABASE') ?: (getenv('DB_NAME') ?: "hadir_tadz");
 
 $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
 
