@@ -126,181 +126,79 @@ include __DIR__ . '/../includes/sidebar.php';
                     </div>
                 </div>
 
-                <?php
-                    $hadir_count = 0; $terlambat_count = 0; $izin_count = 0; $sakit_count = 0; $alpha_count = 0; $unfilled = 0;
-                    foreach ($students as $s) {
-                        $st = $s['attendance_status'] ?? '';
-                        if ($st === 'HADIR') $hadir_count++;
-                        elseif ($st === 'TERLAMBAT') $terlambat_count++;
-                        elseif ($st === 'IZIN') $izin_count++;
-                        elseif ($st === 'SAKIT') $sakit_count++;
-                        elseif ($st === 'ALPHA') $alpha_count++;
-                        else $unfilled++;
-                    }
-                ?>
-
-                <!-- Mobile: Compact Checklist -->
-                <div class="lg:hidden">
-                    <?php if (!empty($students)): ?>
-                        <!-- Status Summary Bar -->
-                        <div class="px-4 py-2.5 border-b border-slate-100 flex items-center gap-2 overflow-x-auto text-[10px] font-bold">
-                            <?php if ($unfilled > 0): ?>
-                                <span class="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-50 text-amber-700 whitespace-nowrap">
-                                    <span class="w-2 h-2 rounded-full bg-amber-400"></span> <?= $unfilled ?> Belum
-                                </span>
-                            <?php endif; ?>
-                            <?php if ($hadir_count > 0): ?>
-                                <span class="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 whitespace-nowrap">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> <?= $hadir_count ?> Hadir
-                                </span>
-                            <?php endif; ?>
-                            <?php if ($terlambat_count > 0): ?>
-                                <span class="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-50 text-amber-700 whitespace-nowrap">
-                                    <span class="w-2 h-2 rounded-full bg-amber-500"></span> <?= $terlambat_count ?> Terlambat
-                                </span>
-                            <?php endif; ?>
-                            <?php if ($izin_count > 0): ?>
-                                <span class="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50 text-blue-700 whitespace-nowrap">
-                                    <span class="w-2 h-2 rounded-full bg-blue-600"></span> <?= $izin_count ?> Izin
-                                </span>
-                            <?php endif; ?>
-                            <?php if ($sakit_count > 0): ?>
-                                <span class="flex items-center gap-1 px-2 py-1 rounded-full bg-purple-50 text-purple-700 whitespace-nowrap">
-                                    <span class="w-2 h-2 rounded-full bg-purple-600"></span> <?= $sakit_count ?> Sakit
-                                </span>
-                            <?php endif; ?>
-                            <?php if ($alpha_count > 0): ?>
-                                <span class="flex items-center gap-1 px-2 py-1 rounded-full bg-rose-50 text-rose-700 whitespace-nowrap">
-                                    <span class="w-2 h-2 rounded-full bg-rose-600"></span> <?= $alpha_count ?> Alpha
-                                </span>
-                            <?php endif; ?>
-                        </div>
-
-                        <!-- Compact Student List -->
-                        <div class="divide-y divide-slate-100">
-                            <?php $no = 1; foreach ($students as $s):
-                                $current_st = $s['attendance_status'] ?? '';
-                                $initial = strtoupper(substr($s['full_name'], 0, 1));
-                                $avatar_colors = ['bg-emerald-100 text-emerald-700', 'bg-blue-100 text-blue-700', 'bg-purple-100 text-purple-700', 'bg-amber-100 text-amber-700', 'bg-rose-100 text-rose-700', 'bg-cyan-100 text-cyan-700'];
-                                $color_idx = $no % count($avatar_colors);
-                            ?>
-                                <div class="px-4 py-3 flex items-center gap-3">
-                                    <!-- Avatar + Name -->
-                                    <div class="flex items-center gap-2.5 min-w-0 flex-1">
-                                        <span class="w-8 h-8 rounded-full <?= $avatar_colors[$color_idx] ?> flex items-center justify-center text-xs font-extrabold shrink-0">
-                                            <?= $initial ?>
-                                        </span>
-                                        <div class="min-w-0">
-                                            <div class="text-sm font-bold text-slate-800 truncate"><?= htmlspecialchars($s['full_name']) ?></div>
-                                            <div class="text-[10px] text-slate-400 font-mono"><?= htmlspecialchars($s['nisn']) ?></div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Status Dots (tap to select) -->
-                                    <div class="flex items-center gap-1.5 shrink-0">
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="status[<?= $s['user_id'] ?>]" value="HADIR" <?= ($current_st === 'HADIR') ? 'checked' : '' ?> class="peer sr-only">
-                                            <span class="dot-status peer-checked:bg-emerald-500 peer-checked:border-emerald-500 peer-checked:shadow-[0_0_0_2px_rgba(16,185,129,0.25)] <?= $current_st === 'HADIR' ? 'bg-emerald-500 border-emerald-500 shadow-[0_0_0_2px_rgba(16,185,129,0.25)]' : ($current_st === '' ? 'bg-amber-50 border-amber-300' : '') ?>" title="Hadir"></span>
-                                        </label>
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="status[<?= $s['user_id'] ?>]" value="TERLAMBAT" <?= ($current_st === 'TERLAMBAT') ? 'checked' : '' ?> class="peer sr-only">
-                                            <span class="dot-status peer-checked:bg-amber-500 peer-checked:border-amber-500 peer-checked:shadow-[0_0_0_2px_rgba(245,158,11,0.25)] <?= $current_st === 'TERLAMBAT' ? 'bg-amber-500 border-amber-500 shadow-[0_0_0_2px_rgba(245,158,11,0.25)]' : '' ?>" title="Terlambat"></span>
-                                        </label>
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="status[<?= $s['user_id'] ?>]" value="IZIN" <?= ($current_st === 'IZIN') ? 'checked' : '' ?> class="peer sr-only">
-                                            <span class="dot-status peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-checked:shadow-[0_0_0_2px_rgba(37,99,235,0.25)] <?= $current_st === 'IZIN' ? 'bg-blue-600 border-blue-600 shadow-[0_0_0_2px_rgba(37,99,235,0.25)]' : '' ?>" title="Izin"></span>
-                                        </label>
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="status[<?= $s['user_id'] ?>]" value="SAKIT" <?= ($current_st === 'SAKIT') ? 'checked' : '' ?> class="peer sr-only">
-                                            <span class="dot-status peer-checked:bg-purple-600 peer-checked:border-purple-600 peer-checked:shadow-[0_0_0_2px_rgba(147,51,234,0.25)] <?= $current_st === 'SAKIT' ? 'bg-purple-600 border-purple-600 shadow-[0_0_0_2px_rgba(147,51,234,0.25)]' : '' ?>" title="Sakit"></span>
-                                        </label>
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="status[<?= $s['user_id'] ?>]" value="ALPHA" <?= ($current_st === 'ALPHA') ? 'checked' : '' ?> class="peer sr-only">
-                                            <span class="dot-status peer-checked:bg-rose-600 peer-checked:border-rose-600 peer-checked:shadow-[0_0_0_2px_rgba(225,29,72,0.25)] <?= $current_st === 'ALPHA' ? 'bg-rose-600 border-rose-600 shadow-[0_0_0_2px_rgba(225,29,72,0.25)]' : '' ?>" title="Alpha"></span>
-                                        </label>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php else: ?>
-                        <div class="text-center py-10 text-slate-500 text-sm">
-                            Tidak ada data siswa dalam kelas ini.
-                        </div>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Desktop: Table Layout (hidden on mobile) -->
-                <div class="hidden lg:block">
-                    <div class="table-responsive-card">
-                        <table class="w-full text-left text-xs text-slate-600">
-                            <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
+                <div class="table-responsive-card">
+                    <table class="w-full text-left text-xs text-slate-600">
+                        <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
+                            <tr>
+                                <th class="py-3 px-4 w-12 text-center">No</th>
+                                <th class="py-3 px-4">Nama Lengkap Siswa</th>
+                                <th class="py-3 px-4">NISN</th>
+                                <th class="py-3 px-4 text-center">Pilihan Status Kehadiran</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <?php if (empty($students)): ?>
                                 <tr>
-                                    <th class="py-3 px-4 w-12 text-center">No</th>
-                                    <th class="py-3 px-4">Nama Lengkap Siswa</th>
-                                    <th class="py-3 px-4">NISN</th>
-                                    <th class="py-3 px-4 text-center">Pilihan Status Kehadiran</th>
+                                    <td colspan="4" class="text-center py-10 text-slate-500">
+                                        Tidak ada data siswa dalam kelas ini.
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                <?php if (empty($students)): ?>
-                                    <tr>
-                                        <td colspan="4" class="text-center py-10 text-slate-500">
-                                            Tidak ada data siswa dalam kelas ini.
+                            <?php else: ?>
+                                <?php $no = 1; foreach ($students as $s): 
+                                    $current_st = $s['attendance_status'] ?? '';
+                                ?>
+                                    <tr class="hover:bg-slate-50/80 transition">
+                                        <td class="py-3.5 px-4 text-center font-mono text-slate-500" data-label="No"><?= $no++ ?></td>
+                                        <td class="py-3.5 px-4" data-label="Nama">
+                                            <div class="font-bold text-slate-800 text-sm"><?= htmlspecialchars($s['full_name']) ?></div>
+                                            <div class="text-[10px] text-slate-500"><?= ($s['gender'] === 'L') ? 'Laki-laki' : 'Perempuan' ?></div>
+                                        </td>
+                                        <td class="py-3.5 px-4 font-mono font-bold text-slate-700" data-label="NISN">
+                                            <?= htmlspecialchars($s['nisn']) ?>
+                                        </td>
+                                        <td class="py-3.5 px-4" data-label="Status">
+                                            <!-- Radio Status Buttons Grid (wrap di layar kecil) -->
+                                            <div class="flex flex-wrap items-center justify-start gap-1.5 sm:justify-center sm:gap-2 <?= empty($current_st) ? 'ring-1 ring-amber-300 rounded-xl p-1 bg-amber-50/50' : '' ?>">
+                                                <label class="cursor-pointer">
+                                                    <input type="radio" name="status[<?= $s['user_id'] ?>]" value="HADIR" <?= ($current_st === 'HADIR') ? 'checked' : '' ?> class="peer sr-only status-radio" data-status="HADIR">
+                                                    <span class="px-3 py-1.5 rounded-xl border text-xs font-bold transition peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-600 bg-slate-50 text-slate-600 border-slate-200">
+                                                        Hadir
+                                                    </span>
+                                                </label>
+                                                <label class="cursor-pointer">
+                                                    <input type="radio" name="status[<?= $s['user_id'] ?>]" value="TERLAMBAT" <?= ($current_st === 'TERLAMBAT') ? 'checked' : '' ?> class="peer sr-only status-radio" data-status="TERLAMBAT">
+                                                    <span class="px-3 py-1.5 rounded-xl border text-xs font-bold transition peer-checked:bg-amber-500 peer-checked:text-white peer-checked:border-amber-500 bg-slate-50 text-slate-600 border-slate-200">
+                                                        Terlambat
+                                                    </span>
+                                                </label>
+                                                <label class="cursor-pointer">
+                                                    <input type="radio" name="status[<?= $s['user_id'] ?>]" value="IZIN" <?= ($current_st === 'IZIN') ? 'checked' : '' ?> class="peer sr-only status-radio" data-status="IZIN">
+                                                    <span class="px-3 py-1.5 rounded-xl border text-xs font-bold transition peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 bg-slate-50 text-slate-600 border-slate-200">
+                                                        Izin
+                                                    </span>
+                                                </label>
+                                                <label class="cursor-pointer">
+                                                    <input type="radio" name="status[<?= $s['user_id'] ?>]" value="SAKIT" <?= ($current_st === 'SAKIT') ? 'checked' : '' ?> class="peer sr-only status-radio" data-status="SAKIT">
+                                                    <span class="px-3 py-1.5 rounded-xl border text-xs font-bold transition peer-checked:bg-purple-600 peer-checked:text-white peer-checked:border-purple-600 bg-slate-50 text-slate-600 border-slate-200">
+                                                        Sakit
+                                                    </span>
+                                                </label>
+                                                <label class="cursor-pointer">
+                                                    <input type="radio" name="status[<?= $s['user_id'] ?>]" value="ALPHA" <?= ($current_st === 'ALPHA') ? 'checked' : '' ?> class="peer sr-only status-radio" data-status="ALPHA">
+                                                    <span class="px-3 py-1.5 rounded-xl border text-xs font-bold transition peer-checked:bg-rose-600 peer-checked:text-white peer-checked:border-rose-600 bg-slate-50 text-slate-600 border-slate-200">
+                                                        Alpha
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <?php if (empty($current_st)): ?>
+                                                <p class="text-[10px] text-amber-600 mt-1 font-semibold">Belum diisi</p>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
-                                <?php else: ?>
-                                    <?php $no = 1; foreach ($students as $s): 
-                                        $current_st = $s['attendance_status'] ?? '';
-                                    ?>
-                                        <tr class="hover:bg-slate-50/80 transition">
-                                            <td class="py-3.5 px-4 text-center font-mono text-slate-500" data-label="No"><?= $no++ ?></td>
-                                            <td class="py-3.5 px-4" data-label="Nama">
-                                                <div class="font-bold text-slate-800 text-sm"><?= htmlspecialchars($s['full_name']) ?></div>
-                                                <div class="text-[10px] text-slate-500"><?= ($s['gender'] === 'L') ? 'Laki-laki' : 'Perempuan' ?></div>
-                                            </td>
-                                            <td class="py-3.5 px-4 font-mono font-bold text-slate-700" data-label="NISN">
-                                                <?= htmlspecialchars($s['nisn']) ?>
-                                            </td>
-                                            <td class="py-3.5 px-4" data-label="Status">
-                                                <div class="flex flex-wrap items-center justify-start gap-1.5 sm:justify-center sm:gap-2 <?= empty($current_st) ? 'ring-1 ring-amber-300 rounded-xl p-1 bg-amber-50/50' : '' ?>">
-                                                    <label class="cursor-pointer">
-                                                        <input type="radio" name="status[<?= $s['user_id'] ?>]" value="HADIR" <?= ($current_st === 'HADIR') ? 'checked' : '' ?> class="peer sr-only status-radio" data-status="HADIR">
-                                                        <span class="px-3 py-1.5 rounded-xl border text-xs font-bold transition peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-600 bg-slate-50 text-slate-600 border-slate-200">
-                                                            Hadir
-                                                        </span>
-                                                    </label>
-                                                    <label class="cursor-pointer">
-                                                        <input type="radio" name="status[<?= $s['user_id'] ?>]" value="TERLAMBAT" <?= ($current_st === 'TERLAMBAT') ? 'checked' : '' ?> class="peer sr-only status-radio" data-status="TERLAMBAT">
-                                                        <span class="px-3 py-1.5 rounded-xl border text-xs font-bold transition peer-checked:bg-amber-500 peer-checked:text-white peer-checked:border-amber-500 bg-slate-50 text-slate-600 border-slate-200">
-                                                            Terlambat
-                                                        </span>
-                                                    </label>
-                                                    <label class="cursor-pointer">
-                                                        <input type="radio" name="status[<?= $s['user_id'] ?>]" value="IZIN" <?= ($current_st === 'IZIN') ? 'checked' : '' ?> class="peer sr-only status-radio" data-status="IZIN">
-                                                        <span class="px-3 py-1.5 rounded-xl border text-xs font-bold transition peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 bg-slate-50 text-slate-600 border-slate-200">
-                                                            Izin
-                                                        </span>
-                                                    </label>
-                                                    <label class="cursor-pointer">
-                                                        <input type="radio" name="status[<?= $s['user_id'] ?>]" value="SAKIT" <?= ($current_st === 'SAKIT') ? 'checked' : '' ?> class="peer sr-only status-radio" data-status="SAKIT">
-                                                        <span class="px-3 py-1.5 rounded-xl border text-xs font-bold transition peer-checked:bg-purple-600 peer-checked:text-white peer-checked:border-purple-600 bg-slate-50 text-slate-600 border-slate-200">
-                                                            Sakit
-                                                        </span>
-                                                    </label>
-                                                    <label class="cursor-pointer">
-                                                        <input type="radio" name="status[<?= $s['user_id'] ?>]" value="ALPHA" <?= ($current_st === 'ALPHA') ? 'checked' : '' ?> class="peer sr-only status-radio" data-status="ALPHA">
-                                                        <span class="px-3 py-1.5 rounded-xl border text-xs font-bold transition peer-checked:bg-rose-600 peer-checked:text-white peer-checked:border-rose-600 bg-slate-50 text-slate-600 border-slate-200">
-                                                            Alpha
-                                                        </span>
-                                                    </label>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
 
                 <?php if (!empty($students)): ?>
@@ -321,25 +219,5 @@ include __DIR__ . '/../includes/sidebar.php';
         showToast("Seluruh siswa telah diatur ke status: " + status, "info");
     }
 </script>
-
-<style>
-    .dot-status {
-        display: block;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        border-width: 2px;
-        border-style: solid;
-        border-color: #e2e8f0;
-        background-color: transparent;
-        transition: all 0.15s ease;
-    }
-    .dot-status:active {
-        transform: scale(0.9);
-    }
-    @media (min-width: 1024px) {
-        .dot-status { display: none; }
-    }
-</style>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
