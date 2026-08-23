@@ -62,13 +62,26 @@ foreach ($classes as $c) {
     $class_options[$c['id']] = $c['class_name'];
 }
 
-// Fetch My Journals
+// Pagination
+$page = max(1, (int)($_GET['page'] ?? 1));
+$per_page = 10;
+$offset = ($page - 1) * $per_page;
+
+// Count total
+$countStmt = $pdo->prepare("SELECT COUNT(*) FROM journals WHERE teacher_user_id = ? AND deleted_at IS NULL AND school_id = ?");
+$countStmt->execute([$user['id'], $school_id]);
+$total = (int)$countStmt->fetchColumn();
+$total_pages = max(1, (int)ceil($total / $per_page));
+if ($page > $total_pages) $page = $total_pages;
+
+// Fetch My Journals (paginated)
 $myJournalsStmt = $pdo->prepare("
     SELECT j.*, c.class_name
     FROM journals j
     JOIN classes c ON j.class_id = c.id
     WHERE j.teacher_user_id = ? AND j.deleted_at IS NULL AND j.school_id = ?
     ORDER BY j.date DESC, j.created_at DESC
+    LIMIT $per_page OFFSET $offset
 ");
 $myJournalsStmt->execute([$user['id'], $school_id]);
 $my_journals = $myJournalsStmt->fetchAll();
@@ -125,7 +138,11 @@ include __DIR__ . '/../includes/sidebar.php';
             <div class="space-y-3">
                 <?php if (empty($my_journals)): ?>
                     <div class="text-center py-8 text-slate-500 text-xs">
-                        Belum ada jurnal pembelajaran yang tersimpan.
+                        <?php if ($total > 0): ?>
+                            Tidak ada data di halaman ini.
+                        <?php else: ?>
+                            Belum ada jurnal pembelajaran yang tersimpan.
+                        <?php endif; ?>
                     </div>
                 <?php else: ?>
                     <?php foreach ($my_journals as $mj): ?>
@@ -141,6 +158,38 @@ include __DIR__ . '/../includes/sidebar.php';
                             </div>
                         </div>
                     <?php endforeach; ?>
+
+                    <?php if ($total_pages > 1): ?>
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+                            <span class="text-[11px] text-slate-500">Hal <?= $page ?> dari <?= $total_pages ?> (<?= $total ?> data)</span>
+                            <div class="flex items-center gap-1">
+                                <?php if ($page > 1): ?>
+                                    <a href="?page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition">
+                                        <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                                    </a>
+                                <?php endif; ?>
+                                <?php
+                                $start_p = max(1, $page - 2);
+                                $end_p = min($total_pages, $page + 2);
+                                if ($start_p > 1): ?>
+                                    <a href="?page=1" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition">1</a>
+                                    <?php if ($start_p > 2): ?><span class="text-slate-400 text-xs">...</span><?php endif; ?>
+                                <?php endif; ?>
+                                <?php for ($p = $start_p; $p <= $end_p; $p++): ?>
+                                    <a href="?page=<?= $p ?>" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition <?= $p === $page ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-600' ?>"><?= $p ?></a>
+                                <?php endfor;
+                                if ($end_p < $total_pages): ?>
+                                    <?php if ($end_p < $total_pages - 1): ?><span class="text-slate-400 text-xs">...</span><?php endif; ?>
+                                    <a href="?page=<?= $total_pages ?>" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition"><?= $total_pages ?></a>
+                                <?php endif; ?>
+                                <?php if ($page < $total_pages): ?>
+                                    <a href="?page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition">
+                                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         <?= ds_card_end() ?>

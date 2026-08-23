@@ -48,13 +48,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch Student's permissions
+// Pagination
+$page = max(1, (int)($_GET['page'] ?? 1));
+$per_page = 10;
+$offset = ($page - 1) * $per_page;
+
+// Count total
+$countStmt = $pdo->prepare("SELECT COUNT(*) FROM permissions WHERE user_id = ? AND deleted_at IS NULL");
+$countStmt->execute([$user['id']]);
+$total = (int)$countStmt->fetchColumn();
+$total_pages = max(1, (int)ceil($total / $per_page));
+if ($page > $total_pages) $page = $total_pages;
+
+// Fetch Student's permissions (paginated)
 $stmt = $pdo->prepare("
     SELECT p.*, v.full_name AS verifier_name
     FROM permissions p
     LEFT JOIN users v ON p.verified_by_user_id = v.id
     WHERE p.user_id = ? AND p.deleted_at IS NULL
     ORDER BY p.created_at DESC
+    LIMIT $per_page OFFSET $offset
 ");
 $stmt->execute([$user['id']]);
 $my_permissions = $stmt->fetchAll();
@@ -122,7 +135,11 @@ $type_options = [
             <div class="space-y-3">
                 <?php if (empty($my_permissions)): ?>
                     <div class="text-center py-8 text-slate-500 text-xs">
-                        Belum ada permohonan izin yang pernah diajukan.
+                        <?php if ($total > 0): ?>
+                            Tidak ada data di halaman ini.
+                        <?php else: ?>
+                            Belum ada permohonan izin yang pernah diajukan.
+                        <?php endif; ?>
                     </div>
                 <?php else: ?>
                     <?php foreach ($my_permissions as $mp): ?>
@@ -151,12 +168,44 @@ $type_options = [
                                 <span>Diajukan pada: <?= date('d/m/Y H:i', strtotime($mp['created_at'])) ?></span>
                                 <?php if ($mp['attachment_url']): ?>
                                     <a href="<?= htmlspecialchars($mp['attachment_url']) ?>" target="_blank" class="text-emerald-700 font-bold hover:underline flex items-center gap-1">
-                                        <i class="fa-solid fa-paperclip"></i> Lihat Lampiran
+                                        <i class="fa-solid fa-paperclip"></i> Lampiran
                                     </a>
                                 <?php endif; ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
+
+                    <?php if ($total_pages > 1): ?>
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+                            <span class="text-[11px] text-slate-500">Hal <?= $page ?> dari <?= $total_pages ?> (<?= $total ?> data)</span>
+                            <div class="flex items-center gap-1">
+                                <?php if ($page > 1): ?>
+                                    <a href="?page=<?= $page - 1 ?>" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition">
+                                        <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                                    </a>
+                                <?php endif; ?>
+                                <?php
+                                $start_p = max(1, $page - 2);
+                                $end_p = min($total_pages, $page + 2);
+                                if ($start_p > 1): ?>
+                                    <a href="?page=1" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition">1</a>
+                                    <?php if ($start_p > 2): ?><span class="text-slate-400 text-xs">...</span><?php endif; ?>
+                                <?php endif; ?>
+                                <?php for ($p = $start_p; $p <= $end_p; $p++): ?>
+                                    <a href="?page=<?= $p ?>" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition <?= $p === $page ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-600' ?>"><?= $p ?></a>
+                                <?php endfor;
+                                if ($end_p < $total_pages): ?>
+                                    <?php if ($end_p < $total_pages - 1): ?><span class="text-slate-400 text-xs">...</span><?php endif; ?>
+                                    <a href="?page=<?= $total_pages ?>" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition"><?= $total_pages ?></a>
+                                <?php endif; ?>
+                                <?php if ($page < $total_pages): ?>
+                                    <a href="?page=<?= $page + 1 ?>" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition">
+                                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>
