@@ -169,50 +169,43 @@ include __DIR__ . '/../includes/sidebar.php';
             <input type="hidden" id="form-class-id" name="class_id" value="">
 
             <div class="grid grid-cols-2 gap-3">
-                <?= ds_input('Kode Kelas', 'text', [
-                    'name' => 'class_code',
+                <?= ds_input('class_code', 'Kode Kelas', 'text', '', [
                     'id' => 'form-class-code',
                     'required' => true,
                     'placeholder' => 'Contoh: X-IPA-1',
                     'pattern' => '[A-Za-z0-9\-]+',
                     'help_text' => 'Huruf, angka, dan tanda hubung saja'
                 ]) ?>
-                <?= ds_select('Tingkatan', [
+                <?= ds_select('grade', [
                     'X' => 'Kelas X (Sepuluh)',
                     'XI' => 'Kelas XI (Sebelas)',
                     'XII' => 'Kelas XII (Duabelas)'
-                ], '', '', [
-                    'name' => 'grade',
+                ], '', 'Tingkatan', [
                     'id' => 'form-class-grade'
                 ]) ?>
             </div>
 
-            <?= ds_input('Nama Kelas', 'text', [
-                'name' => 'class_name',
+            <?= ds_input('class_name', 'Nama Kelas', 'text', '', [
                 'id' => 'form-class-name',
                 'required' => true,
                 'placeholder' => 'Contoh: Kelas X - MIPA 1'
             ]) ?>
 
-            <?= ds_input('Jurusan / Peminatan', 'text', [
-                'name' => 'major',
+            <?= ds_input('major', 'Jurusan / Peminatan', 'text', '', [
                 'id' => 'form-class-major',
                 'required' => true,
                 'placeholder' => 'Contoh: Matematika dan Ilmu Pengetahuan Alam'
             ]) ?>
 
-            <?= ds_select('Wali Kelas', array_merge(['' => '-- Pilih Guru Wali Kelas --'], array_combine(
+            <?= ds_select('homeroom_teacher_id', array_merge(['' => '-- Pilih Guru Wali Kelas --'], array_combine(
                 array_column($teachers, 'id'),
                 array_map(fn($t) => $t['full_name'] . ' (' . $t['nip'] . ')', $teachers)
-            )), '', '', [
-                'name' => 'homeroom_teacher_id',
+            )), '', 'Wali Kelas', [
                 'id' => 'form-class-homeroom'
             ]) ?>
 
-            <?= ds_input('Tahun Ajaran', 'text', [
-                'name' => 'academic_year',
+            <?= ds_input('academic_year', 'Tahun Ajaran', 'text', '2025/2026', [
                 'id' => 'form-class-academic',
-                'value' => '2025/2026',
                 'pattern' => '[0-9]{4}/[0-9]{4}',
                 'help_text' => 'Format: YYYY/YYYY'
             ]) ?>

@@ -112,26 +112,20 @@ include __DIR__ . '/../includes/sidebar.php';
         <!-- Filter Bar (Hidden on Print) -->
         <div class="no-print bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
             <form method="GET" action="" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
-                <?= ds_input('Dari Tanggal', 'date', [
-                    'name' => 'start_date',
-                    'value' => $start_date
-                ]) ?>
+                <?= ds_input('start_date', 'Dari Tanggal', 'date', $start_date) ?>
 
-                <?= ds_input('Sampai Tanggal', 'date', [
-                    'name' => 'end_date',
-                    'value' => $end_date
-                ]) ?>
+                <?= ds_input('end_date', 'Sampai Tanggal', 'date', $end_date) ?>
 
-                <?= ds_select('Kelas', array_merge(['' => '-- Semua Kelas --'], array_combine(
+                <?= ds_select('class_id', array_merge(['' => '-- Semua Kelas --'], array_combine(
                     array_column($classes, 'id'),
                     array_column($classes, 'class_name')
-                )), $filter_class, '', ['name' => 'class_id']) ?>
+                )), $filter_class) ?>
 
-                <?= ds_select('Peran', [
+                <?= ds_select('role_code', [
                     '' => '-- Semua Peran --',
                     'siswa' => 'Siswa',
                     'guru' => 'Guru'
-                ], $filter_role, '', ['name' => 'role_code']) ?>
+                ], $filter_role) ?>
 
                 <div class="flex gap-2">
                     <?= ds_button('Tampilkan', 'secondary', 'submit', ['class' => 'flex-1']) ?>

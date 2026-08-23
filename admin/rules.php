@@ -116,63 +116,47 @@ include __DIR__ . '/../includes/sidebar.php';
             <input type="hidden" name="action" value="save_rule">
             <input type="hidden" id="form-rule-id" name="rule_id" value="">
 
-            <?= ds_input('Nama Aturan', 'text', [
-                'name' => 'rule_name',
+            <?= ds_input('rule_name', 'Nama Aturan', 'text', '', [
                 'id' => 'form-rule-name',
                 'required' => true,
                 'placeholder' => 'Contoh: Aturan Jam Masuk Siswa'
             ]) ?>
 
             <div class="grid grid-cols-2 gap-3">
-                <?= ds_select('Berlaku Untuk', [
+                <?= ds_select('role_code', [
                     'siswa' => 'Khusus Siswa',
                     'guru' => 'Khusus Guru',
                     'all' => 'Semua Pengguna'
-                ], '', '', [
-                    'name' => 'role_code',
+                ], '', 'Berlaku Untuk', [
                     'id' => 'form-rule-role'
                 ]) ?>
-                <?= ds_input('Radius GPS (Meter)', 'number', [
-                    'name' => 'radius_limit',
+                <?= ds_input('radius_limit', 'Radius GPS (Meter)', 'number', '150', [
                     'id' => 'form-rule-radius',
-                    'required' => true,
-                    'value' => '150'
+                    'required' => true
                 ]) ?>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <?= ds_input('Mulai Buka', 'time', [
-                    'name' => 'check_in_start',
-                    'id' => 'form-rule-in-start',
-                    'value' => '06:00'
+                <?= ds_input('check_in_start', 'Mulai Buka', 'time', '06:00', [
+                    'id' => 'form-rule-in-start'
                 ]) ?>
-                <?= ds_input('Jam Masuk', 'time', [
-                    'name' => 'work_start_time',
-                    'id' => 'form-rule-work-start',
-                    'value' => '07:00'
+                <?= ds_input('work_start_time', 'Jam Masuk', 'time', '07:00', [
+                    'id' => 'form-rule-work-start'
                 ]) ?>
-                <?= ds_input('Toleransi / Batas', 'time', [
-                    'name' => 'late_threshold_time',
-                    'id' => 'form-rule-late',
-                    'value' => '07:15'
+                <?= ds_input('late_threshold_time', 'Toleransi / Batas', 'time', '07:15', [
+                    'id' => 'form-rule-late'
                 ]) ?>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <?= ds_input('Mulai Pulang', 'time', [
-                    'name' => 'check_out_start',
-                    'id' => 'form-rule-out-start',
-                    'value' => '14:00'
+                <?= ds_input('check_out_start', 'Mulai Pulang', 'time', '14:00', [
+                    'id' => 'form-rule-out-start'
                 ]) ?>
-                <?= ds_input('Pulang Cepat', 'time', [
-                    'name' => 'early_leave_threshold',
-                    'id' => 'form-rule-early',
-                    'value' => '13:30'
+                <?= ds_input('early_leave_threshold', 'Pulang Cepat', 'time', '13:30', [
+                    'id' => 'form-rule-early'
                 ]) ?>
-                <?= ds_input('Selesai Jam Kerja', 'time', [
-                    'name' => 'work_end_time',
-                    'id' => 'form-rule-work-end',
-                    'value' => '15:30'
+                <?= ds_input('work_end_time', 'Selesai Jam Kerja', 'time', '15:30', [
+                    'id' => 'form-rule-work-end'
                 ]) ?>
             </div>
 

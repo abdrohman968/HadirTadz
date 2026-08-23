@@ -101,16 +101,12 @@ include __DIR__ . '/../includes/sidebar.php';
             </h3>
             <form method="POST" action="" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                 <div class="sm:col-span-2">
-                    <?= ds_input('Nama Perangkat / Lokasi Kiosk', 'text', [
-                        'name' => 'device_name',
-                        'placeholder' => 'Contoh: Kiosk Gerbang Utama',
-                        'value' => 'Kiosk Gerbang'
+                    <?= ds_input('device_name', 'Nama Perangkat / Lokasi Kiosk', 'text', 'Kiosk Gerbang', [
+                        'placeholder' => 'Contoh: Kiosk Gerbang Utama'
                     ]) ?>
                 </div>
                 <div>
-                    <?= ds_input('Kedaluwarsa (Opsional)', 'datetime-local', [
-                        'name' => 'expires_at'
-                    ]) ?>
+                    <?= ds_input('expires_at', 'Kedaluwarsa (Opsional)', 'datetime-local') ?>
                 </div>
                 <div class="sm:col-span-3">
                     <?= ds_button('<i class="fa-solid fa-key"></i> <span>Generate Token Kiosk</span>', 'primary', 'submit', ['name' => 'action', 'value' => 'generate']) ?>

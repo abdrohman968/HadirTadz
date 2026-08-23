@@ -138,30 +138,23 @@ include __DIR__ . '/../includes/sidebar.php';
         <!-- Filters Bar -->
         <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
             <form method="GET" action="" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
-                <?= ds_input('Tanggal', 'date', [
-                    'name' => 'date',
-                    'value' => $filter_date
-                ]) ?>
+                <?= ds_input('date', 'Tanggal', 'date', $filter_date) ?>
 
-                <?= ds_select('Kelas', array_merge(['' => '-- Semua Kelas --'], array_combine(
+                <?= ds_select('class_id', array_merge(['' => '-- Semua Kelas --'], array_combine(
                     array_column($classes, 'id'),
                     array_column($classes, 'class_name')
-                )), $filter_class, '', ['name' => 'class_id']) ?>
+                )), $filter_class) ?>
 
-                <?= ds_select('Status', [
+                <?= ds_select('status', [
                     '' => '-- Semua Status --',
                     'HADIR' => 'HADIR',
                     'TERLAMBAT' => 'TERLAMBAT',
                     'IZIN' => 'IZIN',
                     'SAKIT' => 'SAKIT',
                     'ALPHA' => 'ALPHA'
-                ], $filter_status, '', ['name' => 'status']) ?>
+                ], $filter_status) ?>
 
-                <?= ds_input('Cari Nama / ID', 'text', [
-                    'name' => 'search',
-                    'value' => $search,
-                    'placeholder' => 'Ketik nama atau NISN...'
-                ]) ?>
+                <?= ds_input('search', 'Cari Nama / ID', 'text', $search, ['placeholder' => 'Ketik nama atau NISN...']) ?>
 
                 <div class="flex gap-2">
                     <?= ds_button('Filter', 'secondary', 'submit', ['class' => 'flex-1']) ?>
@@ -272,50 +265,42 @@ include __DIR__ . '/../includes/sidebar.php';
             <input type="hidden" id="form-attendance-id" name="attendance_id" value="">
 
             <div id="user-select-container">
-                <?= ds_select('Siswa / Guru', array_merge(['' => '-- Pilih Pengguna --'], array_combine(
+                <?= ds_select('user_id', array_merge(['' => '-- Pilih Pengguna --'], array_combine(
                     array_column($users_list, 'id'),
                     array_map(fn($u) => $u['full_name'] . ' (' . $u['identifier'] . ' - ' . ($u['class_name'] ?? $u['role_name']) . ')', $users_list)
                 )), '', 'Pilih Siswa / Guru', [
-                    'name' => 'user_id',
                     'id' => 'form-user-id',
                     'required' => true
                 ]) ?>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-                <?= ds_input('Tanggal', 'date', [
-                    'name' => 'date',
+                <?= ds_input('date', 'Tanggal', 'date', $filter_date, [
                     'id' => 'form-date',
-                    'value' => $filter_date,
                     'required' => true
                 ]) ?>
-                <?= ds_select('Status Kehadiran', [
+                <?= ds_select('status', [
                     'HADIR' => 'HADIR',
                     'TERLAMBAT' => 'TERLAMBAT',
                     'IZIN' => 'IZIN',
                     'SAKIT' => 'SAKIT',
                     'ALPHA' => 'ALPHA'
-                ], 'HADIR', '', [
-                    'name' => 'status',
+                ], 'HADIR', 'Status Kehadiran', [
                     'id' => 'form-status',
                     'required' => true
                 ]) ?>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-                <?= ds_input('Jam Masuk (HH:mm)', 'time', [
-                    'name' => 'time_in',
-                    'id' => 'form-time-in',
-                    'value' => '07:00'
+                <?= ds_input('time_in', 'Jam Masuk (HH:mm)', 'time', '07:00', [
+                    'id' => 'form-time-in'
                 ]) ?>
-                <?= ds_input('Jam Pulang (HH:mm)', 'time', [
-                    'name' => 'time_out',
+                <?= ds_input('time_out', 'Jam Pulang (HH:mm)', 'time', '', [
                     'id' => 'form-time-out'
                 ]) ?>
             </div>
 
-            <?= ds_textarea('Catatan / Keterangan', [
-                'name' => 'notes',
+            <?= ds_textarea('notes', 'Catatan / Keterangan', '', [
                 'id' => 'form-notes',
                 'rows' => 2,
                 'placeholder' => 'Contoh: Lupa bawa kartu / presensi manual'
