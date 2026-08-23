@@ -157,6 +157,13 @@ if (!function_exists('ds_input')) {
  * @return string HTML input component
  */
 function ds_input($name, $label = '', $type = 'text', $value = '', $attributes = []) {
+    if (is_array($type)) { $attributes = $type; $type = 'text'; }
+    if (is_array($value)) { $attributes = $value; $value = ''; }
+    if (!is_string($name)) $name = '';
+    if (!is_string($label)) $label = '';
+    if (!is_string($type)) $type = 'text';
+    if (!is_string($value)) $value = '';
+    if (!is_array($attributes)) $attributes = [];
     $id = $attributes['id'] ?? $name;
     $required = isset($attributes['required']) ? '<span class="text-rose-500">*</span>' : '';
     $error_msg = $attributes['error'] ?? '';
@@ -226,6 +233,12 @@ if (!function_exists('ds_textarea')) {
  * @return string HTML textarea component
  */
 function ds_textarea($name, $label = '', $value = '', $attributes = []) {
+    if (is_array($label)) { $attributes = $label; $label = ''; }
+    if (is_array($value)) { $attributes = $value; $value = ''; }
+    if (!is_string($name)) $name = '';
+    if (!is_string($label)) $label = '';
+    if (!is_string($value)) $value = '';
+    if (!is_array($attributes)) $attributes = [];
     $id = $attributes['id'] ?? $name;
     $required = isset($attributes['required']) ? '<span class="text-rose-500">*</span>' : '';
     $rows = $attributes['rows'] ?? 3;
@@ -300,6 +313,13 @@ if (!function_exists('ds_select')) {
  * @return string HTML select component
  */
 function ds_select($name, $options = [], $selected = '', $label = '', $attributes = []) {
+    if (is_array($selected)) { $attributes = $selected; $selected = ''; }
+    if (is_array($label)) { $attributes = $label; $label = ''; }
+    if (!is_string($name)) $name = '';
+    if (!is_string($selected)) $selected = '';
+    if (!is_string($label)) $label = '';
+    if (!is_array($attributes)) $attributes = [];
+    if (!is_array($options)) $options = [];
     $id = $attributes['id'] ?? $name;
     $required = isset($attributes['required']) ? '<span class="text-rose-500">*</span>' : '';
     $placeholder = $attributes['placeholder'] ?? null;
