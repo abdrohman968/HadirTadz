@@ -10,7 +10,7 @@ const getLanHost = () => {
   return hostUri.split(':')[0] || '';
 };
 
-const ONLINE_URI = 'https://hadirtadz.vercel.app/login';
+const ONLINE_URI = '';
 const PORTS = [80, 8000, 8080, 8081, 3000, 5000];
 const APP_PATH = '/absensi_digital/auth/login.php';
 
@@ -45,6 +45,7 @@ export default function App() {
   }, [effectiveHost, port]);
 
   const switchToOnline = useCallback(() => {
+    if (!ONLINE_URI) return;
     setError(null);
     setLoading(true);
     setRetryCountdown(0);
@@ -94,7 +95,7 @@ export default function App() {
         if (newHost !== host) {
           setError(null);
           setLoading(true);
-          const uri = target.key === 'local' ? buildLocalUri(newHost, parseInt(port, 10) || 80) : ONLINE_URI;
+          const uri = target.key === 'local' ? buildLocalUri(newHost, parseInt(port, 10) || 80) : (ONLINE_URI || buildLocalUri(newHost, parseInt(port, 10) || 80));
           setTarget((prev) => ({ ...prev, uri }));
         } else {
           reload();
@@ -111,8 +112,7 @@ export default function App() {
     const internalHost =
       url.startsWith(`http://${effectiveHost}`) ||
       url.startsWith('http://10.0.2.2') ||
-      url.startsWith('http://localhost') ||
-      url.startsWith('https://hadirtadz.vercel.app');
+      url.startsWith('http://localhost');
     if (!internalHost && (url.startsWith('http') || url.startsWith('wa.me') || url.startsWith('https://wa.me'))) {
       Linking.openURL(url).catch(() => {});
     }
@@ -131,12 +131,14 @@ export default function App() {
             >
               <Text style={[styles.segText, target.key === 'local' && styles.segTextActive]}>Lokal</Text>
             </Pressable>
-            <Pressable
-              onPress={switchToOnline}
-              style={[styles.segBtn, target.key === 'online' && styles.segBtnActive]}
-            >
-              <Text style={[styles.segText, target.key === 'online' && styles.segTextActive]}>Online</Text>
-            </Pressable>
+            {ONLINE_URI ? (
+              <Pressable
+                onPress={switchToOnline}
+                style={[styles.segBtn, target.key === 'online' && styles.segBtnActive]}
+              >
+                <Text style={[styles.segText, target.key === 'online' && styles.segTextActive]}>Online</Text>
+              </Pressable>
+            ) : null}
           </View>
           <Pressable onPress={reload} style={styles.reload}>
             <Text style={styles.reloadText}>Muat Ulang</Text>
